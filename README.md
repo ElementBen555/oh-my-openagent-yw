@@ -34,38 +34,32 @@
 > | [<img alt="Discord link" src="https://img.shields.io/discord/1452487457085063218?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=flat-square" width="156px" />](https://discord.gg/PUwSMR9XNk) | Join our [Discord community](https://discord.gg/PUwSMR9XNk) to connect with contributors and fellow `oh-my-openagent` users. |
 > | :-----| :----- |
 > | [<img alt="X link" src="https://img.shields.io/badge/Follow-%40justsisyphus-00CED1?style=flat-square&logo=x&labelColor=black" width="156px" />](https://x.com/justsisyphus) | Updates for `oh-my-openagent` used to be posted on my X account. <br /> Since it was mistakenly suspended, [@justsisyphus](https://x.com/justsisyphus) now posts updates on my behalf. |
-> | [<img alt="GitHub Follow" src="https://img.shields.io/github/followers/code-yeongyu?style=flat-square&logo=github&labelColor=black&color=24292f" width="156px" />](https://github.com/code-yeongyu) | Follow [@code-yeongyu](https://github.com/code-yeongyu) on GitHub for more projects. |
+> | [<img alt="GitHub Follow" src="https://img.shields.io/github/followers/ElementBen555?style=flat-square&logo=github&labelColor=black&color=24292f" width="156px" />](https://github.com/ElementBen555) | Follow [@ElementBen555](https://github.com/ElementBen555) on GitHub for more projects. |
 
 <!-- <CENTERED SECTION FOR GITHUB DISPLAY> -->
 
 <div align="center">
 
-<a href="https://github.com/code-yeongyu/oh-my-openagent#oh-my-openagent"><img src="./.github/assets/omo-logo.png" alt="OmO" width="200" /></a>
+<a href="https://github.com/ElementBen555/oh-my-openagent-yw#oh-my-openagent"><img src="./.github/assets/omo-logo.png" alt="OmO" width="200" /></a>
 
-[![Oh My OpenAgent](./.github/assets/hero.jpg)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-openagent)
+[![Oh My OpenAgent](./.github/assets/hero.jpg)](https://github.com/ElementBen555/oh-my-openagent-yw#oh-my-openagent)
 
-[![Preview](./.github/assets/omo.png)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-openagent)
+[![Preview](./.github/assets/omo.png)](https://github.com/ElementBen555/oh-my-openagent-yw#oh-my-openagent)
 
 </div>
 
 > This is oh-my-openagent, running Team Mode. With Kimi K2.6 and GPT-5.5.
 
-> Anthropic [**blocked OpenCode because of us.**](https://x.com/thdxr/status/2010149530486911014) **Yes, this is true.**
-> They want you locked in. Claude Code is a nice prison, but it's still a prison.
->
-> You don't need to pay $200 for 2 hours of work.
-> The future isn't picking one winner; it's orchestrating them all. Models get cheaper every month. Smarter every month. No single provider will dominate. We're building for that open market, not their walled gardens.
-
 <div align="center">
 
-[![GitHub Release](https://img.shields.io/github/v/release/code-yeongyu/oh-my-openagent?color=369eff&labelColor=black&logo=github&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/ElementBen555/oh-my-openagent-yw?color=369eff&labelColor=black&logo=github&style=flat-square)](https://github.com/ElementBen555/oh-my-openagent-yw/releases)
 [![npm downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fomo.dev%2Fapi%2Fnpm-downloads&style=flat-square)](https://www.npmjs.com/package/oh-my-opencode)
-[![GitHub Contributors](https://img.shields.io/github/contributors/code-yeongyu/oh-my-openagent?color=c4f042&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/graphs/contributors)
-[![GitHub Forks](https://img.shields.io/github/forks/code-yeongyu/oh-my-openagent?color=8ae8ff&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/network/members)
-[![GitHub Stars](https://img.shields.io/github/stars/code-yeongyu/oh-my-openagent?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/code-yeongyu/oh-my-openagent?color=ff80eb&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/issues)
-[![License](https://img.shields.io/badge/license-SUL--1.0-white?labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/LICENSE.md)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/code-yeongyu/oh-my-openagent)
+[![GitHub Contributors](https://img.shields.io/github/contributors/ElementBen555/oh-my-openagent-yw?color=c4f042&labelColor=black&style=flat-square)](https://github.com/ElementBen555/oh-my-openagent-yw/graphs/contributors)
+[![GitHub Forks](https://img.shields.io/github/forks/ElementBen555/oh-my-openagent-yw?color=8ae8ff&labelColor=black&style=flat-square)](https://github.com/ElementBen555/oh-my-openagent-yw/network/members)
+[![GitHub Stars](https://img.shields.io/github/stars/ElementBen555/oh-my-openagent-yw?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/ElementBen555/oh-my-openagent-yw/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/ElementBen555/oh-my-openagent-yw?color=ff80eb&labelColor=black&style=flat-square)](https://github.com/ElementBen555/oh-my-openagent-yw/issues)
+[![License](https://img.shields.io/badge/license-SUL--1.0-white?labelColor=black&style=flat-square)](https://github.com/ElementBen555/oh-my-openagent-yw/blob/dev/LICENSE.md)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ElementBen555/oh-my-openagent-yw)
 [![Docs](https://img.shields.io/badge/docs-omo.vibetip.help-369eff?labelColor=black&logo=readthedocs&logoColor=white&style=flat-square)](https://omo.vibetip.help/docs)
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-cn.md)
@@ -86,11 +80,7 @@
 
 > "use oh-my-opencode, you will never go back" <br/>- [d0t3ch](https://x.com/d0t3ch/status/2001685618200580503)
 
-> "I haven't really been able to articulate exactly what makes it so great yet, but the development experience has reached a completely different dimension." - [
-苔硯:こけすずり](https://x.com/kokesuzuri/status/2008532913961529372?s=20)
-
-> "Experimenting with open code, oh my opencode and supermemory this weekend to build some minecraft/souls-like abomination."
-> "Asking it to add crouch animations while I go take my post-lunch walk. [Video]" - [MagiMetal](https://x.com/MagiMetal/status/2005374704178373023)
+> "I haven't really been able to articulate exactly what makes it so great yet, but the development experience has reached a completely different dimension." - [苔硯:こけすずり](https://x.com/kokesuzuri/status/2008532913961529372?s=20)
 
 > "You guys should pull this into core and recruit him. Seriously. It's really, really, really good." <br/>- Henning Kilset
 
@@ -108,12 +98,11 @@ We did the work. Tested everything. Kept what actually shipped.
 
 Install oh-my-openagent. Type `ultrawork`. Done.
 
-
 ## Installation
 
 oh-my-openagent ships in two editions of the same product:
 
-- **Ultimate Edition (omo for OpenCode)** — full omo. 11 agents, 54+ lifecycle hooks, **7 built-in MCPs**, all slash commands, Team Mode, ulw-loop, ultrawork, hashline edits — everything.
+- **Ultimate Edition (omo for OpenCode)** — full omo. 11 agents, 53–60 lifecycle hooks, **7 built-in MCPs**, all slash commands, Team Mode, ulw-loop, ultrawork, hashline edits — everything.
 - **Light Edition (omo for Codex CLI)** — the portable components that fit Codex's plugin system: `rules`, `comment-checker`, `git-bash`, `lsp`, `ultrawork`, `ulw-loop`, `start-work-continuation`, and `telemetry`, plus plugin-scoped MCPs for `grep_app`, `context7`, `codegraph`, `git_bash`, and `lsp`, and the shared `ast-grep` skill. No agent orchestration and no `team_*` tools — Codex CLI's own surface does that work.
 
 Pick the edition(s) you want.
@@ -136,7 +125,7 @@ Paste this prompt into Claude Code, AmpCode, Cursor, or any agent:
 
 ```
 Install and configure oh-my-openagent by following the instructions here:
-https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
+https://raw.githubusercontent.com/ElementBen555/oh-my-openagent-yw/refs/heads/dev/docs/guide/installation.md
 ```
 
 If you only want the **Light edition** (Codex CLI), the installer asks whether to configure Codex for autonomous full-permissions mode. You can run it yourself in one line:
@@ -154,10 +143,20 @@ For the Light edition, Bun is not required. Use `npx lazycodex-ai install` from 
 Fetch the full guide and follow it step by step:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
+curl -fsSL https://raw.githubusercontent.com/ElementBen555/oh-my-openagent-yw/refs/heads/dev/docs/guide/installation.md
 ```
 
 The guide covers: platform selection, the subscription interview, provider authentication (Anthropic / Gemini / Copilot / Z.ai / OpenCode Zen), the agent-to-model matching matrix, modes (`ultrawork`, `search`, `analyze`, `team`, `hyperplan`), slash commands, the Light edition's 8 Codex components, Team Mode, and uninstall. Don't summarize it; read it end to end.
+
+### About Chinese Documentation
+
+Chinese documentation is available:
+
+- [简体中文 README](README.zh-cn.md)
+- [中文文档入口](docs/zh/README.md) — 安装指南、配置参考、功能概览
+- [安装指南 (中文)](docs/zh/guide/installation.md)
+- [配置参考 (中文)](docs/zh/reference/configuration.md)
+- [功能概览 (中文)](docs/zh/reference/features.md)
 
 ### Note on package and command names
 
@@ -183,9 +182,8 @@ See [Privacy Policy](docs/legal/privacy-policy.md) and [Terms of Service](docs/l
 We're past the era of reading docs. Just paste this into your agent:
 
 ```
-Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/README.md
+Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/ElementBen555/oh-my-openagent-yw/refs/heads/dev/README.md
 ```
-
 
 ## ROADMAP
 
@@ -209,28 +207,24 @@ Even with only the following subscriptions, `ultrawork` works well (this project
 - [GLM Coding Plan ($10)](https://z.ai/subscribe)
 - If you're eligible for pay-per-token, using Kimi and Gemini models won't cost much.
 
-|       | Feature                                                  | Edition  | What it does                                                                                                                                                                                                     |
-| :---: | :------------------------------------------------------- | :------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|   🤖   | **Discipline Agents**                                    | Ultimate | Sisyphus orchestrates Hephaestus, Oracle, Librarian, Explore. A full AI dev team in parallel.                                                                                                                    |
-|   🧩   | **Codex CLI Light Edition**                              | Light    | Portable OMO components (rules, comment-checker, git-bash, LSP, ultrawork, ulw-loop, start-work continuation, telemetry) running inside OpenAI Codex CLI. Install via `npx lazycodex-ai install`.             |
+|       | Feature                                                  | Edition  | What it does |
+| :---: | :------------------------------------------------------- | :------: | :----------- |
+|   🤖   | **Discipline Agents**                                    | Ultimate | Sisyphus orchestrates Hephaestus, Oracle, Librarian, Explore. A full AI dev team in parallel. |
+|   🧩   | **Codex CLI Light Edition**                              | Light    | Portable OMO components running inside OpenAI Codex CLI. Install via `npx lazycodex-ai install`. |
 |   👥   | **Team Mode** (v4.0, opt-in)                             | Ultimate | Lead agent + up to 8 parallel members, real-time tmux visualization, dedicated `team_*` tools. Powers `hyperplan` (5 hostile critics) and `security-research` (3 hunters + 2 PoC engineers). [Docs →](docs/guide/team-mode.md) |
-|   ⚡   | **`ultrawork` / `ulw`**                                  | Both     | One word. Every agent activates. Doesn't stop until done.                                                                                                                                                        |
-|   🚪   | **[IntentGate](https://factory.ai/news/terminal-bench)** | Ultimate | Analyzes true user intent before classifying or acting. No more literal misinterpretations. (Light edition only recognises the `ultrawork`/`ulw` keyword.)                                                       |
-|   🔗   | **Hash-Anchored Edit Tool**                              | Ultimate | `LINE#ID` content hash validates every change. Zero stale-line errors. Inspired by [oh-my-pi](https://github.com/can1357/oh-my-pi). [The Harness Problem →](https://blog.can.ac/2026/02/12/the-harness-problem/) |
-|   🛠️   | **LSP integration**                                      | Both     | Diagnostics, navigation, symbols, workspace rename. IDE precision for agents. Same LSP MCP server in both editions.                                                                                              |
-|   🔎   | **AST-Grep**                                             | Ultimate | Pattern-aware code search and rewriting across 25 languages.                                                                                                                                                     |
-|   🧠   | **Background Agents**                                    | Ultimate | Fire 5+ specialists in parallel. Context stays lean. Results when ready.                                                                                                                                         |
-|   📚   | **Built-in MCPs** (web/docs/code search + reasoning + GitHub) | Ultimate | Exa (web search), Context7 (official docs), Grep.app (GitHub search), Sequential Thinking (dynamic reasoning), GitHub MCP (repo/PR/issue management). Always on. |
-|   🔁   | **Ralph Loop / `/ulw-loop`**                             | Ultimate | Self-referential loop. Doesn't stop until 100% done.                                                                                                                                                             |
-|   ✅   | **Todo Enforcer**                                        | Ultimate | Agent goes idle? System yanks it back. Your task gets done, period.                                                                                                                                              |
-|   💬   | **Comment Checker**                                      | Both     | No AI slop in comments. Code reads like a senior wrote it.                                                                                                                                                       |
-|   📐   | **Rules Injection** (`AGENTS.md` / `.omo/rules/**`)      | Both     | Project rules and AGENTS.md auto-loaded into the agent's context at every prompt.                                                                                                                                |
-|   🎯   | **Ulw Loop**                                            | Both     | Durable multi-goal orchestration with evidence audit, backed by `.omo/ulw-loop/`.                                                                                                                               |
-|   🖥️   | **Tmux Integration**                                     | Ultimate | Full interactive terminal. REPLs, debuggers, TUIs. All live.                                                                                                                                                     |
-|   🔌   | **Claude Code Compatible**                               | Ultimate | Your hooks, commands, skills, MCPs, and plugins? All work here.                                                                                                                                                  |
-|   🧬   | **Skill-Embedded MCPs**                                  | Ultimate | Skills carry their own MCP servers. No context bloat.                                                                                                                                                            |
-|   📋   | **Prometheus Planner**                                   | Ultimate | Interview-mode strategic planning before any execution.                                                                                                                                                          |
-|   🔍   | **`/init-deep`**                                         | Ultimate | Auto-generates hierarchical `AGENTS.md` files throughout your project. Great for both token efficiency and your agent's performance.                                                                             |
+|   ⚡   | **`ultrawork` / `ulw`**                                  | Both     | One word. Every agent activates. Doesn't stop until done. |
+|   🚪   | **[IntentGate](https://factory.ai/news/terminal-bench)** | Ultimate | Analyzes true user intent before classifying or acting. No more literal misinterpretations. |
+|   🔗   | **Hash-Anchored Edit Tool**                              | Ultimate | `LINE#ID` content hash validates every change. Zero stale-line errors. Inspired by [oh-my-pi](https://github.com/can1357/oh-my-pi). |
+|   🛠️   | **LSP + AST-Grep**                                       | Both     | Diagnostics, navigation, symbols, workspace rename. IDE precision for agents. Pattern-aware code search across 25 languages. |
+|   🧠   | **Background Agents**                                    | Ultimate | Fire 5+ specialists in parallel. Context stays lean. Results when ready. |
+|   📚   | **Built-in MCPs** (web/docs/code/reasoning/GitHub)       | Ultimate | Exa (web search), Context7 (official docs), Grep.app (GitHub search), Sequential Thinking (dynamic reflective reasoning), GitHub MCP (repo/PR/issue management). **Offline health-check disables unreachable MCPs gracefully.** Always on. |
+|   🔁   | **Ralph Loop / `/ulw-loop`**                             | Ultimate | Self-referential loop. Doesn't stop until 100% done. |
+|   ✅   | **Todo Enforcer**                                        | Ultimate | Agent goes idle? System yanks it back. Your task gets done, period. |
+|   💬   | **Comment Checker**                                      | Both     | No AI slop in comments. Code reads like a senior wrote it. |
+|   📐   | **Rules Injection** (`AGENTS.md` / `.omo/rules/**`)      | Both     | Project rules and AGENTS.md auto-loaded into the agent's context at every prompt. |
+|   🧬   | **Skill-Embedded MCPs**                                  | Ultimate | Skills carry their own MCP servers. No context bloat. |
+|   📋   | **Prometheus Planner**                                   | Ultimate | Interview-mode strategic planning before any execution. |
+|   🔍   | **`/init-deep`**                                         | Ultimate | Auto-generates hierarchical `AGENTS.md` files throughout your project. Great for both token efficiency and your agent's performance. |
 
 > **Edition legend.** **Ultimate** = OpenCode-only (`bunx oh-my-openagent install`). **Light** = Codex CLI-only (`npx lazycodex-ai install`). **Both** = shipped in both editions, often with slightly different implementations under the hood.
 
@@ -298,26 +292,30 @@ Every hook, command, skill, MCP, plugin works here unchanged. Full compatibility
 
 ### World-Class Tools for Your Agents
 
-LSP, AST-Grep, Tmux, and MCP, actually integrated, not duct-taped together.
+LSP, AST-Grep, Tmux, MCP. These aren't glued together; they're deeply integrated.
 
-- **LSP**: `lsp_rename`, `lsp_goto_definition`, `lsp_find_references`, `lsp_diagnostics`. IDE precision for every agent.
+- **LSP**: Supports `lsp_rename`, `lsp_goto_definition`, `lsp_find_references`, and `lsp_diagnostics`. IDE-grade precision for agents.
 - **AST-Grep**: Pattern-aware code search and rewriting across 25 languages.
-- **Tmux**: Full interactive terminal. REPLs, debuggers, TUI apps. Your agent stays in session.
-- **MCP**: Web search, official docs, GitHub code search. All baked in.
+- **Tmux**: Real interactive terminal environment supporting REPLs, debuggers, and TUI tools. Agent processes persist.
+- **MCP**: Built-in web search, official documentation lookup, GitHub-grade code search, dynamic reflective reasoning, and GitHub repository management.
 
 ### Skill-Embedded MCPs
 
-MCP servers eat your context budget. We fixed that.
+A pile of global MCP servers is a context hog. We fixed that.
 
-Skills bring their own MCP servers. They spin up on demand, scoped to the task, and go away when done. The context window stays clean.
+Each skill carries its own MCP server. Spun up only when the skill is active. Destroyed when done. Your context window stays clean.
 
-### Codes Better. Hash-Anchored Edits
+### Offline-Resilient MCPs
 
-The harness problem is real. Most agent failures aren't the model's fault; it's the edit tool.
+Network down? We don't crash.
 
-> *"None of these tools give the model a stable, verifiable identifier for the lines it wants to change... They all rely on the model reproducing content it already saw. When it can't - and it often can't - the user blames the model."*
->
-> <br/>- [Can Bölük, The Harness Problem](https://blog.can.ac/2026/02/12/the-harness-problem/)
+Remote MCPs (`websearch`, `context7`, `grep_app`) are probed at plugin initialization with a **2-second HEAD timeout**. Unreachable servers are automatically disabled (`enabled: false`) so the plugin keeps working offline. See `packages/omo-opencode/src/mcp/mcp-health-check.ts`.
+
+### Hash-Anchored Edits
+
+The harness problem is real. Most "agent failures" aren't the model getting dumber — they're editing tools that suck.
+
+> *"Currently, all tools fail to provide the model with a stable, verifiable way to reference lines... When the model inevitably writes something slightly wrong, users blame the model, not the tool."* <br/>— [Can Bölük, The Harness Problem](https://blog.can.ac/2026/02/12/the-harness-problem/)
 
 Inspired by [oh-my-pi](https://github.com/can1357/oh-my-pi), we built **Hashline**. Every line the agent reads comes back tagged with a content hash:
 
@@ -327,28 +325,28 @@ Inspired by [oh-my-pi](https://github.com/can1357/oh-my-pi), we built **Hashline
 33#MB| }
 ```
 
-The agent edits by referencing those tags. If the file has changed since the last read, the hash won't match and the edit is rejected before any corruption. No whitespace reproduction. No stale-line errors.
+The agent references lines through these tags when making edits. If the file changed in the meantime, hash verification fails and the edit is rejected before contaminated code ever lands. No indentation white-out, no stale-line errors.
 
-Grok Code Fast 1: **6.7% → 68.3%** success rate, just from changing the edit tool.
+On Grok Code Fast 1, edit success rate jumped from **6.7% to 68.3%** just by changing the editing tool.
 
-### Deep Initialization. `/init-deep`
+### Deep Context Initialization: `/init-deep`
 
-Run `/init-deep`. It generates hierarchical `AGENTS.md` files:
+Run `/init-deep` once. It generates a tree of `AGENTS.md` files:
 
 ```
 project/
-├── AGENTS.md              ← project-wide context
+├── AGENTS.md              ← global architecture and conventions
 ├── src/
-│   ├── AGENTS.md          ← src-specific context
+│   ├── AGENTS.md          ← src-level conventions
 │   └── components/
-│       └── AGENTS.md      ← component-specific context
+│       └── AGENTS.md      ← component-level details
 ```
 
-Agents auto-read relevant context. Zero manual management.
+Agents automatically load the right context. No more manual prompting.
 
-### Planning. Prometheus
+### Prometheus — Think Before Acting
 
-Complex task? Don't prompt and pray.
+Hard problem? Don't prompt and pray.
 
 `/start-work` calls Prometheus. He **interviews you like a real engineer**, identifies scope and ambiguities, and builds a verified plan before touching code. The agent knows what it's building before it starts.
 
@@ -416,7 +414,7 @@ To remove oh-my-openagent:
    omo cleanup --platform=codex
    ```
 
-   The uninstall command removes managed `sisyphuslabs` Codex cache/marketplace state, strips `omo@sisyphuslabs` plugin and hook-state blocks from `~/.codex/config.toml` after writing a backup, and removes agent TOML links listed in the install manifest. If a specific project still has old project-local Codex plugin state, run the command from that project or pass `--project <path>`; it repairs known project-local `.codex/config.toml` conflicts and reports project-local `.codex` artifacts without deleting project-owned files.
+   The uninstall command removes managed `sisyphuslabs` Codex cache/marketplace state, strips `omo@sisyphuslabs` plugin and hook-state blocks from `~/.codex/config.toml` after writing a backup, and removes agent TOML links listed in the install manifest.
 
 ## Features
 
@@ -425,20 +423,17 @@ Features you'll think should've always existed. Once you use them, you can't go 
 See full [Features Documentation](docs/reference/features.md).
 
 **Quick Overview:**
-- **Agents**: Sisyphus (the main agent), Prometheus (planner), Oracle (architecture/debugging), Librarian (docs/code search), Explore (fast codebase grep), Multimodal Looker
+- **Agents**: Sisyphus (orchestrator), Prometheus (planner), Oracle (architecture/debugging), Librarian (docs/code search), Explore (fast codebase grep), Multimodal Looker
 - **Background Agents**: Run multiple agents in parallel like a real dev team
 - **LSP & AST Tools**: Refactoring, rename, diagnostics, AST-aware code search
-- **Hash-anchored Edit Tool**: `LINE#ID` references validate content before applying every change. Surgical edits, zero stale-line errors
+- **Hash-anchored Edit Tool**: `LINE#ID` references validate content before applying every change
 - **Context Injection**: Auto-inject AGENTS.md, README.md, conditional rules
 - **Claude Code Compatibility**: Full hook system, commands, skills, agents, MCPs
-- **Built-in MCPs**: websearch (Exa), context7 (docs), grep_app (GitHub search), sequential_thinking (dynamic reasoning), github (repo/PR/issue management) — injected at runtime by the plugin; not visible in `opencode mcp list` (see [MCP docs](docs/reference/features.md#native-vs-plugin-injected-mcps))
+- **Built-in MCPs**: websearch (Exa), context7 (docs), grep_app (GitHub search), sequential_thinking (dynamic reasoning), github (repo/PR/issue management) — runtime-injected, with offline health-check graceful degradation
 - **Session Tools**: List, read, search, and analyze session history
-- **Productivity Features**: Ralph Loop, Todo Enforcer, Comment Checker, Think Mode, and more
-- **Doctor Command**: Built-in diagnostics (`bunx oh-my-opencode doctor`) verify plugin registration, config, models, and environment
-- **Model Fallbacks**: `fallback_models` can mix plain model strings with per-fallback object settings in the same array
-- **File Prompts**: Load prompts from files with `file://` support in agent configurations
+- **Doctor Command**: Built-in diagnostics verifying plugin registration, config, models, and environment
+- **Model Fallbacks**: Per-agent fallback chains mixing plain model strings with per-fallback object settings
 - **Session Recovery**: Automatic recovery from session errors, context window limits, and API failures
-- **Model Setup**: Agent-model matching is built into the [Installation Guide](docs/guide/installation.md#step-5-understand-your-model-setup)
 
 ## Configuration
 
@@ -450,15 +445,13 @@ See [Configuration Documentation](docs/reference/configuration.md).
 - **Config Locations**: User config plus walked `.opencode/oh-my-openagent.json[c]` configs up to `$HOME`; closest wins. Legacy `oh-my-opencode.json[c]` still works.
 - **JSONC Support**: Comments and trailing commas supported
 - **Agents**: Override models, temperatures, prompts, and permissions for any agent
-- **Built-in Skills**: `playwright` (browser automation), `git-master` (atomic commits)
-- **Sisyphus Agent**: Main orchestrator with Prometheus (Planner) and Metis (Plan Consultant)
-- **Background Tasks**: Configure concurrency limits per provider/model
 - **Categories**: Domain-specific task delegation (`visual`, `business-logic`, custom)
-- **Hooks**: 54+ lifecycle hooks (61 with Team Mode), all configurable via `disabled_hooks`
-- **MCPs**: Built-in websearch (Exa), context7 (docs), grep_app (GitHub search), sequential_thinking (dynamic reasoning), github (repo/PR/issue management) — runtime-injected, not shown in `opencode mcp list`
+- **Hooks**: 53–60 lifecycle hooks (base + team-mode), configurable via `disabled_hooks`
+- **MCPs**: 7 built-in MCPs with 2-second health probe and offline graceful degradation
 - **LSP**: Full LSP support with refactoring tools
-- **Experimental**: Aggressive truncation, auto-resume, and more
+- **Team Mode**: Lead + up to 8 members, tmux visualization, dedicated `team_*` tools
 
+---
 
 ## Author's Note
 
