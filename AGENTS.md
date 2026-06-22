@@ -4,6 +4,14 @@
 
 **Generated:** 2026-06-17 | **Commit:** 437922bc0 | **Branch:** dev | **Release:** v4.10.0
 
+## LANGUAGE
+
+- **对话默认使用中文** — 与 OpenCode 交互时，默认用中文输出和回复。
+- **英文关键字保留英文** — 涉及 TypeScript 关键字、API 名称、npm 包名、CLI 命令、环境变量等专业技术术语时，保留英文原文，不强行翻译。
+- **文档双语维护** — 用户面向的文档同时提供英文和中文版本。新增功能必须同步更新两种语言的 README、 guides 和 reference docs。技术实现细节（如 AGENTS.md 中的架构描述）可用英文为主，但需确保中文版本存在。
+- **Agent prompts 用英文** — 内部 Agent 的系统提示（system prompts）和 skill 文件中的指令使用英文（模型对英文的遵循度更高），但对用户可见的输出用中文。
+- **日志/诊断信息用英文** — 日志文件名（`oh-my-opencode.log`）、诊断输出、错误码保持英文，便于跨团队和技术支持。
+
 ## STOP. QA IS MANDATORY. NON-NEGOTIABLE. EVERY SINGLE TIME YOU TOUCH AN OPENCODE- OR CODEX-CONNECTED COMPONENT.
 
 > **IF YOUR CHANGE TOUCHES ANYTHING WIRED INTO OPENCODE OR INTO THE CODEX LIGHT EDITION, YOU MUST QA IT. ALWAYS. EVERY SINGLE TIME. NO EXCEPTIONS. THERE IS NO "TOO SMALL TO SKIP". THERE IS NO "IT OBVIOUSLY WORKS".**
