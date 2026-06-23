@@ -1,53 +1,50 @@
-import { getOpenCodeConfigPaths, detectPluginConfigFile } from "../../shared"
-import { CONFIG_BASENAME, LEGACY_CONFIG_BASENAME } from "../../shared/plugin-identity"
-import type {
-  OpenCodeBinaryType,
-  OpenCodeConfigPaths,
-} from "../../shared/opencode-config-dir-types"
+import { detectPluginConfigFile, getOpenCodeConfigPaths } from "../../shared";
+import type { OpenCodeBinaryType, OpenCodeConfigPaths } from "../../shared/opencode-config-dir-types";
+import { CONFIG_BASENAME, LEGACY_CONFIG_BASENAME } from "../../shared/plugin-identity";
 
 export interface ConfigContext {
-  binary: OpenCodeBinaryType
-  version: string | null
-  paths: OpenCodeConfigPaths
+	binary: OpenCodeBinaryType;
+	version: string | null;
+	paths: OpenCodeConfigPaths;
 }
 
-let configContext: ConfigContext | null = null
+let configContext: ConfigContext | null = null;
 
 export function initConfigContext(binary: OpenCodeBinaryType, version: string | null): void {
-  const paths = getOpenCodeConfigPaths({ binary, version })
-  configContext = { binary, version, paths }
+	const paths = getOpenCodeConfigPaths({ binary, version });
+	configContext = { binary, version, paths };
 }
 
 export function getConfigContext(): ConfigContext {
-  if (!configContext) {
-    const paths = getOpenCodeConfigPaths({ binary: "opencode", version: null })
-    configContext = { binary: "opencode", version: null, paths }
-  }
-  return configContext
+	if (!configContext) {
+		const paths = getOpenCodeConfigPaths({ binary: "opencode", version: null });
+		configContext = { binary: "opencode", version: null, paths };
+	}
+	return configContext;
 }
 
 export function resetConfigContext(): void {
-  configContext = null
+	configContext = null;
 }
 
 export function getConfigDir(): string {
-  return getConfigContext().paths.configDir
+	return getConfigContext().paths.configDir;
 }
 
 export function getConfigJson(): string {
-  return getConfigContext().paths.configJson
+	return getConfigContext().paths.configJson;
 }
 
 export function getConfigJsonc(): string {
-  return getConfigContext().paths.configJsonc
+	return getConfigContext().paths.configJsonc;
 }
 
 export function getOmoConfigPath(): string {
-  const configDir = getConfigContext().paths.configDir
-  const detected = detectPluginConfigFile(configDir, {
-    basenames: [CONFIG_BASENAME],
-    legacyBasenames: [LEGACY_CONFIG_BASENAME],
-  })
-  if (detected.format !== "none") return detected.path
-  return getConfigContext().paths.omoConfig
+	const configDir = getConfigContext().paths.configDir;
+	const detected = detectPluginConfigFile(configDir, {
+		basenames: [CONFIG_BASENAME],
+		legacyBasenames: [LEGACY_CONFIG_BASENAME],
+	});
+	if (detected.format !== "none") return detected.path;
+	return getConfigContext().paths.omoConfig;
 }

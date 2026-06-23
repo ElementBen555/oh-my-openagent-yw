@@ -1,1 +1,1 @@
-export { formatDurationHuman } from "@oh-my-opencode/utils"
+export { formatDurationHuman } from "@oh-my-opencode/utils";

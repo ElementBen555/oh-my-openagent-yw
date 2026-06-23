@@ -1,5 +1,4 @@
-export * from "./detector"
-export * from "./switcher"
-export * from "./types"
-
-export { clearThinkModeState, createThinkModeHook } from "./hook"
+export * from "./detector";
+export { clearThinkModeState, createThinkModeHook } from "./hook";
+export * from "./switcher";
+export * from "./types";

@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/mcp-client-core/skill-mcp-manager"
+export * from "@oh-my-opencode/mcp-client-core/skill-mcp-manager";

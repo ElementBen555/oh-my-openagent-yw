@@ -1,5 +1,5 @@
-import { isRecord } from "@oh-my-opencode/utils"
-import { log } from "./logger"
+import { isRecord } from "@oh-my-opencode/utils";
+import { log } from "./logger";
 
 /**
  * Builds HTTP Basic Auth header from environment variables.
@@ -7,139 +7,137 @@ import { log } from "./logger"
  * @returns Basic Auth header string, or undefined if OPENCODE_SERVER_PASSWORD is not set
  */
 export function getServerBasicAuthHeader(): string | undefined {
-  const password = process.env.OPENCODE_SERVER_PASSWORD
-  if (!password) {
-    return undefined
-  }
+	const password = process.env.OPENCODE_SERVER_PASSWORD;
+	if (!password) {
+		return undefined;
+	}
 
-  const username = process.env.OPENCODE_SERVER_USERNAME ?? "opencode"
-  const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64")
+	const username = process.env.OPENCODE_SERVER_USERNAME ?? "opencode";
+	const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
 
-  return `Basic ${token}`
+	return `Basic ${token}`;
 }
 
-type UnknownRecord = Record<string, unknown>
-
-
+type UnknownRecord = Record<string, unknown>;
 
 function isRequestFetch(value: unknown): value is (request: Request) => Promise<Response> {
-  return typeof value === "function"
+	return typeof value === "function";
 }
 
 function wrapRequestFetch(
-  baseFetch: (request: Request) => Promise<Response>,
-  auth: string
+	baseFetch: (request: Request) => Promise<Response>,
+	auth: string,
 ): (request: Request) => Promise<Response> {
-  return async (request: Request): Promise<Response> => {
-    const headers = new Headers(request.headers)
-    headers.set("Authorization", auth)
-    return baseFetch(new Request(request, { headers }))
-  }
+	return async (request: Request): Promise<Response> => {
+		const headers = new Headers(request.headers);
+		headers.set("Authorization", auth);
+		return baseFetch(new Request(request, { headers }));
+	};
 }
 
 function getInternalClient(client: unknown): UnknownRecord | null {
-  if (!isRecord(client)) {
-    return null
-  }
+	if (!isRecord(client)) {
+		return null;
+	}
 
-  const internal = client["_client"]
-  return isRecord(internal) ? internal : null
+	const internal = client["_client"];
+	return isRecord(internal) ? internal : null;
 }
 
 function tryInjectViaSetConfigHeaders(internal: UnknownRecord, auth: string): boolean {
-  const setConfig = internal["setConfig"]
-  if (typeof setConfig !== "function") {
-    return false
-  }
+	const setConfig = internal["setConfig"];
+	if (typeof setConfig !== "function") {
+		return false;
+	}
 
-  setConfig({
-    headers: {
-      Authorization: auth,
-    },
-  })
+	setConfig({
+		headers: {
+			Authorization: auth,
+		},
+	});
 
-  return true
+	return true;
 }
 
 function tryInjectViaInterceptors(internal: UnknownRecord, auth: string): boolean {
-  const interceptors = internal["interceptors"]
-  if (!isRecord(interceptors)) {
-    return false
-  }
+	const interceptors = internal["interceptors"];
+	if (!isRecord(interceptors)) {
+		return false;
+	}
 
-  const requestInterceptors = interceptors["request"]
-  if (!isRecord(requestInterceptors)) {
-    return false
-  }
+	const requestInterceptors = interceptors["request"];
+	if (!isRecord(requestInterceptors)) {
+		return false;
+	}
 
-  const use = requestInterceptors["use"]
-  if (typeof use !== "function") {
-    return false
-  }
+	const use = requestInterceptors["use"];
+	if (typeof use !== "function") {
+		return false;
+	}
 
-  use.call(requestInterceptors, (request: Request): Request => {
-    if (!request.headers.get("Authorization")) {
-      request.headers.set("Authorization", auth)
-    }
-    return request
-  })
+	use.call(requestInterceptors, (request: Request): Request => {
+		if (!request.headers.get("Authorization")) {
+			request.headers.set("Authorization", auth);
+		}
+		return request;
+	});
 
-  return true
+	return true;
 }
 
 function tryInjectViaFetchWrapper(internal: UnknownRecord, auth: string): boolean {
-  const getConfig = internal["getConfig"]
-  const setConfig = internal["setConfig"]
-  if (typeof getConfig !== "function" || typeof setConfig !== "function") {
-    return false
-  }
+	const getConfig = internal["getConfig"];
+	const setConfig = internal["setConfig"];
+	if (typeof getConfig !== "function" || typeof setConfig !== "function") {
+		return false;
+	}
 
-  const config = getConfig()
-  if (!isRecord(config)) {
-    return false
-  }
+	const config = getConfig();
+	if (!isRecord(config)) {
+		return false;
+	}
 
-  const fetchValue = config["fetch"]
-  if (!isRequestFetch(fetchValue)) {
-    return false
-  }
+	const fetchValue = config["fetch"];
+	if (!isRequestFetch(fetchValue)) {
+		return false;
+	}
 
-  setConfig({
-    fetch: wrapRequestFetch(fetchValue, auth),
-  })
+	setConfig({
+		fetch: wrapRequestFetch(fetchValue, auth),
+	});
 
-  return true
+	return true;
 }
 
 function tryInjectViaMutableInternalConfig(internal: UnknownRecord, auth: string): boolean {
-  const configValue = internal["_config"]
-  if (!isRecord(configValue)) {
-    return false
-  }
+	const configValue = internal["_config"];
+	if (!isRecord(configValue)) {
+		return false;
+	}
 
-  const fetchValue = configValue["fetch"]
-  if (!isRequestFetch(fetchValue)) {
-    return false
-  }
+	const fetchValue = configValue["fetch"];
+	if (!isRequestFetch(fetchValue)) {
+		return false;
+	}
 
-  configValue["fetch"] = wrapRequestFetch(fetchValue, auth)
+	configValue["fetch"] = wrapRequestFetch(fetchValue, auth);
 
-  return true
+	return true;
 }
 
 function tryInjectViaTopLevelFetch(client: unknown, auth: string): boolean {
-  if (!isRecord(client)) {
-    return false
-  }
+	if (!isRecord(client)) {
+		return false;
+	}
 
-  const fetchValue = client["fetch"]
-  if (!isRequestFetch(fetchValue)) {
-    return false
-  }
+	const fetchValue = client["fetch"];
+	if (!isRequestFetch(fetchValue)) {
+		return false;
+	}
 
-  client["fetch"] = wrapRequestFetch(fetchValue, auth)
+	client["fetch"] = wrapRequestFetch(fetchValue, auth);
 
-  return true
+	return true;
 }
 
 /**
@@ -155,35 +153,35 @@ function tryInjectViaTopLevelFetch(client: unknown, auth: string): boolean {
  * @throws {Error} If OPENCODE_SERVER_PASSWORD is set but client structure is incompatible
  */
 export function injectServerAuthIntoClient(client: unknown): void {
-  const auth = getServerBasicAuthHeader()
-  if (!auth) {
-    return
-  }
+	const auth = getServerBasicAuthHeader();
+	if (!auth) {
+		return;
+	}
 
-  try {
-    const internal = getInternalClient(client)
-    if (internal) {
-      const injectedHeaders = tryInjectViaSetConfigHeaders(internal, auth)
-      const injectedInterceptors = tryInjectViaInterceptors(internal, auth)
-      const injectedFetch = tryInjectViaFetchWrapper(internal, auth)
-      const injectedMutable = tryInjectViaMutableInternalConfig(internal, auth)
+	try {
+		const internal = getInternalClient(client);
+		if (internal) {
+			const injectedHeaders = tryInjectViaSetConfigHeaders(internal, auth);
+			const injectedInterceptors = tryInjectViaInterceptors(internal, auth);
+			const injectedFetch = tryInjectViaFetchWrapper(internal, auth);
+			const injectedMutable = tryInjectViaMutableInternalConfig(internal, auth);
 
-      const injected = injectedHeaders || injectedInterceptors || injectedFetch || injectedMutable
+			const injected = injectedHeaders || injectedInterceptors || injectedFetch || injectedMutable;
 
-      if (!injected) {
-        log("[opencode-server-auth] OPENCODE_SERVER_PASSWORD is set but SDK client structure is incompatible", {
-          keys: Object.keys(internal),
-        })
-      }
-      return
-    }
+			if (!injected) {
+				log("[opencode-server-auth] OPENCODE_SERVER_PASSWORD is set but SDK client structure is incompatible", {
+					keys: Object.keys(internal),
+				});
+			}
+			return;
+		}
 
-    const injected = tryInjectViaTopLevelFetch(client, auth)
-    if (!injected) {
-      log("[opencode-server-auth] OPENCODE_SERVER_PASSWORD is set but no compatible SDK client found")
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    log("[opencode-server-auth] Failed to inject server auth", { message })
-  }
+		const injected = tryInjectViaTopLevelFetch(client, auth);
+		if (!injected) {
+			log("[opencode-server-auth] OPENCODE_SERVER_PASSWORD is set but no compatible SDK client found");
+		}
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		log("[opencode-server-auth] Failed to inject server auth", { message });
+	}
 }

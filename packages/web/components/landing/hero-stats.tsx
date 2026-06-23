@@ -1,7 +1,7 @@
 "use client"
 
+import { Bot, Download, GitBranch, Star } from "lucide-react"
 import type { ReactNode } from "react"
-import { Star, Bot, Download, GitBranch } from "lucide-react"
 import { useLiveStats } from "./live-stats"
 
 interface HeroStatsProps {

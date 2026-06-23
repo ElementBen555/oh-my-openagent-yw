@@ -1,1 +1,1 @@
-export { spawn } from "@oh-my-opencode/tmux-core"
+export { spawn } from "@oh-my-opencode/tmux-core";

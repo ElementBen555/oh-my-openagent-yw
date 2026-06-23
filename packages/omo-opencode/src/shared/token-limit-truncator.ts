@@ -1,4 +1,4 @@
-import type { TruncationResult } from "./dynamic-truncator-types"
+import type { TruncationResult } from "./dynamic-truncator-types";
 
 const CHARS_PER_TOKEN_ESTIMATE = 4;
 
@@ -6,13 +6,9 @@ function estimateTokens(text: string): number {
 	return Math.ceil(text.length / CHARS_PER_TOKEN_ESTIMATE);
 }
 
-export function truncateToTokenLimit(
-	output: string,
-	maxTokens: number,
-	preserveHeaderLines = 3,
-): TruncationResult {
-	if (typeof output !== 'string') {
-		return { result: String(output ?? ''), truncated: false };
+export function truncateToTokenLimit(output: string, maxTokens: number, preserveHeaderLines = 3): TruncationResult {
+	if (typeof output !== "string") {
+		return { result: String(output ?? ""), truncated: false };
 	}
 
 	const currentTokens = estimateTokens(output);
@@ -26,9 +22,7 @@ export function truncateToTokenLimit(
 	if (lines.length <= preserveHeaderLines) {
 		const maxChars = maxTokens * CHARS_PER_TOKEN_ESTIMATE;
 		return {
-			result:
-				output.slice(0, maxChars) +
-				"\n\n[Output truncated due to context window limit]",
+			result: output.slice(0, maxChars) + "\n\n[Output truncated due to context window limit]",
 			truncated: true,
 		};
 	}
@@ -43,8 +37,7 @@ export function truncateToTokenLimit(
 
 	if (availableTokens <= 0) {
 		return {
-			result:
-				headerText + "\n\n[Content truncated due to context window limit]",
+			result: headerText + "\n\n[Content truncated due to context window limit]",
 			truncated: true,
 			removedCount: contentLines.length,
 		};
@@ -66,9 +59,7 @@ export function truncateToTokenLimit(
 	const removedCount = contentLines.length - resultLines.length;
 
 	return {
-		result:
-			truncatedContent +
-			`\n\n[${removedCount} more lines truncated due to context window limit]`,
+		result: truncatedContent + `\n\n[${removedCount} more lines truncated due to context window limit]`,
 		truncated: true,
 		removedCount,
 	};

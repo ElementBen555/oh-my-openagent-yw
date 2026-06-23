@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-cache-legacy-bins"
+export * from "@oh-my-opencode/omo-codex/install/codex-cache-legacy-bins";

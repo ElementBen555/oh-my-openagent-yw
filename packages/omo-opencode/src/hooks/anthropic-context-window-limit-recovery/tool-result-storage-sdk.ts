@@ -1,130 +1,124 @@
-import type { PluginInput } from "@opencode-ai/plugin"
-import { TRUNCATION_MESSAGE } from "./storage-paths"
-import type { ToolResultInfo } from "./tool-part-types"
-import { patchPart } from "../../shared/opencode-http-api"
-import { log } from "../../shared/logger"
-import { normalizeSDKResponse } from "../../shared"
+import type { PluginInput } from "@opencode-ai/plugin";
+import { normalizeSDKResponse } from "../../shared";
+import { log } from "../../shared/logger";
+import { patchPart } from "../../shared/opencode-http-api";
+import { TRUNCATION_MESSAGE } from "./storage-paths";
+import type { ToolResultInfo } from "./tool-part-types";
 
-type OpencodeClient = PluginInput["client"]
+type OpencodeClient = PluginInput["client"];
 
 interface SDKToolPart {
-  id: string
-  type: string
-  callID?: string
-  tool?: string
-  state?: {
-    status?: string
-    input?: Record<string, unknown>
-    output?: string
-    error?: string
-    time?: { start?: number; end?: number; compacted?: number }
-  }
+	id: string;
+	type: string;
+	callID?: string;
+	tool?: string;
+	state?: {
+		status?: string;
+		input?: Record<string, unknown>;
+		output?: string;
+		error?: string;
+		time?: { start?: number; end?: number; compacted?: number };
+	};
 }
 
 interface SDKMessage {
-  info?: { id?: string }
-  parts?: SDKToolPart[]
+	info?: { id?: string };
+	parts?: SDKToolPart[];
 }
 
 export async function findToolResultsBySizeFromSDK(
-  client: OpencodeClient,
-  sessionID: string
+	client: OpencodeClient,
+	sessionID: string,
 ): Promise<ToolResultInfo[]> {
-  try {
-    const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
-    const results: ToolResultInfo[] = []
+	try {
+		const response = await client.session.messages({ path: { id: sessionID } });
+		const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true });
+		const results: ToolResultInfo[] = [];
 
-    for (const msg of messages) {
-      const messageID = msg.info?.id
-      if (!messageID || !msg.parts) continue
+		for (const msg of messages) {
+			const messageID = msg.info?.id;
+			if (!messageID || !msg.parts) continue;
 
-      for (const part of msg.parts) {
-        if (part.type === "tool" && part.state?.output && !part.state?.time?.compacted && part.tool) {
-          results.push({
-            partPath: "",
-            partId: part.id,
-            messageID,
-            toolName: part.tool,
-            outputSize: part.state.output.length,
-          })
-        }
-      }
-    }
+			for (const part of msg.parts) {
+				if (part.type === "tool" && part.state?.output && !part.state?.time?.compacted && part.tool) {
+					results.push({
+						partPath: "",
+						partId: part.id,
+						messageID,
+						toolName: part.tool,
+						outputSize: part.state.output.length,
+					});
+				}
+			}
+		}
 
-    return results.sort((a, b) => b.outputSize - a.outputSize)
-  } catch (error) {
-    if (!(error instanceof Error)) {
-      throw error
-    }
-    return []
-  }
+		return results.sort((a, b) => b.outputSize - a.outputSize);
+	} catch (error) {
+		if (!(error instanceof Error)) {
+			throw error;
+		}
+		return [];
+	}
 }
 
 export async function truncateToolResultAsync(
-  client: OpencodeClient,
-  sessionID: string,
-  messageID: string,
-  partId: string,
-  part: SDKToolPart
+	client: OpencodeClient,
+	sessionID: string,
+	messageID: string,
+	partId: string,
+	part: SDKToolPart,
 ): Promise<{ success: boolean; toolName?: string; originalSize?: number }> {
-  if (!part.state?.output) return { success: false }
+	if (!part.state?.output) return { success: false };
 
-  const originalSize = part.state.output.length
-  const toolName = part.tool
+	const originalSize = part.state.output.length;
+	const toolName = part.tool;
 
-  const updatedPart: Record<string, unknown> = {
-    ...part,
-    state: {
-      ...part.state,
-      output: TRUNCATION_MESSAGE,
-      time: {
-        ...(part.state.time ?? { start: Date.now() }),
-        compacted: Date.now(),
-      },
-    },
-  }
+	const updatedPart: Record<string, unknown> = {
+		...part,
+		state: {
+			...part.state,
+			output: TRUNCATION_MESSAGE,
+			time: {
+				...(part.state.time ?? { start: Date.now() }),
+				compacted: Date.now(),
+			},
+		},
+	};
 
-  try {
-    const patched = await patchPart(client, sessionID, messageID, partId, updatedPart)
-    if (!patched) return { success: false }
-    return { success: true, toolName, originalSize }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    log("[context-window-recovery] truncateToolResultAsync failed", { error: errorMessage })
-    return { success: false }
-  }
+	try {
+		const patched = await patchPart(client, sessionID, messageID, partId, updatedPart);
+		if (!patched) return { success: false };
+		return { success: true, toolName, originalSize };
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		log("[context-window-recovery] truncateToolResultAsync failed", { error: errorMessage });
+		return { success: false };
+	}
 }
 
-export async function countTruncatedResultsFromSDK(
-  client: OpencodeClient,
-  sessionID: string
-): Promise<number> {
-  try {
-    const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
-    let count = 0
+export async function countTruncatedResultsFromSDK(client: OpencodeClient, sessionID: string): Promise<number> {
+	try {
+		const response = await client.session.messages({ path: { id: sessionID } });
+		const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true });
+		let count = 0;
 
-    for (const msg of messages) {
-      if (!msg.parts) continue
-      for (const part of msg.parts) {
-        if (part.type === "tool" && part.state?.time?.compacted) count++
-      }
-    }
+		for (const msg of messages) {
+			if (!msg.parts) continue;
+			for (const part of msg.parts) {
+				if (part.type === "tool" && part.state?.time?.compacted) count++;
+			}
+		}
 
-    return count
-  } catch (error) {
-    if (!(error instanceof Error)) {
-      throw error
-    }
-    return 0
-  }
+		return count;
+	} catch (error) {
+		if (!(error instanceof Error)) {
+			throw error;
+		}
+		return 0;
+	}
 }
 
-export async function getTotalToolOutputSizeFromSDK(
-  client: OpencodeClient,
-  sessionID: string
-): Promise<number> {
-  const results = await findToolResultsBySizeFromSDK(client, sessionID)
-  return results.reduce((sum, result) => sum + result.outputSize, 0)
+export async function getTotalToolOutputSizeFromSDK(client: OpencodeClient, sessionID: string): Promise<number> {
+	const results = await findToolResultsBySizeFromSDK(client, sessionID);
+	return results.reduce((sum, result) => sum + result.outputSize, 0);
 }

@@ -1,28 +1,27 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { log } from "../../shared/logger";
+import { isSqliteBackend } from "../../shared/opencode-storage-detection";
+import { getMessageIds } from "./message-storage-directory";
+import { PART_STORAGE_DIR, TRUNCATION_MESSAGE } from "./storage-paths";
+import type { StoredToolPart, ToolResultInfo } from "./tool-part-types";
 
-import { getMessageIds } from "./message-storage-directory"
-import { PART_STORAGE_DIR, TRUNCATION_MESSAGE } from "./storage-paths"
-import type { StoredToolPart, ToolResultInfo } from "./tool-part-types"
-import { isSqliteBackend } from "../../shared/opencode-storage-detection"
-import { log } from "../../shared/logger"
-
-let hasLoggedTruncateWarning = false
+let hasLoggedTruncateWarning = false;
 
 export function findToolResultsBySize(sessionID: string): ToolResultInfo[] {
-	const messageIds = getMessageIds(sessionID)
-	const results: ToolResultInfo[] = []
+	const messageIds = getMessageIds(sessionID);
+	const results: ToolResultInfo[] = [];
 
 	for (const messageID of messageIds) {
-		const partDir = join(PART_STORAGE_DIR, messageID)
-		if (!existsSync(partDir)) continue
+		const partDir = join(PART_STORAGE_DIR, messageID);
+		if (!existsSync(partDir)) continue;
 
 		for (const file of readdirSync(partDir)) {
-			if (!file.endsWith(".json")) continue
+			if (!file.endsWith(".json")) continue;
 			try {
-				const partPath = join(partDir, file)
-				const content = readFileSync(partPath, "utf-8")
-				const part = JSON.parse(content) as StoredToolPart
+				const partPath = join(partDir, file);
+				const content = readFileSync(partPath, "utf-8");
+				const part = JSON.parse(content) as StoredToolPart;
 
 				if (part.type === "tool" && part.state?.output && !part.truncated) {
 					results.push({
@@ -31,99 +30,99 @@ export function findToolResultsBySize(sessionID: string): ToolResultInfo[] {
 						messageID,
 						toolName: part.tool,
 						outputSize: part.state.output.length,
-					})
+					});
 				}
 			} catch (error) {
 				if (error instanceof Error) {
-					continue
+					continue;
 				}
-				throw error
+				throw error;
 			}
 		}
 	}
 
-	return results.sort((a, b) => b.outputSize - a.outputSize)
+	return results.sort((a, b) => b.outputSize - a.outputSize);
 }
 
 export function findLargestToolResult(sessionID: string): ToolResultInfo | null {
-	const results = findToolResultsBySize(sessionID)
-	return results.length > 0 ? results[0] : null
+	const results = findToolResultsBySize(sessionID);
+	return results.length > 0 ? results[0] : null;
 }
 
 export function truncateToolResult(partPath: string): {
-	success: boolean
-	toolName?: string
-	originalSize?: number
+	success: boolean;
+	toolName?: string;
+	originalSize?: number;
 } {
 	if (isSqliteBackend()) {
 		if (!hasLoggedTruncateWarning) {
-			log("[context-window-recovery] Disabled on SQLite backend: truncateToolResult")
-			hasLoggedTruncateWarning = true
+			log("[context-window-recovery] Disabled on SQLite backend: truncateToolResult");
+			hasLoggedTruncateWarning = true;
 		}
-		return { success: false }
+		return { success: false };
 	}
 
 	try {
-		const content = readFileSync(partPath, "utf-8")
-		const part = JSON.parse(content) as StoredToolPart
+		const content = readFileSync(partPath, "utf-8");
+		const part = JSON.parse(content) as StoredToolPart;
 
 		if (!part.state?.output) {
-			return { success: false }
+			return { success: false };
 		}
 
-		const originalSize = part.state.output.length
-		const toolName = part.tool
+		const originalSize = part.state.output.length;
+		const toolName = part.tool;
 
-		part.truncated = true
-		part.originalSize = originalSize
-		part.state.output = TRUNCATION_MESSAGE
+		part.truncated = true;
+		part.originalSize = originalSize;
+		part.state.output = TRUNCATION_MESSAGE;
 
 		if (!part.state.time) {
-			part.state.time = { start: Date.now() }
+			part.state.time = { start: Date.now() };
 		}
-		part.state.time.compacted = Date.now()
+		part.state.time.compacted = Date.now();
 
-		writeFileSync(partPath, JSON.stringify(part, null, 2))
+		writeFileSync(partPath, JSON.stringify(part, null, 2));
 
-		return { success: true, toolName, originalSize }
+		return { success: true, toolName, originalSize };
 	} catch (error) {
 		if (!(error instanceof Error)) {
-			throw error
+			throw error;
 		}
 
-		return { success: false }
+		return { success: false };
 	}
 }
 
 export function getTotalToolOutputSize(sessionID: string): number {
-	const results = findToolResultsBySize(sessionID)
-	return results.reduce((sum, result) => sum + result.outputSize, 0)
+	const results = findToolResultsBySize(sessionID);
+	return results.reduce((sum, result) => sum + result.outputSize, 0);
 }
 
 export function countTruncatedResults(sessionID: string): number {
-	const messageIds = getMessageIds(sessionID)
-	let count = 0
+	const messageIds = getMessageIds(sessionID);
+	let count = 0;
 
 	for (const messageID of messageIds) {
-		const partDir = join(PART_STORAGE_DIR, messageID)
-		if (!existsSync(partDir)) continue
+		const partDir = join(PART_STORAGE_DIR, messageID);
+		if (!existsSync(partDir)) continue;
 
 		for (const file of readdirSync(partDir)) {
-			if (!file.endsWith(".json")) continue
+			if (!file.endsWith(".json")) continue;
 			try {
-				const content = readFileSync(join(partDir, file), "utf-8")
-				const part = JSON.parse(content)
+				const content = readFileSync(join(partDir, file), "utf-8");
+				const part = JSON.parse(content);
 				if (part.truncated === true) {
-					count++
+					count++;
 				}
 			} catch (error) {
 				if (error instanceof Error) {
-					continue
+					continue;
 				}
-				throw error
+				throw error;
 			}
 		}
 	}
 
-	return count
+	return count;
 }

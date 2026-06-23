@@ -1,144 +1,144 @@
 /// <reference types="bun-types" />
 
-import { describe, test, expect, spyOn, beforeEach, afterEach, mock } from "bun:test"
-import type { OhMyOpenCodeConfig } from "../config"
+import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
+import type { OhMyOpenCodeConfig } from "../config";
 
-import * as mcpLoader from "../features/claude-code-mcp-loader"
-import * as mcpModule from "../mcp"
-import * as shared from "../shared"
+import * as mcpLoader from "../features/claude-code-mcp-loader";
+import * as mcpModule from "../mcp";
+import * as shared from "../shared";
 
-let loadMcpConfigsSpy: ReturnType<typeof spyOn>
-let createBuiltinMcpsSpy: ReturnType<typeof spyOn>
-let logSpy: ReturnType<typeof spyOn>
-let fetchSpy: ReturnType<typeof spyOn>
+let loadMcpConfigsSpy: ReturnType<typeof spyOn>;
+let createBuiltinMcpsSpy: ReturnType<typeof spyOn>;
+let logSpy: ReturnType<typeof spyOn>;
+let fetchSpy: ReturnType<typeof spyOn>;
 
 beforeEach(() => {
-  mock.restore()
+	mock.restore();
 
-  loadMcpConfigsSpy = spyOn(mcpLoader, "loadMcpConfigs").mockResolvedValue({
-    servers: {},
-    loadedServers: [],
-  })
-  createBuiltinMcpsSpy = spyOn(mcpModule, "createBuiltinMcps").mockReturnValue({})
-  logSpy = spyOn(shared, "log").mockImplementation(() => {})
-  fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 200 }))
-})
+	loadMcpConfigsSpy = spyOn(mcpLoader, "loadMcpConfigs").mockResolvedValue({
+		servers: {},
+		loadedServers: [],
+	});
+	createBuiltinMcpsSpy = spyOn(mcpModule, "createBuiltinMcps").mockReturnValue({});
+	logSpy = spyOn(shared, "log").mockImplementation(() => {});
+	fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 200 }));
+});
 
 afterEach(() => {
-  loadMcpConfigsSpy.mockRestore()
-  createBuiltinMcpsSpy.mockRestore()
-  logSpy.mockRestore()
-  fetchSpy?.mockRestore()
-  mock.restore()
-})
+	loadMcpConfigsSpy.mockRestore();
+	createBuiltinMcpsSpy.mockRestore();
+	logSpy.mockRestore();
+	fetchSpy?.mockRestore();
+	mock.restore();
+});
 
 function createPluginConfig(overrides: Partial<OhMyOpenCodeConfig> = {}): OhMyOpenCodeConfig {
-  return {
-    disabled_mcps: [],
-    ...overrides,
-  } as OhMyOpenCodeConfig
+	return {
+		disabled_mcps: [],
+		...overrides,
+	} as OhMyOpenCodeConfig;
 }
 
 const EMPTY_PLUGIN_COMPONENTS = {
-  commands: {},
-  skills: {},
-  agents: {},
-  mcpServers: {},
-  hooksConfigs: [],
-  plugins: [],
-  errors: [],
-}
+	commands: {},
+	skills: {},
+	agents: {},
+	mcpServers: {},
+	hooksConfigs: [],
+	plugins: [],
+	errors: [],
+};
 
-const TEST_CTX = { directory: "/workspace/project" }
+const TEST_CTX = { directory: "/workspace/project" };
 
 async function importFreshMcpConfigHandlerModule(): Promise<typeof import("./mcp-config-handler")> {
-  return import(`./mcp-config-handler?test=${Date.now()}-${Math.random()}`)
+	return import(`./mcp-config-handler?test=${Date.now()}-${Math.random()}`);
 }
 
 describe("applyMcpConfig collision handling", () => {
-  test("merges without collision when names are unique", async () => {
-    //#given
-    const userMcp = {
-      userServer: { type: "remote", url: "https://user.example.com", enabled: true },
-    }
+	test("merges without collision when names are unique", async () => {
+		//#given
+		const userMcp = {
+			userServer: { type: "remote", url: "https://user.example.com", enabled: true },
+		};
 
-    loadMcpConfigsSpy.mockResolvedValue({
-      servers: {
-        claudeServer: { type: "remote", url: "https://claude.example.com", enabled: true },
-      },
-      loadedServers: [],
-    })
+		loadMcpConfigsSpy.mockResolvedValue({
+			servers: {
+				claudeServer: { type: "remote", url: "https://claude.example.com", enabled: true },
+			},
+			loadedServers: [],
+		});
 
-    const config: Record<string, unknown> = { mcp: userMcp }
-    const pluginConfig = createPluginConfig()
+		const config: Record<string, unknown> = { mcp: userMcp };
+		const pluginConfig = createPluginConfig();
 
-    //#when
-    const { applyMcpConfig } = await importFreshMcpConfigHandlerModule()
-    await applyMcpConfig({ config, ctx: TEST_CTX, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS })
+		//#when
+		const { applyMcpConfig } = await importFreshMcpConfigHandlerModule();
+		await applyMcpConfig({ config, ctx: TEST_CTX, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS });
 
-    //#then
-    const mergedMcp = config.mcp as Record<string, Record<string, unknown>>
-    expect(mergedMcp).toHaveProperty("userServer")
-    expect(mergedMcp).toHaveProperty("claudeServer")
-    expect(mergedMcp.userServer.enabled).toBe(true)
-    expect(mergedMcp.claudeServer.enabled).toBe(true)
-    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining("overrides Claude Code"))
-  })
+		//#then
+		const mergedMcp = config.mcp as Record<string, Record<string, unknown>>;
+		expect(mergedMcp).toHaveProperty("userServer");
+		expect(mergedMcp).toHaveProperty("claudeServer");
+		expect(mergedMcp.userServer.enabled).toBe(true);
+		expect(mergedMcp.claudeServer.enabled).toBe(true);
+		expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining("overrides Claude Code"));
+	});
 
-  test("user config wins on collision with Claude Code and logs warning", async () => {
-    //#given
-    const userMcp = {
-      sharedServer: { type: "remote", url: "https://user.example.com", enabled: true },
-    }
+	test("user config wins on collision with Claude Code and logs warning", async () => {
+		//#given
+		const userMcp = {
+			sharedServer: { type: "remote", url: "https://user.example.com", enabled: true },
+		};
 
-    loadMcpConfigsSpy.mockResolvedValue({
-      servers: {
-        sharedServer: { type: "remote", url: "https://claude.example.com", enabled: true },
-      },
-      loadedServers: [],
-    })
+		loadMcpConfigsSpy.mockResolvedValue({
+			servers: {
+				sharedServer: { type: "remote", url: "https://claude.example.com", enabled: true },
+			},
+			loadedServers: [],
+		});
 
-    const config: Record<string, unknown> = { mcp: userMcp }
-    const pluginConfig = createPluginConfig()
+		const config: Record<string, unknown> = { mcp: userMcp };
+		const pluginConfig = createPluginConfig();
 
-    //#when
-    const { applyMcpConfig } = await importFreshMcpConfigHandlerModule()
-    await applyMcpConfig({ config, ctx: TEST_CTX, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS })
+		//#when
+		const { applyMcpConfig } = await importFreshMcpConfigHandlerModule();
+		await applyMcpConfig({ config, ctx: TEST_CTX, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS });
 
-    //#then
-    const mergedMcp = config.mcp as Record<string, Record<string, unknown>>
-    expect(mergedMcp.sharedServer.url).toBe("https://user.example.com")
-    expect(logSpy).toHaveBeenCalledWith(
-      'warning: MCP server "sharedServer" from user config overrides Claude Code .mcp.json'
-    )
-  })
+		//#then
+		const mergedMcp = config.mcp as Record<string, Record<string, unknown>>;
+		expect(mergedMcp.sharedServer.url).toBe("https://user.example.com");
+		expect(logSpy).toHaveBeenCalledWith(
+			'warning: MCP server "sharedServer" from user config overrides Claude Code .mcp.json',
+		);
+	});
 
-  test("preserves enabled:false from user config after collision with Claude Code", async () => {
-    //#given
-    const userMcp = {
-      sharedServer: { type: "remote", url: "https://user.example.com", enabled: false },
-    }
+	test("preserves enabled:false from user config after collision with Claude Code", async () => {
+		//#given
+		const userMcp = {
+			sharedServer: { type: "remote", url: "https://user.example.com", enabled: false },
+		};
 
-    loadMcpConfigsSpy.mockResolvedValue({
-      servers: {
-        sharedServer: { type: "remote", url: "https://claude.example.com", enabled: true },
-      },
-      loadedServers: [],
-    })
+		loadMcpConfigsSpy.mockResolvedValue({
+			servers: {
+				sharedServer: { type: "remote", url: "https://claude.example.com", enabled: true },
+			},
+			loadedServers: [],
+		});
 
-    const config: Record<string, unknown> = { mcp: userMcp }
-    const pluginConfig = createPluginConfig()
+		const config: Record<string, unknown> = { mcp: userMcp };
+		const pluginConfig = createPluginConfig();
 
-    //#when
-    const { applyMcpConfig } = await importFreshMcpConfigHandlerModule()
-    await applyMcpConfig({ config, ctx: TEST_CTX, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS })
+		//#when
+		const { applyMcpConfig } = await importFreshMcpConfigHandlerModule();
+		await applyMcpConfig({ config, ctx: TEST_CTX, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS });
 
-    //#then
-    const mergedMcp = config.mcp as Record<string, Record<string, unknown>>
-    expect(mergedMcp.sharedServer.enabled).toBe(false)
-    expect(mergedMcp.sharedServer.url).toBe("https://user.example.com")
-    expect(logSpy).toHaveBeenCalledWith(
-      'warning: MCP server "sharedServer" from user config overrides Claude Code .mcp.json'
-    )
-  })
-})
+		//#then
+		const mergedMcp = config.mcp as Record<string, Record<string, unknown>>;
+		expect(mergedMcp.sharedServer.enabled).toBe(false);
+		expect(mergedMcp.sharedServer.url).toBe("https://user.example.com");
+		expect(logSpy).toHaveBeenCalledWith(
+			'warning: MCP server "sharedServer" from user config overrides Claude Code .mcp.json',
+		);
+	});
+});

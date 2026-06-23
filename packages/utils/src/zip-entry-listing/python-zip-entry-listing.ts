@@ -1,20 +1,17 @@
-import { spawn, spawnSync } from "../runtime"
-
-import type { ArchiveEntry } from "../archive-entry-validator"
-import { readProcessStream } from "../process-stream-reader"
+import type { ArchiveEntry } from "../archive-entry-validator";
+import { readProcessStream } from "../process-stream-reader";
+import { spawn, spawnSync } from "../runtime";
 
 export function isPythonZipListingAvailable(): boolean {
 	const proc = spawnSync(["python3", "--version"], {
 		stdout: "ignore",
 		stderr: "ignore",
-	})
+	});
 
-	return proc.exitCode === 0
+	return proc.exitCode === 0;
 }
 
-export async function listZipEntriesWithPython(
-	archivePath: string
-): Promise<ArchiveEntry[]> {
+export async function listZipEntriesWithPython(archivePath: string): Promise<ArchiveEntry[]> {
 	const script = [
 		"import json, stat, sys, zipfile",
 		"entries = []",
@@ -35,23 +32,23 @@ export async function listZipEntriesWithPython(
 		"            entry['linkPath'] = link_path",
 		"        entries.append(entry)",
 		"print(json.dumps(entries))",
-	].join("\n")
+	].join("\n");
 
 	const proc = spawn(["python3", "-c", script, archivePath], {
 		stdout: "pipe",
 		stderr: "pipe",
-	})
+	});
 
 	const [exitCode, stdout, stderr] = await Promise.all([
 		proc.exited,
 		// #3919: Use Buffer-concat stream reads for Node utility-process compatibility.
 		readProcessStream(proc.stdout),
 		readProcessStream(proc.stderr),
-	])
+	]);
 
 	if (exitCode !== 0) {
-		throw new Error(`zip entry listing failed (exit ${exitCode}): ${stderr}`)
+		throw new Error(`zip entry listing failed (exit ${exitCode}): ${stderr}`);
 	}
 
-	return JSON.parse(stdout) as ArchiveEntry[]
+	return JSON.parse(stdout) as ArchiveEntry[];
 }

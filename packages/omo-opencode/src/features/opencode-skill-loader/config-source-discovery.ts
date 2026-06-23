@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/opencode-skill-loader/config-source-discovery"
+export * from "@oh-my-opencode/skills-loader-core/opencode-skill-loader/config-source-discovery";

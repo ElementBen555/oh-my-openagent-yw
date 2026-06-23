@@ -1,5 +1,5 @@
-import type { JSX } from "react"
 import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Section } from "@/components/ui/section"
 

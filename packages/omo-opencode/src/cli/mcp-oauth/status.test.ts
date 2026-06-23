@@ -1,48 +1,48 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
-import { status } from "./status"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { status } from "./status";
 
 describe("status command", () => {
-  beforeEach(() => {
-    // setup
-  })
+	beforeEach(() => {
+		// setup
+	});
 
-  afterEach(() => {
-    // cleanup
-  })
+	afterEach(() => {
+		// cleanup
+	});
 
-  it("returns success code when checking status for specific server", async () => {
-    // given
-    const serverName = "test-server"
+	it("returns success code when checking status for specific server", async () => {
+		// given
+		const serverName = "test-server";
 
-    // when
-    const exitCode = await status(serverName)
+		// when
+		const exitCode = await status(serverName);
 
-    // then
-    expect(typeof exitCode).toBe("number")
-    expect(exitCode).toBe(0)
-  })
+		// then
+		expect(typeof exitCode).toBe("number");
+		expect(exitCode).toBe(0);
+	});
 
-  it("returns success code when checking status for all servers", async () => {
-    // given
-    const serverName = undefined
+	it("returns success code when checking status for all servers", async () => {
+		// given
+		const serverName = undefined;
 
-    // when
-    const exitCode = await status(serverName)
+		// when
+		const exitCode = await status(serverName);
 
-    // then
-    expect(typeof exitCode).toBe("number")
-    expect(exitCode).toBe(0)
-  })
+		// then
+		expect(typeof exitCode).toBe("number");
+		expect(exitCode).toBe(0);
+	});
 
-  it("handles non-existent server gracefully", async () => {
-    // given
-    const serverName = "non-existent-server"
+	it("handles non-existent server gracefully", async () => {
+		// given
+		const serverName = "non-existent-server";
 
-    // when
-    const exitCode = await status(serverName)
+		// when
+		const exitCode = await status(serverName);
 
-    // then
-    expect(typeof exitCode).toBe("number")
-    expect(exitCode).toBe(0)
-  })
-})
+		// then
+		expect(typeof exitCode).toBe("number");
+		expect(exitCode).toBe(0);
+	});
+});

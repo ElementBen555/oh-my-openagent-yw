@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-mailbox/reservation"
+export * from "@oh-my-opencode/team-core/team-mailbox/reservation";

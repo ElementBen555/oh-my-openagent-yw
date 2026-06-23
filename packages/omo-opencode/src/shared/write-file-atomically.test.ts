@@ -1,112 +1,112 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
-import { readFileSync, writeFileSync, existsSync, rmSync, mkdirSync, statSync } from "fs"
-import { join } from "path"
-import { tmpdir } from "os"
-import { writeFileAtomically } from "./write-file-atomically"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { writeFileAtomically } from "./write-file-atomically";
 
-const testDir = join(tmpdir(), "write-file-atomically-test-" + Date.now())
+const testDir = join(tmpdir(), "write-file-atomically-test-" + Date.now());
 
 beforeEach(() => {
-  mkdirSync(testDir, { recursive: true })
-})
+	mkdirSync(testDir, { recursive: true });
+});
 
 afterEach(() => {
-  rmSync(testDir, { recursive: true, force: true })
-})
+	rmSync(testDir, { recursive: true, force: true });
+});
 
 describe("writeFileAtomically", () => {
-  it("writes content to a new file", () => {
-    // given
-    const filePath = join(testDir, "new-file.txt")
-    const content = "hello world"
+	it("writes content to a new file", () => {
+		// given
+		const filePath = join(testDir, "new-file.txt");
+		const content = "hello world";
 
-    // when
-    writeFileAtomically(filePath, content)
+		// when
+		writeFileAtomically(filePath, content);
 
-    // then
-    expect(existsSync(filePath)).toBe(true)
-    expect(readFileSync(filePath, "utf-8")).toBe(content)
-  })
+		// then
+		expect(existsSync(filePath)).toBe(true);
+		expect(readFileSync(filePath, "utf-8")).toBe(content);
+	});
 
-  it("#given target file exists #when writeFileAtomically called #then overwrites successfully", () => {
-    // given
-    const filePath = join(testDir, "existing-file.txt")
-    const originalContent = "original content"
-    const newContent = "new content"
-    writeFileSync(filePath, originalContent, "utf-8")
+	it("#given target file exists #when writeFileAtomically called #then overwrites successfully", () => {
+		// given
+		const filePath = join(testDir, "existing-file.txt");
+		const originalContent = "original content";
+		const newContent = "new content";
+		writeFileSync(filePath, originalContent, "utf-8");
 
-    // when
-    writeFileAtomically(filePath, newContent)
+		// when
+		writeFileAtomically(filePath, newContent);
 
-    // then
-    expect(existsSync(filePath)).toBe(true)
-    expect(readFileSync(filePath, "utf-8")).toBe(newContent)
-    expect(existsSync(`${filePath}.tmp`)).toBe(false)
-  })
+		// then
+		expect(existsSync(filePath)).toBe(true);
+		expect(readFileSync(filePath, "utf-8")).toBe(newContent);
+		expect(existsSync(`${filePath}.tmp`)).toBe(false);
+	});
 
-  it("#given private mode #when writeFileAtomically called #then temp and final files use that mode", () => {
-    // given
-    const filePath = join(testDir, "private-file.txt")
-    const tempModes: number[] = []
+	it("#given private mode #when writeFileAtomically called #then temp and final files use that mode", () => {
+		// given
+		const filePath = join(testDir, "private-file.txt");
+		const tempModes: number[] = [];
 
-    // when
-    writeFileAtomically(filePath, "private", {
-      mode: 0o600,
-      beforeRenameSync: (tempPath) => {
-        tempModes.push(statSync(tempPath).mode & 0o777)
-      },
-    })
+		// when
+		writeFileAtomically(filePath, "private", {
+			mode: 0o600,
+			beforeRenameSync: (tempPath) => {
+				tempModes.push(statSync(tempPath).mode & 0o777);
+			},
+		});
 
-    // then
-    expect(readFileSync(filePath, "utf-8")).toBe("private")
-    if (process.platform === "win32") {
-      expect(tempModes).toHaveLength(1)
-      return
-    }
-    expect(tempModes).toEqual([0o600])
-    expect(statSync(filePath).mode & 0o777).toBe(0o600)
-  })
+		// then
+		expect(readFileSync(filePath, "utf-8")).toBe("private");
+		if (process.platform === "win32") {
+			expect(tempModes).toHaveLength(1);
+			return;
+		}
+		expect(tempModes).toEqual([0o600]);
+		expect(statSync(filePath).mode & 0o777).toBe(0o600);
+	});
 
-  it("#given parent directory does not exist #when writeFileAtomically called #then throws", () => {
-    // given
-    const filePath = join(testDir, "nonexistent", "deep", "file.txt")
+	it("#given parent directory does not exist #when writeFileAtomically called #then throws", () => {
+		// given
+		const filePath = join(testDir, "nonexistent", "deep", "file.txt");
 
-    // when/then
-    expect(() => writeFileAtomically(filePath, "content")).toThrow()
-  })
+		// when/then
+		expect(() => writeFileAtomically(filePath, "content")).toThrow();
+	});
 
-  it("#given fsync fails with EPERM (synced folder) #when writeFileAtomically called #then write succeeds", () => {
-    // given
-    const filePath = join(testDir, "synced-folder.txt")
-    const content = "content from a synced folder where fsync is rejected"
+	it("#given fsync fails with EPERM (synced folder) #when writeFileAtomically called #then write succeeds", () => {
+		// given
+		const filePath = join(testDir, "synced-folder.txt");
+		const content = "content from a synced folder where fsync is rejected";
 
-    // when
-    writeFileAtomically(filePath, content, {
-      fsyncSync: () => {
-        const error = new Error("EPERM: operation not permitted, fsync") as NodeJS.ErrnoException
-        error.code = "EPERM"
-        throw error
-      },
-    })
+		// when
+		writeFileAtomically(filePath, content, {
+			fsyncSync: () => {
+				const error = new Error("EPERM: operation not permitted, fsync") as NodeJS.ErrnoException;
+				error.code = "EPERM";
+				throw error;
+			},
+		});
 
-    // then
-    expect(existsSync(filePath)).toBe(true)
-    expect(readFileSync(filePath, "utf-8")).toBe(content)
-  })
+		// then
+		expect(existsSync(filePath)).toBe(true);
+		expect(readFileSync(filePath, "utf-8")).toBe(content);
+	});
 
-  it("#given fsync fails with EIO (real I/O error) #when writeFileAtomically called #then propagates the error", () => {
-    // given
-    const filePath = join(testDir, "io-error.txt")
+	it("#given fsync fails with EIO (real I/O error) #when writeFileAtomically called #then propagates the error", () => {
+		// given
+		const filePath = join(testDir, "io-error.txt");
 
-    // when/then
-    expect(() =>
-      writeFileAtomically(filePath, "content", {
-        fsyncSync: () => {
-          const error = new Error("EIO: input/output error") as NodeJS.ErrnoException
-          error.code = "EIO"
-          throw error
-        },
-      }),
-    ).toThrow("EIO")
-  })
-})
+		// when/then
+		expect(() =>
+			writeFileAtomically(filePath, "content", {
+				fsyncSync: () => {
+					const error = new Error("EIO: input/output error") as NodeJS.ErrnoException;
+					error.code = "EIO";
+					throw error;
+				},
+			}),
+		).toThrow("EIO");
+	});
+});

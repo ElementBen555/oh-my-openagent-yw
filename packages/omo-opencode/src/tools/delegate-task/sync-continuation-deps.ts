@@ -1,9 +1,9 @@
-import { pollSyncSession } from "./sync-session-poller"
-import { fetchSyncResult } from "./sync-result-fetcher"
+import { fetchSyncResult } from "./sync-result-fetcher";
+import { pollSyncSession } from "./sync-session-poller";
 
 export const syncContinuationDeps = {
-  pollSyncSession,
-  fetchSyncResult,
-}
+	pollSyncSession,
+	fetchSyncResult,
+};
 
-export type SyncContinuationDeps = typeof syncContinuationDeps
+export type SyncContinuationDeps = typeof syncContinuationDeps;

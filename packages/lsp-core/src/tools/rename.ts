@@ -1,5 +1,5 @@
-import { formatApplyResult, formatPrepareRenameResult } from "../lsp/formatters.js";
 import { withLspClient } from "../lsp/client-wrapper.js";
+import { formatApplyResult, formatPrepareRenameResult } from "../lsp/formatters.js";
 import { applyWorkspaceEdit } from "../lsp/workspace-edit.js";
 import { missingDependencyResult } from "../missing-dependency-result.js";
 import { clientOptions, requireNumber, requireString } from "./parameters.js";

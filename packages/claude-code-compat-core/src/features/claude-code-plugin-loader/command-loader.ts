@@ -1,55 +1,55 @@
-import { existsSync, readdirSync, readFileSync } from "fs"
-import { basename, join } from "path"
-import { parseFrontmatter } from "../../shared/frontmatter"
-import { isMarkdownFile } from "../../shared/file-utils"
-import { sanitizeModelField } from "../../shared/model-sanitizer"
-import { resolvePluginPath } from "./plugin-path-resolver"
-import { log } from "../../shared/logger"
-import type { CommandDefinition, CommandFrontmatter } from "../claude-code-command-loader/types"
-import type { LoadedPlugin } from "./types"
+import { existsSync, readdirSync, readFileSync } from "fs";
+import { basename, join } from "path";
+import { isMarkdownFile } from "../../shared/file-utils";
+import { parseFrontmatter } from "../../shared/frontmatter";
+import { log } from "../../shared/logger";
+import { sanitizeModelField } from "../../shared/model-sanitizer";
+import type { CommandDefinition, CommandFrontmatter } from "../claude-code-command-loader/types";
+import { resolvePluginPath } from "./plugin-path-resolver";
+import type { LoadedPlugin } from "./types";
 
 export function loadPluginCommands(plugins: LoadedPlugin[]): Record<string, CommandDefinition> {
-  const commands: Record<string, CommandDefinition> = {}
+	const commands: Record<string, CommandDefinition> = {};
 
-  for (const plugin of plugins) {
-    if (!plugin.commandsDir || !existsSync(plugin.commandsDir)) continue
+	for (const plugin of plugins) {
+		if (!plugin.commandsDir || !existsSync(plugin.commandsDir)) continue;
 
-    const entries = readdirSync(plugin.commandsDir, { withFileTypes: true })
+		const entries = readdirSync(plugin.commandsDir, { withFileTypes: true });
 
-    for (const entry of entries) {
-      if (!isMarkdownFile(entry)) continue
+		for (const entry of entries) {
+			if (!isMarkdownFile(entry)) continue;
 
-      const commandPath = join(plugin.commandsDir, entry.name)
-      const commandName = basename(entry.name, ".md")
-      const namespacedName = `${plugin.name}:${commandName}`
+			const commandPath = join(plugin.commandsDir, entry.name);
+			const commandName = basename(entry.name, ".md");
+			const namespacedName = `${plugin.name}:${commandName}`;
 
-      try {
-        const content = readFileSync(commandPath, "utf-8")
-        const { data, body } = parseFrontmatter<CommandFrontmatter>(content)
+			try {
+				const content = readFileSync(commandPath, "utf-8");
+				const { data, body } = parseFrontmatter<CommandFrontmatter>(content);
 
-        const resolvedBody = resolvePluginPath(body, plugin.installPath)
-        const wrappedTemplate = `<command-instruction>\n${resolvedBody.trim()}\n</command-instruction>\n\n<user-request>\n$ARGUMENTS\n</user-request>`
-        const formattedDescription = `(plugin: ${plugin.name}) ${data.description || ""}`
+				const resolvedBody = resolvePluginPath(body, plugin.installPath);
+				const wrappedTemplate = `<command-instruction>\n${resolvedBody.trim()}\n</command-instruction>\n\n<user-request>\n$ARGUMENTS\n</user-request>`;
+				const formattedDescription = `(plugin: ${plugin.name}) ${data.description || ""}`;
 
-        const definition = {
-          name: namespacedName,
-          description: formattedDescription,
-          template: wrappedTemplate,
-          agent: data.agent,
-          model: sanitizeModelField(data.model, "claude-code"),
-          subtask: data.subtask,
-          argumentHint: data["argument-hint"],
-        }
+				const definition = {
+					name: namespacedName,
+					description: formattedDescription,
+					template: wrappedTemplate,
+					agent: data.agent,
+					model: sanitizeModelField(data.model, "claude-code"),
+					subtask: data.subtask,
+					argumentHint: data["argument-hint"],
+				};
 
-        const { name: _name, argumentHint: _argumentHint, ...openCodeCompatible } = definition
-        commands[namespacedName] = openCodeCompatible as CommandDefinition
+				const { name: _name, argumentHint: _argumentHint, ...openCodeCompatible } = definition;
+				commands[namespacedName] = openCodeCompatible as CommandDefinition;
 
-        log(`Loaded plugin command: ${namespacedName}`, { path: commandPath })
-      } catch (error) {
-        log(`Failed to load plugin command: ${commandPath}`, error)
-      }
-    }
-  }
+				log(`Loaded plugin command: ${namespacedName}`, { path: commandPath });
+			} catch (error) {
+				log(`Failed to load plugin command: ${commandPath}`, error);
+			}
+		}
+	}
 
-  return commands
+	return commands;
 }

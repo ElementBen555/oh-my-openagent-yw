@@ -1,54 +1,54 @@
-import { createBuiltinSkills } from "../builtin-skills/skills"
-import { discoverSkills } from "./loader"
-import type { LoadedSkill } from "./types"
-import type { SkillResolutionOptions } from "./skill-resolution-options"
+import { createBuiltinSkills } from "../builtin-skills/skills";
+import { discoverSkills } from "./loader";
+import type { SkillResolutionOptions } from "./skill-resolution-options";
+import type { LoadedSkill } from "./types";
 
-const cachedSkillsByProvider = new Map<string, LoadedSkill[]>()
-const SHARED_SKILL_PREFIX = "shared/"
+const cachedSkillsByProvider = new Map<string, LoadedSkill[]>();
+const SHARED_SKILL_PREFIX = "shared/";
 
 function isDisabledAlias(name: string, disabledSkills: ReadonlySet<string>): boolean {
-	const normalizedName = name.toLowerCase()
-	if (disabledSkills.has(normalizedName)) return true
+	const normalizedName = name.toLowerCase();
+	if (disabledSkills.has(normalizedName)) return true;
 
 	for (const disabledSkill of disabledSkills) {
-		if (disabledSkill.toLowerCase() === normalizedName) return true
+		if (disabledSkill.toLowerCase() === normalizedName) return true;
 	}
 
-	return false
+	return false;
 }
 
 export function isDisabledSkillAlias(skill: LoadedSkill, disabledSkills: ReadonlySet<string>): boolean {
-	const normalizedSkillName = skill.name.toLowerCase()
+	const normalizedSkillName = skill.name.toLowerCase();
 	if (isDisabledAlias(normalizedSkillName, disabledSkills)) {
-		return true
+		return true;
 	}
 
 	if (skill.scope !== "shared") {
-		return false
+		return false;
 	}
 
 	if (normalizedSkillName.startsWith(SHARED_SKILL_PREFIX)) {
-		return isDisabledAlias(normalizedSkillName.slice(SHARED_SKILL_PREFIX.length), disabledSkills)
+		return isDisabledAlias(normalizedSkillName.slice(SHARED_SKILL_PREFIX.length), disabledSkills);
 	}
 
-	return isDisabledAlias(`${SHARED_SKILL_PREFIX}${normalizedSkillName}`, disabledSkills)
+	return isDisabledAlias(`${SHARED_SKILL_PREFIX}${normalizedSkillName}`, disabledSkills);
 }
 
 export function clearSkillCache(): void {
-	cachedSkillsByProvider.clear()
+	cachedSkillsByProvider.clear();
 }
 
 export async function getAllSkills(options?: SkillResolutionOptions): Promise<LoadedSkill[]> {
-	const browserProvider = options?.browserProvider ?? "playwright"
-	const teamModeEnabled = options?.teamModeEnabled ?? false
-	const directory = options?.directory ?? ""
-	const cacheKey = `${directory}:${browserProvider}:${teamModeEnabled ? "team-on" : "team-off"}`
-	const hasDisabledSkills = options?.disabledSkills && options.disabledSkills.size > 0
+	const browserProvider = options?.browserProvider ?? "playwright";
+	const teamModeEnabled = options?.teamModeEnabled ?? false;
+	const directory = options?.directory ?? "";
+	const cacheKey = `${directory}:${browserProvider}:${teamModeEnabled ? "team-on" : "team-off"}`;
+	const hasDisabledSkills = options?.disabledSkills && options.disabledSkills.size > 0;
 
 	// Skip cache if disabledSkills is provided (varies between calls)
 	if (!hasDisabledSkills) {
-		const cached = cachedSkillsByProvider.get(cacheKey)
-		if (cached) return cached
+		const cached = cachedSkillsByProvider.get(cacheKey);
+		if (cached) return cached;
 	}
 
 	const [discoveredSkills, builtinSkillDefinitions] = await Promise.all([
@@ -58,7 +58,7 @@ export async function getAllSkills(options?: SkillResolutionOptions): Promise<Lo
 			disabledSkills: options?.disabledSkills,
 			teamModeEnabled,
 		}),
-	])
+	]);
 
 	const builtinSkillsAsLoaded: LoadedSkill[] = builtinSkillDefinitions.map((skill) => ({
 		name: skill.name,
@@ -76,34 +76,34 @@ export async function getAllSkills(options?: SkillResolutionOptions): Promise<Lo
 		metadata: skill.metadata as Record<string, string> | undefined,
 		allowedTools: skill.allowedTools,
 		mcpConfig: skill.mcpConfig,
-	}))
+	}));
 
 	// Provider-gated skill names that should be filtered based on browserProvider
-	const providerGatedSkillNames = new Set(["agent-browser", "playwright"])
+	const providerGatedSkillNames = new Set(["agent-browser", "playwright"]);
 
 	// Filter discovered skills to exclude provider-gated names that don't match the selected provider
 	const filteredDiscoveredSkills = discoveredSkills.filter((skill) => {
 		if (!providerGatedSkillNames.has(skill.name)) {
-			return true
+			return true;
 		}
 		// For provider-gated skills, only include if it matches the selected provider
-		return skill.name === browserProvider
-	})
+		return skill.name === browserProvider;
+	});
 
-	const discoveredNames = new Set(filteredDiscoveredSkills.map((skill) => skill.name))
-	const uniqueBuiltins = builtinSkillsAsLoaded.filter((skill) => !discoveredNames.has(skill.name))
+	const discoveredNames = new Set(filteredDiscoveredSkills.map((skill) => skill.name));
+	const uniqueBuiltins = builtinSkillsAsLoaded.filter((skill) => !discoveredNames.has(skill.name));
 
-	let allSkills = [...filteredDiscoveredSkills, ...uniqueBuiltins]
+	let allSkills = [...filteredDiscoveredSkills, ...uniqueBuiltins];
 
 	// Filter discovered skills by disabledSkills (builtin skills are already filtered by createBuiltinSkills)
 	if (hasDisabledSkills) {
-		const disabledSkills = options?.disabledSkills
+		const disabledSkills = options?.disabledSkills;
 		if (disabledSkills) {
-			allSkills = allSkills.filter((skill) => !isDisabledSkillAlias(skill, disabledSkills))
+			allSkills = allSkills.filter((skill) => !isDisabledSkillAlias(skill, disabledSkills));
 		}
 	} else {
-		cachedSkillsByProvider.set(cacheKey, allSkills)
+		cachedSkillsByProvider.set(cacheKey, allSkills);
 	}
 
-	return allSkills
+	return allSkills;
 }

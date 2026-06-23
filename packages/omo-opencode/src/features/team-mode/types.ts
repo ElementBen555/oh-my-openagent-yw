@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/types"
+export * from "@oh-my-opencode/team-core/types";

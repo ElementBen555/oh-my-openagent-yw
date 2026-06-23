@@ -1,3 +1,3 @@
-export * from "./paths"
-export * from "./loader"
-export * from "./validator"
+export * from "./loader";
+export * from "./paths";
+export * from "./validator";

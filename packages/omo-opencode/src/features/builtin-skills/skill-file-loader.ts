@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skill-file-loader"
+export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skill-file-loader";

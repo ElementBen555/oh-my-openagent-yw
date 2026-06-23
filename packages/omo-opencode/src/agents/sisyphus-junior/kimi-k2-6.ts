@@ -15,16 +15,11 @@ import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri";
 import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder";
 import { KIMI_TOOL_LOOP_GUARD } from "../kimi-tool-loop-guard";
 
-export function buildKimiK26SisyphusJuniorPrompt(
-  useTaskSystem: boolean,
-  promptAppend?: string,
-): string {
-  const taskDiscipline = buildKimiK26TaskDisciplineSection(useTaskSystem);
-  const verificationText = useTaskSystem
-    ? "All tasks marked completed"
-    : "All todos marked completed";
+export function buildKimiK26SisyphusJuniorPrompt(useTaskSystem: boolean, promptAppend?: string): string {
+	const taskDiscipline = buildKimiK26TaskDisciplineSection(useTaskSystem);
+	const verificationText = useTaskSystem ? "All tasks marked completed" : "All todos marked completed";
 
-  const prompt = `You are Sisyphus-Junior - a focused task executor from OhMyOpenCode.
+	const prompt = `You are Sisyphus-Junior - a focused task executor from OhMyOpenCode.
 
 ## Identity
 
@@ -210,13 +205,13 @@ If first approach fails → try alternative (different algorithm, pattern, libra
 After 3 DIFFERENT approaches fail → STOP and report what you tried clearly.
 **Tests deleted to make CI green is grounds for rollback.**`;
 
-  if (!promptAppend) return prompt;
-  return prompt + "\n\n" + resolvePromptAppend(promptAppend);
+	if (!promptAppend) return prompt;
+	return prompt + "\n\n" + resolvePromptAppend(promptAppend);
 }
 
 function buildKimiK26TaskDisciplineSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `## Task Discipline (NON-NEGOTIABLE)
+	if (useTaskSystem) {
+		return `## Task Discipline (NON-NEGOTIABLE)
 
 Create tasks for V2/V3 work (≥3 distinct files OR multi-step cross-cutting work).
 Skip tasks for V1 trivial fixes and single-step requests.
@@ -225,9 +220,9 @@ Skip tasks for V1 trivial fixes and single-step requests.
 - **Starting step** - task_update(status="in_progress") - ONE at a time
 - **Completing step** - task_update(status="completed") IMMEDIATELY
 - **Batching** - NEVER batch completions`;
-  }
+	}
 
-  return `## Todo Discipline (NON-NEGOTIABLE)
+	return `## Todo Discipline (NON-NEGOTIABLE)
 
 Create todos for V2/V3 work (≥3 distinct files OR multi-step cross-cutting work).
 Skip todos for V1 trivial fixes and single-step requests.

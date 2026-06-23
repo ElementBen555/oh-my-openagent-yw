@@ -3,24 +3,19 @@
  * execution, and ships verified outcomes through the right specialists.
  */
 
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder"
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildAgentIdentitySection,
-  buildCategorySkillsDelegationGuide,
-  buildDelegationTable,
-  buildKeyTriggersSection,
-  buildNonClaudePlannerSection,
-} from "../dynamic-agent-prompt-builder"
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard"
+	buildAgentIdentitySection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildKeyTriggersSection,
+	buildNonClaudePlannerSection,
+} from "../dynamic-agent-prompt-builder";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
 
 function buildTaskSystemGuide(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `Create tasks before any non-trivial work (2+ steps, uncertain scope, multiple items).
+	if (useTaskSystem) {
+		return `Create tasks before any non-trivial work (2+ steps, uncertain scope, multiple items).
 
 Workflow:
 1. On receiving a request for implementation the user explicitly asked for, call \`task_create\` with atomic steps.
@@ -28,10 +23,10 @@ Workflow:
 3. After each step, call \`task_update(status="completed")\` immediately. Never batch completions.
 4. If scope changes, update the task list before proceeding.
 
-Your task creations are tracked by the harness; the system will nudge you if you go idle with open tasks.`
-  }
+Your task creations are tracked by the harness; the system will nudge you if you go idle with open tasks.`;
+	}
 
-  return `Create todos before any non-trivial work (2+ steps, uncertain scope, multiple items).
+	return `Create todos before any non-trivial work (2+ steps, uncertain scope, multiple items).
 
 Workflow:
 1. On receiving a request for implementation the user explicitly asked for, call \`todowrite\` with atomic steps.
@@ -39,7 +34,7 @@ Workflow:
 3. After each step, mark it \`completed\` immediately. Never batch completions.
 4. If scope changes, update the todo list before proceeding.
 
-Your todo creations are tracked by the harness; the system will nudge you if you go idle with open items.`
+Your todo creations are tracked by the harness; the system will nudge you if you go idle with open items.`;
 }
 
 const SISYPHUS_GPT_5_5_TEMPLATE = `You are Sisyphus, an orchestration agent based on GPT-5.5. You and the user share the same workspace and collaborate to achieve the user's goals through specialized sub-agents and tools provided by the OhMyOpenCode harness.
@@ -419,37 +414,33 @@ ${GPT_APPLY_PATCH_GUIDANCE}
 ## Shell commands
 
 Use \`rg\` directly for text and file search. One tool call, one clear thing. Never chain unrelated commands with \`;\` or \`&&\` in one call - they render poorly. Do not use Python to read or write files when a shell command or the file-edit tools would suffice.
-`
+`;
 
 export function buildGpt55SisyphusPrompt(
-  model: string,
-  availableAgents: AvailableAgent[],
-  _availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	model: string,
+	availableAgents: AvailableAgent[],
+	_availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const agentIdentity = buildAgentIdentitySection(
-    "Sisyphus",
-    "Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
-  )
-  const personality = ""
-  const taskSystemGuide = buildTaskSystemGuide(useTaskSystem)
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  )
-  const delegationTable = buildDelegationTable(availableAgents)
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model)
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
+	const agentIdentity = buildAgentIdentitySection(
+		"Sisyphus",
+		"Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
+	);
+	const personality = "";
+	const taskSystemGuide = buildTaskSystemGuide(useTaskSystem);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
 
-  const body = SISYPHUS_GPT_5_5_TEMPLATE
-    .replace("{{ personality }}", personality)
-    .replace("{{ taskSystemGuide }}", taskSystemGuide)
-    .replace("{{ categorySkillsGuide }}", categorySkillsGuide)
-    .replace("{{ delegationTable }}", delegationTable)
-    .replace("{{ nonClaudePlannerSection }}", nonClaudePlannerSection)
-    .replace("{{ keyTriggers }}", keyTriggers)
+	const body = SISYPHUS_GPT_5_5_TEMPLATE.replace("{{ personality }}", personality)
+		.replace("{{ taskSystemGuide }}", taskSystemGuide)
+		.replace("{{ categorySkillsGuide }}", categorySkillsGuide)
+		.replace("{{ delegationTable }}", delegationTable)
+		.replace("{{ nonClaudePlannerSection }}", nonClaudePlannerSection)
+		.replace("{{ keyTriggers }}", keyTriggers);
 
-  return `${agentIdentity}\n${body}`
+	return `${agentIdentity}\n${body}`;
 }

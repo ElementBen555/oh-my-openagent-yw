@@ -1,39 +1,37 @@
-import type { TmuxConfig } from "../../config/schema"
-import type { applyLayout, closeTmuxPane, enforceMainPaneWidth, replaceTmuxPane, spawnTmuxPane } from "../../shared/tmux"
-import type { PaneAction, WindowState } from "./types"
+import type { TmuxConfig } from "../../config/schema";
+import type {
+	applyLayout,
+	closeTmuxPane,
+	enforceMainPaneWidth,
+	replaceTmuxPane,
+	spawnTmuxPane,
+} from "../../shared/tmux";
+import type { PaneAction, WindowState } from "./types";
 
 export interface ActionResult {
-	success: boolean
-	paneId?: string
-	error?: string
+	success: boolean;
+	paneId?: string;
+	error?: string;
 }
 
 export interface ExecuteContext {
-	config: TmuxConfig
-	directory: string
-	serverUrl: string
-	windowState: WindowState
+	config: TmuxConfig;
+	directory: string;
+	serverUrl: string;
+	windowState: WindowState;
 }
 
 export interface ActionExecutorDeps {
-	spawnTmuxPane: typeof spawnTmuxPane
-	closeTmuxPane: typeof closeTmuxPane
-	replaceTmuxPane: typeof replaceTmuxPane
-	applyLayout: typeof applyLayout
-	enforceMainPaneWidth: typeof enforceMainPaneWidth
+	spawnTmuxPane: typeof spawnTmuxPane;
+	closeTmuxPane: typeof closeTmuxPane;
+	replaceTmuxPane: typeof replaceTmuxPane;
+	applyLayout: typeof applyLayout;
+	enforceMainPaneWidth: typeof enforceMainPaneWidth;
 }
 
-async function enforceMainPane(
-	windowState: WindowState,
-	config: TmuxConfig,
-	deps: ActionExecutorDeps,
-): Promise<void> {
-	if (!windowState.mainPane) return
-	await deps.enforceMainPaneWidth(
-		windowState.mainPane.paneId,
-		windowState.windowWidth,
-		config.main_pane_size,
-	)
+async function enforceMainPane(windowState: WindowState, config: TmuxConfig, deps: ActionExecutorDeps): Promise<void> {
+	if (!windowState.mainPane) return;
+	await deps.enforceMainPaneWidth(windowState.mainPane.paneId, windowState.windowWidth, config.main_pane_size);
 }
 
 export async function executeActionWithDeps(
@@ -42,11 +40,11 @@ export async function executeActionWithDeps(
 	deps: ActionExecutorDeps,
 ): Promise<ActionResult> {
 	if (action.type === "close") {
-		const success = await deps.closeTmuxPane(action.paneId)
+		const success = await deps.closeTmuxPane(action.paneId);
 		if (success) {
-			await enforceMainPane(ctx.windowState, ctx.config, deps)
+			await enforceMainPane(ctx.windowState, ctx.config, deps);
 		}
-		return { success }
+		return { success };
 	}
 
 	if (action.type === "replace") {
@@ -57,11 +55,11 @@ export async function executeActionWithDeps(
 			ctx.config,
 			ctx.serverUrl,
 			ctx.directory,
-		)
+		);
 		return {
 			success: result.success,
 			paneId: result.paneId,
-		}
+		};
 	}
 
 	const result = await deps.spawnTmuxPane(
@@ -72,14 +70,14 @@ export async function executeActionWithDeps(
 		ctx.directory,
 		action.targetPaneId,
 		action.splitDirection,
-	)
+	);
 
 	if (result.success) {
-		await enforceMainPane(ctx.windowState, ctx.config, deps)
+		await enforceMainPane(ctx.windowState, ctx.config, deps);
 	}
 
 	return {
 		success: result.success,
 		paneId: result.paneId,
-	}
+	};
 }

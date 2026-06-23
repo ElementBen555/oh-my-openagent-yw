@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-registry/loader"
+export * from "@oh-my-opencode/team-core/team-registry/loader";

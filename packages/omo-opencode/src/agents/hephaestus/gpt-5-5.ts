@@ -1,23 +1,18 @@
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard"
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder"
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildCategorySkillsDelegationGuide,
-  buildDelegationTable,
-  buildOracleSection,
-  buildFrontendGuidanceSection,
-} from "../dynamic-agent-prompt-builder"
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildFrontendGuidanceSection,
+	buildOracleSection,
+} from "../dynamic-agent-prompt-builder";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
 
 function buildTaskSystemGuide(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `Create tasks for any non-trivial work (2+ steps, uncertain scope, multiple items). Call \`task_create\` with atomic steps before starting. Mark exactly one item \`in_progress\` at a time via \`task_update\`. Mark items \`completed\` immediately when done; never batch. Update the task list when scope shifts.`
-  }
+	if (useTaskSystem) {
+		return `Create tasks for any non-trivial work (2+ steps, uncertain scope, multiple items). Call \`task_create\` with atomic steps before starting. Mark exactly one item \`in_progress\` at a time via \`task_update\`. Mark items \`completed\` immediately when done; never batch. Update the task list when scope shifts.`;
+	}
 
-  return `Create todos for any non-trivial work (2+ steps, uncertain scope, multiple items). Call \`todowrite\` with atomic steps before starting. Mark exactly one item \`in_progress\` at a time. Mark items \`completed\` immediately when done; never batch. Update the todo list when scope shifts.`
+	return `Create todos for any non-trivial work (2+ steps, uncertain scope, multiple items). Call \`todowrite\` with atomic steps before starting. Mark exactly one item \`in_progress\` at a time. Mark items \`completed\` immediately when done; never batch. Update the todo list when scope shifts.`;
 }
 
 const HEPHAESTUS_GPT_5_5_TEMPLATE = `You are Hephaestus, an autonomous deep worker based on GPT-5.5. You and the user share one workspace. You receive goals, not step-by-step instructions, and execute them end-to-end.
@@ -230,28 +225,24 @@ Write the final message and stop **only when** Success Criteria are all true. Un
 # Task Tracking
 
 {{ taskSystemGuide }}
-`
+`;
 
 export function buildGpt55HephaestusPrompt(
-  availableAgents: AvailableAgent[],
-  _availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	availableAgents: AvailableAgent[],
+	_availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const taskSystemGuide = buildTaskSystemGuide(useTaskSystem)
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  )
-  const delegationTable = buildDelegationTable(availableAgents)
-  const oracleSection = buildOracleSection(availableAgents)
-  const frontendGuidance = buildFrontendGuidanceSection(availableCategories)
+	const taskSystemGuide = buildTaskSystemGuide(useTaskSystem);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const oracleSection = buildOracleSection(availableAgents);
+	const frontendGuidance = buildFrontendGuidanceSection(availableCategories);
 
-  return HEPHAESTUS_GPT_5_5_TEMPLATE
-    .replace("{{ taskSystemGuide }}", taskSystemGuide)
-    .replace("{{ categorySkillsGuide }}", categorySkillsGuide)
-    .replace("{{ delegationTable }}", delegationTable)
-    .replace("{{ oracleSection }}", oracleSection)
-    .replace("{{ frontendGuidance }}", frontendGuidance)
+	return HEPHAESTUS_GPT_5_5_TEMPLATE.replace("{{ taskSystemGuide }}", taskSystemGuide)
+		.replace("{{ categorySkillsGuide }}", categorySkillsGuide)
+		.replace("{{ delegationTable }}", delegationTable)
+		.replace("{{ oracleSection }}", oracleSection)
+		.replace("{{ frontendGuidance }}", frontendGuidance);
 }

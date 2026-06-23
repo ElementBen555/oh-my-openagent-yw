@@ -1,50 +1,47 @@
 /// <reference path="../../../../bun-test.d.ts" />
-import { describe, it, expect, afterEach, mock, spyOn } from "bun:test"
-import type { PluginInput } from "@opencode-ai/plugin"
+import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
+import type { PluginInput } from "@opencode-ai/plugin";
+import { _resetForTesting, setMainSession, subagentSessions } from "../features/claude-code-session-state";
+import { clearPendingModelFallback, createModelFallbackHook } from "../hooks/model-fallback/hook";
+import * as openclawRuntimeDispatch from "../openclaw/runtime-dispatch";
+import { getSessionPromptParams, setSessionPromptParams } from "../shared/session-prompt-params-state";
+import { createChatMessageHandler } from "./chat-message";
+import { createEventHandler, extractErrorMessage } from "./event";
 
-import { createEventHandler, extractErrorMessage } from "./event"
-import { createChatMessageHandler } from "./chat-message"
-import * as openclawRuntimeDispatch from "../openclaw/runtime-dispatch"
-import { _resetForTesting, setMainSession, subagentSessions } from "../features/claude-code-session-state"
-import { clearPendingModelFallback, createModelFallbackHook } from "../hooks/model-fallback/hook"
-import { getSessionPromptParams, setSessionPromptParams } from "../shared/session-prompt-params-state"
-
-type EventInput = { event: { type: string; properties?: unknown } }
-type EventHandlerArgs = Parameters<typeof createEventHandler>[0]
-type EventHandlerInput = Parameters<ReturnType<typeof createEventHandler>>[0]
-type ChatMessageHandlerArgs = Parameters<typeof createChatMessageHandler>[0]
+type EventInput = { event: { type: string; properties?: unknown } };
+type EventHandlerArgs = Parameters<typeof createEventHandler>[0];
+type EventHandlerInput = Parameters<ReturnType<typeof createEventHandler>>[0];
+type ChatMessageHandlerArgs = Parameters<typeof createChatMessageHandler>[0];
 
 function cast<T>(value: unknown): T {
-	return value as T
+	return value as T;
 }
 
 function asEventHandlerInput(input: EventInput): EventHandlerInput {
-	return cast<EventHandlerInput>(input)
+	return cast<EventHandlerInput>(input);
 }
 
 function asEventHandlerContext(ctx: unknown): EventHandlerArgs["ctx"] {
-	return cast<EventHandlerArgs["ctx"]>(ctx)
+	return cast<EventHandlerArgs["ctx"]>(ctx);
 }
 
 function asChatMessageHandlerContext(ctx: unknown): ChatMessageHandlerArgs["ctx"] {
-	return cast<ChatMessageHandlerArgs["ctx"]>(ctx)
+	return cast<ChatMessageHandlerArgs["ctx"]>(ctx);
 }
 
 function asPluginConfig(config: unknown): EventHandlerArgs["pluginConfig"] {
-	return cast<EventHandlerArgs["pluginConfig"]>(config)
+	return cast<EventHandlerArgs["pluginConfig"]>(config);
 }
 
 function asChatPluginConfig(config: unknown): ChatMessageHandlerArgs["pluginConfig"] {
-	return cast<ChatMessageHandlerArgs["pluginConfig"]>(config)
+	return cast<ChatMessageHandlerArgs["pluginConfig"]>(config);
 }
 
 function asPluginInput(input: unknown): PluginInput {
-	return input as PluginInput
+	return input as PluginInput;
 }
 
-function createEventHandlerManagers(
-	overrides: Record<string, unknown> = {},
-): EventHandlerArgs["managers"] {
+function createEventHandlerManagers(overrides: Record<string, unknown> = {}): EventHandlerArgs["managers"] {
 	return cast<EventHandlerArgs["managers"]>({
 		tmuxSessionManager: {
 			onEvent: () => {},
@@ -52,32 +49,28 @@ function createEventHandlerManagers(
 			onSessionDeleted: async () => {},
 		},
 		...overrides,
-	})
+	});
 }
 
-function createEventHandlerHooks(
-	overrides: Record<string, unknown> = {},
-): EventHandlerArgs["hooks"] {
-	return cast<EventHandlerArgs["hooks"]>(overrides)
+function createEventHandlerHooks(overrides: Record<string, unknown> = {}): EventHandlerArgs["hooks"] {
+	return cast<EventHandlerArgs["hooks"]>(overrides);
 }
 
-function createChatMessageHandlerHooks(
-	overrides: Record<string, unknown> = {},
-): ChatMessageHandlerArgs["hooks"] {
-	return cast<ChatMessageHandlerArgs["hooks"]>(overrides)
+function createChatMessageHandlerHooks(overrides: Record<string, unknown> = {}): ChatMessageHandlerArgs["hooks"] {
+	return cast<ChatMessageHandlerArgs["hooks"]>(overrides);
 }
 
 async function wait(ms: number): Promise<void> {
-	await new Promise((resolve) => setTimeout(resolve, ms))
+	await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function waitUntil(predicate: () => boolean, timeoutMs: number = 500): Promise<void> {
-	const startedAt = Date.now()
+	const startedAt = Date.now();
 	while (!predicate()) {
 		if (Date.now() - startedAt >= timeoutMs) {
-			return
+			return;
 		}
-		await wait(5)
+		await wait(5);
 	}
 }
 
@@ -98,17 +91,17 @@ function createIdleTrackingEventHandler(dispatchCalls: EventInput[]): ReturnType
 			autoUpdateChecker: {
 				event: async (input: EventInput) => {
 					if (input.event.type === "session.idle") {
-						dispatchCalls.push(input)
+						dispatchCalls.push(input);
 					}
 				},
 			},
 		}),
-	})
+	});
 }
 
 function createIdleDedupSpyEventHandler(args: {
-	onEvent: (event: EventInput["event"]) => void
-	sessionNotification: (input: EventInput) => Promise<void>
+	onEvent: (event: EventInput["event"]) => void;
+	sessionNotification: (input: EventInput) => Promise<void>;
 }): ReturnType<typeof createEventHandler> {
 	return createEventHandler({
 		ctx: asEventHandlerContext({
@@ -134,19 +127,19 @@ function createIdleDedupSpyEventHandler(args: {
 		hooks: createEventHandlerHooks({
 			sessionNotification: args.sessionNotification,
 		}),
-	})
+	});
 }
 
 async function flushMicrotasks(turns: number = 5): Promise<void> {
 	for (let index = 0; index < turns; index += 1) {
-		await Promise.resolve()
+		await Promise.resolve();
 	}
 }
 
 afterEach(() => {
-	mock.restore()
-	_resetForTesting()
-})
+	mock.restore();
+	_resetForTesting();
+});
 
 describe("event error extraction", () => {
 	it("prefers nested APIError message over generic top-level message", async () => {
@@ -154,16 +147,16 @@ describe("event error extraction", () => {
 			name: "APIError",
 			message: "Error",
 			data: { message: "Forbidden: Selected provider is forbidden" },
-		}
-		const result = extractErrorMessage(error)
-		expect(result).toBe("Forbidden: Selected provider is forbidden")
-	})
-})
+		};
+		const result = extractErrorMessage(error);
+		expect(result).toBe("Forbidden: Selected provider is forbidden");
+	});
+});
 
 describe("createEventHandler - idle deduplication", () => {
 	it("#given tmux integration enabled #when session.idle arrives #then it forwards the event to tmuxSessionManager.onEvent", async () => {
 		//#given
-		const onEvent = mock<(event: EventInput["event"]) => void>(() => {})
+		const onEvent = mock<(event: EventInput["event"]) => void>(() => {});
 		const idleEvent = {
 			event: {
 				type: "session.idle",
@@ -171,7 +164,7 @@ describe("createEventHandler - idle deduplication", () => {
 					sessionID: "ses_tmux_idle",
 				},
 			},
-		}
+		};
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({
 				directory: "/tmp",
@@ -194,19 +187,19 @@ describe("createEventHandler - idle deduplication", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
 		//#when
-		await eventHandler(asEventHandlerInput(idleEvent))
+		await eventHandler(asEventHandlerInput(idleEvent));
 
 		//#then
-		expect(onEvent).toHaveBeenCalledTimes(1)
-		expect(onEvent.mock.calls[0]?.[0]).toEqual(idleEvent.event)
-	})
+		expect(onEvent).toHaveBeenCalledTimes(1);
+		expect(onEvent.mock.calls[0]?.[0]).toEqual(idleEvent.event);
+	});
 
 	it("#given tmux integration enabled #when session.status reports idle #then synthetic idle forwards to tmuxSessionManager.onEvent", async () => {
 		//#given
-		const onEvent = mock<(event: EventInput["event"]) => void>(() => {})
+		const onEvent = mock<(event: EventInput["event"]) => void>(() => {});
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({
 				directory: "/tmp",
@@ -229,46 +222,48 @@ describe("createEventHandler - idle deduplication", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
 		//#when
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: {
-					sessionID: "ses_tmux_synthetic_idle",
-					status: { type: "idle" },
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: {
+						sessionID: "ses_tmux_synthetic_idle",
+						status: { type: "idle" },
+					},
 				},
-			},
-		}))
+			}),
+		);
 
 		//#then
-		expect(onEvent).toHaveBeenCalledTimes(1)
+		expect(onEvent).toHaveBeenCalledTimes(1);
 		expect(onEvent.mock.calls[0]?.[0]).toEqual({
 			type: "session.idle",
 			properties: {
 				sessionID: "ses_tmux_synthetic_idle",
 				synthetic: true,
 			},
-		})
-	})
+		});
+	});
 
 	it("#given a readiness retry is pending #when session.idle arrives through the plugin handler #then tmux retry spawns the pane", async () => {
 		//#given
-		const sessionStatusData: Record<string, { type: string }> = {}
+		const sessionStatusData: Record<string, { type: string }> = {};
 		const sessionStatusResult = {
 			data: sessionStatusData,
-		}
+		};
 		const spawnTmuxPane = mock(async (_sessionId: string) => ({
 			success: true,
 			paneId: "%mock",
-		}))
-		let waitForSessionReadyCallCount = 0
+		}));
+		let waitForSessionReadyCallCount = 0;
 
 		const executeActions = mock(async (actions: Array<{ type: string; sessionId: string }>) => {
 			for (const action of actions) {
 				if (action.type === "spawn") {
-					await spawnTmuxPane(action.sessionId)
+					await spawnTmuxPane(action.sessionId);
 				}
 			}
 
@@ -276,9 +271,9 @@ describe("createEventHandler - idle deduplication", () => {
 				success: true,
 				spawnedPaneId: "%mock",
 				results: [],
-			}
-		})
-		const executeAction = mock(async () => ({ success: true }))
+			};
+		});
+		const executeAction = mock(async () => ({ success: true }));
 		const queryWindowState = mock(async () => ({
 			windowWidth: 220,
 			windowHeight: 44,
@@ -292,17 +287,17 @@ describe("createEventHandler - idle deduplication", () => {
 				isActive: true,
 			},
 			agentPanes: [],
-		}))
+		}));
 		const waitForSessionReady = mock(async () => {
-			waitForSessionReadyCallCount += 1
+			waitForSessionReadyCallCount += 1;
 			if (waitForSessionReadyCallCount === 1) {
-				throw new Error("session readiness timed out")
+				throw new Error("session readiness timed out");
 			}
 
-			return true
-		})
+			return true;
+		});
 
-		const { TmuxSessionManager } = await import(`../features/tmux-subagent/manager?test=${crypto.randomUUID()}`)
+		const { TmuxSessionManager } = await import(`../features/tmux-subagent/manager?test=${crypto.randomUUID()}`);
 		const managerContext = asPluginInput({
 			serverUrl: new URL("http://localhost:4096"),
 			directory: "/tmp",
@@ -315,23 +310,27 @@ describe("createEventHandler - idle deduplication", () => {
 					messages: async () => ({ data: [] }),
 				},
 			},
-		})
-		const manager = new TmuxSessionManager(managerContext, {
-			enabled: true,
-			isolation: "inline",
-			layout: "main-vertical",
-			main_pane_size: 60,
-			main_pane_min_width: 80,
-			agent_pane_min_width: 40,
-		}, {
-			isInsideTmux: () => true,
-			getCurrentPaneId: () => "%0",
-			queryWindowState,
-			waitForSessionReady,
-			executeActions,
-			executeAction,
-			log: () => {},
-		})
+		});
+		const manager = new TmuxSessionManager(
+			managerContext,
+			{
+				enabled: true,
+				isolation: "inline",
+				layout: "main-vertical",
+				main_pane_size: 60,
+				main_pane_min_width: 80,
+				agent_pane_min_width: 40,
+			},
+			{
+				isInsideTmux: () => true,
+				getCurrentPaneId: () => "%0",
+				queryWindowState,
+				waitForSessionReady,
+				executeActions,
+				executeAction,
+				log: () => {},
+			},
+		);
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({
 				directory: "/tmp",
@@ -353,7 +352,7 @@ describe("createEventHandler - idle deduplication", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
 		//#when
 		await manager.onSessionCreated({
@@ -365,243 +364,271 @@ describe("createEventHandler - idle deduplication", () => {
 					title: "Retry Via Plugin Event",
 				},
 			},
-		})
+		});
 
 		//#then
-		expect(spawnTmuxPane).toHaveBeenCalledTimes(0)
+		expect(spawnTmuxPane).toHaveBeenCalledTimes(0);
 
 		//#when
-		sessionStatusData.ses_retry_via_plugin = { type: "idle" }
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.idle",
-				properties: {
-					sessionID: "ses_retry_via_plugin",
+		sessionStatusData.ses_retry_via_plugin = { type: "idle" };
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.idle",
+					properties: {
+						sessionID: "ses_retry_via_plugin",
+					},
 				},
-			},
-		}))
-		await flushMicrotasks(20)
-		await waitUntil(() => spawnTmuxPane.mock.calls.length === 1)
+			}),
+		);
+		await flushMicrotasks(20);
+		await waitUntil(() => spawnTmuxPane.mock.calls.length === 1);
 
 		//#then
-		expect(spawnTmuxPane).toHaveBeenCalledTimes(1)
-	})
+		expect(spawnTmuxPane).toHaveBeenCalledTimes(1);
+	});
 
 	it("#given session.status already emitted a synthetic idle #when real session.idle follows immediately #then hooks run once", async () => {
 		//#given
-		const dispatchCalls: EventInput[] = []
-		const eventHandler = createIdleTrackingEventHandler(dispatchCalls)
-		const sessionId = "ses_test123"
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: {
-					sessionID: sessionId,
-					status: { type: "idle" },
+		const dispatchCalls: EventInput[] = [];
+		const eventHandler = createIdleTrackingEventHandler(dispatchCalls);
+		const sessionId = "ses_test123";
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: {
+						sessionID: sessionId,
+						status: { type: "idle" },
+					},
 				},
-			},
-		}))
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.idle",
-				properties: {
-					sessionID: sessionId,
+			}),
+		);
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.idle",
+					properties: {
+						sessionID: sessionId,
+					},
 				},
-			},
-		}))
+			}),
+		);
 
 		//#then
-		expect(dispatchCalls).toHaveLength(1)
-		expect(dispatchCalls[0]?.event.type).toBe("session.idle")
-		expect((dispatchCalls[0]?.event.properties as { sessionID?: string } | undefined)?.sessionID).toBe(sessionId)
-	})
+		expect(dispatchCalls).toHaveLength(1);
+		expect(dispatchCalls[0]?.event.type).toBe("session.idle");
+		expect((dispatchCalls[0]?.event.properties as { sessionID?: string } | undefined)?.sessionID).toBe(sessionId);
+	});
 
 	it("keeps other session dedup state untouched when suppressing real-idle-after-synthetic-idle", async () => {
 		//#given
-		const originalDateNow = Date.now
-		let currentNow = 30_000
-		Date.now = () => currentNow
-		const dispatchedSessionIds: string[] = []
+		const originalDateNow = Date.now;
+		let currentNow = 30_000;
+		Date.now = () => currentNow;
+		const dispatchedSessionIds: string[] = [];
 		const eventHandler = createIdleDedupSpyEventHandler({
 			onEvent: () => {},
 			sessionNotification: async (input: EventInput) => {
 				if (input.event.type !== "session.idle") {
-					return
+					return;
 				}
-				const props = input.event.properties as { sessionID?: string } | undefined
+				const props = input.event.properties as { sessionID?: string } | undefined;
 				if (props?.sessionID) {
-					dispatchedSessionIds.push(props.sessionID)
+					dispatchedSessionIds.push(props.sessionID);
 				}
 			},
-		})
+		});
 
 		try {
 			//#when
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.status",
-					properties: {
-						sessionID: "ses_a",
-						status: { type: "idle" },
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.status",
+						properties: {
+							sessionID: "ses_a",
+							status: { type: "idle" },
+						},
 					},
-				},
-			}))
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: "ses_b",
+				}),
+			);
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: "ses_b",
+						},
 					},
-				},
-			}))
+				}),
+			);
 
-			currentNow += 100
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: "ses_a",
+			currentNow += 100;
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: "ses_a",
+						},
 					},
-				},
-			}))
+				}),
+			);
 
-			currentNow += 100
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: "ses_b",
+			currentNow += 100;
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: "ses_b",
+						},
 					},
-				},
-			}))
+				}),
+			);
 
 			//#then
-			expect(dispatchedSessionIds).toEqual(["ses_a", "ses_b"])
+			expect(dispatchedSessionIds).toEqual(["ses_a", "ses_b"]);
 		} finally {
-			Date.now = originalDateNow
+			Date.now = originalDateNow;
 		}
-	})
+	});
 
 	it("dedups back-to-back real session.idle events for the same sessionID within 500ms", async () => {
 		//#given
-		const originalDateNow = Date.now
-		let currentNow = 10_000
-		Date.now = () => currentNow
-		const onEvent = mock<(event: EventInput["event"]) => void>(() => {})
-		const sessionNotification = mock(async (_input: EventInput) => {})
+		const originalDateNow = Date.now;
+		let currentNow = 10_000;
+		Date.now = () => currentNow;
+		const onEvent = mock<(event: EventInput["event"]) => void>(() => {});
+		const sessionNotification = mock(async (_input: EventInput) => {});
 		const eventHandler = createIdleDedupSpyEventHandler({
 			onEvent,
 			sessionNotification,
-		})
-		const sessionId = "ses_same_idle"
+		});
+		const sessionId = "ses_same_idle";
 
 		try {
 			//#when
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: sessionId,
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: sessionId,
+						},
 					},
-				},
-			}))
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: sessionId,
+				}),
+			);
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: sessionId,
+						},
 					},
-				},
-			}))
+				}),
+			);
 
 			//#then
-			expect(onEvent).toHaveBeenCalledTimes(1)
-			expect(sessionNotification).toHaveBeenCalledTimes(1)
+			expect(onEvent).toHaveBeenCalledTimes(1);
+			expect(sessionNotification).toHaveBeenCalledTimes(1);
 
 			//#when
-			currentNow += 501
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: sessionId,
+			currentNow += 501;
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: sessionId,
+						},
 					},
-				},
-			}))
+				}),
+			);
 
 			//#then
-			expect(onEvent).toHaveBeenCalledTimes(2)
-			expect(sessionNotification).toHaveBeenCalledTimes(2)
+			expect(onEvent).toHaveBeenCalledTimes(2);
+			expect(sessionNotification).toHaveBeenCalledTimes(2);
 		} finally {
-			Date.now = originalDateNow
+			Date.now = originalDateNow;
 		}
-	})
+	});
 
 	it("still dedups synthetic-idle-after-real-idle as before", async () => {
 		//#given
-		const dispatchCalls: EventInput[] = []
-		const eventHandler = createIdleTrackingEventHandler(dispatchCalls)
-		const sessionId = "ses_test456"
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.idle",
-				properties: {
-					sessionID: sessionId,
+		const dispatchCalls: EventInput[] = [];
+		const eventHandler = createIdleTrackingEventHandler(dispatchCalls);
+		const sessionId = "ses_test456";
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.idle",
+					properties: {
+						sessionID: sessionId,
+					},
 				},
-			},
-		}))
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: {
-					sessionID: sessionId,
-					status: { type: "idle" },
+			}),
+		);
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: {
+						sessionID: sessionId,
+						status: { type: "idle" },
+					},
 				},
-			},
-		}))
-		expect(dispatchCalls).toHaveLength(1)
-		expect(dispatchCalls[0]?.event.type).toBe("session.idle")
-		expect((dispatchCalls[0]?.event.properties as { sessionID?: string } | undefined)?.sessionID).toBe(sessionId)
-	})
+			}),
+		);
+		expect(dispatchCalls).toHaveLength(1);
+		expect(dispatchCalls[0]?.event.type).toBe("session.idle");
+		expect((dispatchCalls[0]?.event.properties as { sessionID?: string } | undefined)?.sessionID).toBe(sessionId);
+	});
 
 	it("does NOT dedup session.idle events for DIFFERENT sessionIDs", async () => {
 		//#given
-		const originalDateNow = Date.now
-		let currentNow = 20_000
-		Date.now = () => currentNow
-		const onEvent = mock<(event: EventInput["event"]) => void>(() => {})
-		const sessionNotification = mock(async (_input: EventInput) => {})
+		const originalDateNow = Date.now;
+		const currentNow = 20_000;
+		Date.now = () => currentNow;
+		const onEvent = mock<(event: EventInput["event"]) => void>(() => {});
+		const sessionNotification = mock(async (_input: EventInput) => {});
 		const eventHandler = createIdleDedupSpyEventHandler({
 			onEvent,
 			sessionNotification,
-		})
+		});
 
 		try {
 			//#when
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: "ses_first_idle",
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: "ses_first_idle",
+						},
 					},
-				},
-			}))
-			await eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.idle",
-					properties: {
-						sessionID: "ses_second_idle",
+				}),
+			);
+			await eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.idle",
+						properties: {
+							sessionID: "ses_second_idle",
+						},
 					},
-				},
-			}))
+				}),
+			);
 
 			//#then
-			expect(onEvent).toHaveBeenCalledTimes(2)
-			expect(sessionNotification).toHaveBeenCalledTimes(2)
+			expect(onEvent).toHaveBeenCalledTimes(2);
+			expect(sessionNotification).toHaveBeenCalledTimes(2);
 		} finally {
-			Date.now = originalDateNow
+			Date.now = originalDateNow;
 		}
-	})
+	});
 
 	it("both maps pruned on every event", async () => {
 		//#given
@@ -638,7 +665,7 @@ describe("createEventHandler - idle deduplication", () => {
 				compactionTodoPreserver: { event: async () => {} },
 				atlasHook: { handler: async () => {} },
 			}),
-		})
+		});
 
 		await eventHandler({
 			event: {
@@ -648,7 +675,7 @@ describe("createEventHandler - idle deduplication", () => {
 					status: { type: "idle" },
 				},
 			},
-		})
+		});
 
 		await eventHandler({
 			event: {
@@ -658,7 +685,7 @@ describe("createEventHandler - idle deduplication", () => {
 					status: { type: "idle" },
 				},
 			},
-		})
+		});
 
 		await eventHandler({
 			event: {
@@ -667,7 +694,7 @@ describe("createEventHandler - idle deduplication", () => {
 					sessionID: "ses_stale_3",
 				},
 			},
-		})
+		});
 
 		await eventHandler({
 			event: {
@@ -676,15 +703,17 @@ describe("createEventHandler - idle deduplication", () => {
 					sessionID: "ses_stale_4",
 				},
 			},
-		})
-		await wait(600)
+		});
+		await wait(600);
 
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "message.updated",
-			},
-		}))
-		const dispatchCalls: EventInput[] = []
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "message.updated",
+				},
+			}),
+		);
+		const dispatchCalls: EventInput[] = [];
 		const eventHandlerWithMock = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({}),
@@ -701,7 +730,7 @@ describe("createEventHandler - idle deduplication", () => {
 			hooks: createEventHandlerHooks({
 				autoUpdateChecker: {
 					event: async (input: EventInput) => {
-						dispatchCalls.push(input)
+						dispatchCalls.push(input);
 					},
 				},
 				claudeCodeHooks: { event: async () => {} },
@@ -722,7 +751,7 @@ describe("createEventHandler - idle deduplication", () => {
 				compactionTodoPreserver: { event: async () => {} },
 				atlasHook: { handler: async () => {} },
 			}),
-		})
+		});
 
 		await eventHandlerWithMock({
 			event: {
@@ -731,14 +760,14 @@ describe("createEventHandler - idle deduplication", () => {
 					sessionID: "ses_stale_1",
 				},
 			},
-		})
+		});
 
-		expect(dispatchCalls.length).toBe(1)
-		expect(dispatchCalls[0].event.type).toBe("session.idle")
-	})
+		expect(dispatchCalls.length).toBe(1);
+		expect(dispatchCalls[0].event.type).toBe("session.idle");
+	});
 
 	it("dispatches both idle events once the dedup window expires", async () => {
-		const dispatchCalls: EventInput[] = []
+		const dispatchCalls: EventInput[] = [];
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({}),
@@ -756,7 +785,7 @@ describe("createEventHandler - idle deduplication", () => {
 				autoUpdateChecker: {
 					event: async (input: EventInput) => {
 						if (input.event.type === "session.idle") {
-							dispatchCalls.push(input)
+							dispatchCalls.push(input);
 						}
 					},
 				},
@@ -778,9 +807,9 @@ describe("createEventHandler - idle deduplication", () => {
 				compactionTodoPreserver: { event: async () => {} },
 				atlasHook: { handler: async () => {} },
 			}),
-		})
+		});
 
-		const sessionId = "ses_outside_window"
+		const sessionId = "ses_outside_window";
 		await eventHandler({
 			event: {
 				type: "session.status",
@@ -789,9 +818,9 @@ describe("createEventHandler - idle deduplication", () => {
 					status: { type: "idle" },
 				},
 			},
-		})
-		expect(dispatchCalls.length).toBe(1)
-		await wait(600)
+		});
+		expect(dispatchCalls.length).toBe(1);
+		await wait(600);
 		await eventHandler({
 			event: {
 				type: "session.idle",
@@ -799,16 +828,16 @@ describe("createEventHandler - idle deduplication", () => {
 					sessionID: sessionId,
 				},
 			},
-		})
-		expect(dispatchCalls.length).toBe(2)
-		expect(dispatchCalls[0].event.type).toBe("session.idle")
-		expect(dispatchCalls[1].event.type).toBe("session.idle")
-	})
-})
+		});
+		expect(dispatchCalls.length).toBe(2);
+		expect(dispatchCalls[0].event.type).toBe("session.idle");
+		expect(dispatchCalls[1].event.type).toBe("session.idle");
+	});
+});
 
 describe("createEventHandler - event forwarding", () => {
 	it("forwards message activity events to tmux session manager", async () => {
-		const forwardedEvents: EventInput[] = []
+		const forwardedEvents: EventInput[] = [];
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -831,26 +860,28 @@ describe("createEventHandler - event forwarding", () => {
 				},
 				tmuxSessionManager: {
 					onEvent: (event: EventInput["event"]) => {
-						forwardedEvents.push({ event })
+						forwardedEvents.push({ event });
 					},
 					onSessionCreated: async () => {},
 					onSessionDeleted: async () => {},
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "message.part.delta",
-				properties: { sessionID: "ses_tmux_activity", field: "text", delta: "x" },
-			},
-		}))
-		expect(forwardedEvents.length).toBe(1)
-		expect(forwardedEvents[0]?.event.type).toBe("message.part.delta")
-	})
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "message.part.delta",
+					properties: { sessionID: "ses_tmux_activity", field: "text", delta: "x" },
+				},
+			}),
+		);
+		expect(forwardedEvents.length).toBe(1);
+		expect(forwardedEvents[0]?.event.type).toBe("message.part.delta");
+	});
 
 	it("forwards legacy message.part.updated activity with part-only session id to tmux session manager", async () => {
-		const forwardedEvents: EventInput[] = []
+		const forwardedEvents: EventInput[] = [];
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -873,34 +904,36 @@ describe("createEventHandler - event forwarding", () => {
 				},
 				tmuxSessionManager: {
 					onEvent: (event: EventInput["event"]) => {
-						forwardedEvents.push({ event })
+						forwardedEvents.push({ event });
 					},
 					onSessionCreated: async () => {},
 					onSessionDeleted: async () => {},
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "message.part.updated",
-				properties: {
-					part: {
-						id: "part-1",
-						messageID: "msg-1",
-						sessionID: "ses_tmux_part_only",
-						type: "text",
-						text: "x",
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "message.part.updated",
+					properties: {
+						part: {
+							id: "part-1",
+							messageID: "msg-1",
+							sessionID: "ses_tmux_part_only",
+							type: "text",
+							text: "x",
+						},
 					},
 				},
-			},
-		}))
-		expect(forwardedEvents.length).toBe(1)
-		expect(forwardedEvents[0]?.event.type).toBe("message.part.updated")
-	})
+			}),
+		);
+		expect(forwardedEvents.length).toBe(1);
+		expect(forwardedEvents[0]?.event.type).toBe("message.part.updated");
+	});
 
 	it("does not forward tmux activity events when tmux integration is disabled", async () => {
-		const forwardedEvents: EventInput[] = []
+		const forwardedEvents: EventInput[] = [];
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -923,25 +956,27 @@ describe("createEventHandler - event forwarding", () => {
 				},
 				tmuxSessionManager: {
 					onEvent: (event: EventInput["event"]) => {
-						forwardedEvents.push({ event })
+						forwardedEvents.push({ event });
 					},
 					onSessionCreated: async () => {},
 					onSessionDeleted: async () => {},
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "message.part.delta",
-				properties: { sessionID: "ses_tmux_disabled", field: "text", delta: "x" },
-			},
-		}))
-		expect(forwardedEvents).toHaveLength(0)
-	})
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "message.part.delta",
+					properties: { sessionID: "ses_tmux_disabled", field: "text", delta: "x" },
+				},
+			}),
+		);
+		expect(forwardedEvents).toHaveLength(0);
+	});
 
 	it("does not forward session.created to tmux session manager when tmux integration is disabled", async () => {
-		const createdSessions: string[] = []
+		const createdSessions: string[] = [];
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -964,39 +999,41 @@ describe("createEventHandler - event forwarding", () => {
 				},
 				tmuxSessionManager: {
 					onSessionCreated: async (event: { properties?: { info?: { id?: string } } }) => {
-						const sessionId = event.properties?.info?.id
+						const sessionId = event.properties?.info?.id;
 						if (sessionId) {
-							createdSessions.push(sessionId)
+							createdSessions.push(sessionId);
 						}
 					},
 					onSessionDeleted: async () => {},
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_tmux_disabled", parentID: "ses_parent" } },
-			},
-		}))
-		expect(createdSessions).toHaveLength(0)
-	})
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_tmux_disabled", parentID: "ses_parent" } },
+				},
+			}),
+		);
+		expect(createdSessions).toHaveLength(0);
+	});
 
 	it("skips tmux dispatch for subagent sessions marked only via subagentSessions (no parentID)", async () => {
 		//#given
 		type SessionCreatedEvent = {
-			type?: string
+			type?: string;
 			properties?: {
 				info?: {
-					id?: string
-					parentID?: string
-					title?: string
-				}
-			}
-		}
-		const onSessionCreated = mock(async (event: SessionCreatedEvent) => event)
-		subagentSessions.add("ses_marked_subagent")
+					id?: string;
+					parentID?: string;
+					title?: string;
+				};
+			};
+		};
+		const onSessionCreated = mock(async (event: SessionCreatedEvent) => event);
+		subagentSessions.add("ses_marked_subagent");
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -1023,33 +1060,35 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
 		//#when
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_marked_subagent", title: "Child" } },
-			},
-		}))
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_marked_subagent", title: "Child" } },
+				},
+			}),
+		);
 
 		//#then
-		expect(onSessionCreated).not.toHaveBeenCalled()
-	})
+		expect(onSessionCreated).not.toHaveBeenCalled();
+	});
 
 	it("still dispatches for a primary session not in subagentSessions", async () => {
 		//#given
 		type SessionCreatedEvent = {
-			type?: string
+			type?: string;
 			properties?: {
 				info?: {
-					id?: string
-					parentID?: string
-					title?: string
-				}
-			}
-		}
-		const onSessionCreated = mock(async (event: SessionCreatedEvent) => event)
+					id?: string;
+					parentID?: string;
+					title?: string;
+				};
+			};
+		};
+		const onSessionCreated = mock(async (event: SessionCreatedEvent) => event);
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -1076,37 +1115,39 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
 		//#when
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_primary", title: "Primary" } },
-			},
-		}))
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_primary", title: "Primary" } },
+				},
+			}),
+		);
 
 		//#then
-		expect(onSessionCreated).toHaveBeenCalledTimes(1)
+		expect(onSessionCreated).toHaveBeenCalledTimes(1);
 		expect(onSessionCreated).toHaveBeenCalledWith({
 			type: "session.created",
 			properties: { info: { id: "ses_primary", title: "Primary" } },
-		})
-	})
+		});
+	});
 
 	it("Path A skips dispatch even when subagentSessions Set is populated only AFTER the event arrives (parentID covers it)", async () => {
 		//#given
 		type SessionCreatedEvent = {
-			type?: string
+			type?: string;
 			properties?: {
 				info?: {
-					id?: string
-					parentID?: string
-					title?: string
-				}
-			}
-		}
-		const onSessionCreated = mock(async (event: SessionCreatedEvent) => event)
+					id?: string;
+					parentID?: string;
+					title?: string;
+				};
+			};
+		};
+		const onSessionCreated = mock(async (event: SessionCreatedEvent) => event);
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({}),
 			pluginConfig: asPluginConfig({
@@ -1133,36 +1174,40 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
 		//#when
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_parent_marked", parentID: "ses_parent", title: "Child" } },
-			},
-		}))
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_parent_marked", parentID: "ses_parent", title: "Child" } },
+				},
+			}),
+		);
 
 		//#then
-		expect(onSessionCreated).not.toHaveBeenCalled()
+		expect(onSessionCreated).not.toHaveBeenCalled();
 
 		//#when
-		subagentSessions.add("ses_parent_marked")
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_parent_marked", title: "Child" } },
-			},
-		}))
+		subagentSessions.add("ses_parent_marked");
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_parent_marked", title: "Child" } },
+				},
+			}),
+		);
 
 		//#then
-		expect(onSessionCreated).not.toHaveBeenCalled()
-	})
+		expect(onSessionCreated).not.toHaveBeenCalled();
+	});
 
 	it("dispatches OpenClaw after session.created for main sessions (no parentID)", async () => {
 		//#given
-		const openClawSpy = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent")
-		openClawSpy.mockResolvedValue(null)
+		const openClawSpy = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent");
+		openClawSpy.mockResolvedValue(null);
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({ directory: "/tmp/project-created" }),
 			pluginConfig: asPluginConfig({
@@ -1189,33 +1234,35 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_openclaw_created" } },
-			},
-		}))
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_openclaw_created" } },
+				},
+			}),
+		);
 
 		//#then - OpenClaw dispatch called for main session
 		const call = openClawSpy.mock.calls[0]?.[0] as
 			| {
-				rawEvent?: string
-				context?: { sessionId?: string; projectPath?: string; tmuxPaneId?: string }
+					rawEvent?: string;
+					context?: { sessionId?: string; projectPath?: string; tmuxPaneId?: string };
 			  }
-			| undefined
-		expect(call?.rawEvent).toBe("session.created")
+			| undefined;
+		expect(call?.rawEvent).toBe("session.created");
 		expect(call?.context).toEqual({
 			sessionId: "ses_openclaw_created",
 			projectPath: "/tmp/project-created",
 			tmuxPaneId: "%9",
-		})
-	})
+		});
+	});
 
 	it("does NOT dispatch OpenClaw for subagent sessions (with parentID)", async () => {
 		//#given
-		const openClawSpy = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent")
-		openClawSpy.mockResolvedValue(null)
+		const openClawSpy = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent");
+		openClawSpy.mockResolvedValue(null);
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({ directory: "/tmp/project-created" }),
 			pluginConfig: asPluginConfig({
@@ -1242,20 +1289,22 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.created",
-				properties: { info: { id: "ses_subagent", parentID: "ses_parent" } },
-			},
-		}))
-		expect(openClawSpy.mock.calls.length).toBe(0)
-	})
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.created",
+					properties: { info: { id: "ses_subagent", parentID: "ses_parent" } },
+				},
+			}),
+		);
+		expect(openClawSpy.mock.calls.length).toBe(0);
+	});
 
 	it("forwards session.deleted to write-existing-file-guard hook", async () => {
-		const forwardedEvents: EventInput[] = []
-		const disconnectedSessions: string[] = []
-		const deletedSessions: string[] = []
+		const forwardedEvents: EventInput[] = [];
+		const disconnectedSessions: string[] = [];
+		const deletedSessions: string[] = [];
 		const eventHandler = createEventHandler({
 			ctx: {} as never,
 			pluginConfig: asPluginConfig({
@@ -1275,40 +1324,42 @@ describe("createEventHandler - event forwarding", () => {
 			managers: {
 				skillMcpManager: {
 					disconnectSession: async (sessionID: string) => {
-						disconnectedSessions.push(sessionID)
+						disconnectedSessions.push(sessionID);
 					},
 				},
 				tmuxSessionManager: {
 					onSessionCreated: async () => {},
 					onSessionDeleted: async ({ sessionID }: { sessionID: string }) => {
-						deletedSessions.push(sessionID)
+						deletedSessions.push(sessionID);
 					},
 				},
 			} as never,
 			hooks: {
 				writeExistingFileGuard: {
 					event: async (input: EventInput) => {
-						forwardedEvents.push(input)
+						forwardedEvents.push(input);
 					},
 				},
 			} as never,
-		})
-		const sessionID = "ses_forward_delete_event"
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.deleted",
-				properties: { info: { id: sessionID } },
-			},
-		}))
-		expect(forwardedEvents.length).toBe(1)
-		expect(forwardedEvents[0]?.event.type).toBe("session.deleted")
-		expect(disconnectedSessions).toEqual([sessionID])
-		expect(deletedSessions).toEqual([sessionID])
-	})
+		});
+		const sessionID = "ses_forward_delete_event";
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.deleted",
+					properties: { info: { id: sessionID } },
+				},
+			}),
+		);
+		expect(forwardedEvents.length).toBe(1);
+		expect(forwardedEvents[0]?.event.type).toBe("session.deleted");
+		expect(disconnectedSessions).toEqual([sessionID]);
+		expect(deletedSessions).toEqual([sessionID]);
+	});
 
 	it("dispatches OpenClaw for synthetic session.idle events", async () => {
-		const openClawSpy = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent")
-		openClawSpy.mockResolvedValue(null)
+		const openClawSpy = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent");
+		openClawSpy.mockResolvedValue(null);
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({ directory: "/tmp/project-idle" }),
 			pluginConfig: asPluginConfig({ openclaw: { enabled: true, gateways: {}, hooks: {} } }),
@@ -1325,28 +1376,30 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			}),
 			hooks: createEventHandlerHooks({}),
-		})
+		});
 
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: { sessionID: "ses_openclaw_idle", status: { type: "idle" } },
-			},
-		}))
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: { sessionID: "ses_openclaw_idle", status: { type: "idle" } },
+				},
+			}),
+		);
 
 		const call = openClawSpy.mock.calls[0]?.[0] as
 			| {
-				rawEvent?: string
-				context?: { sessionId?: string; projectPath?: string; tmuxPaneId?: string }
+					rawEvent?: string;
+					context?: { sessionId?: string; projectPath?: string; tmuxPaneId?: string };
 			  }
-			| undefined
-		expect(call?.rawEvent).toBe("session.idle")
+			| undefined;
+		expect(call?.rawEvent).toBe("session.idle");
 		expect(call?.context).toEqual({
 			sessionId: "ses_openclaw_idle",
 			projectPath: "/tmp/project-idle",
 			tmuxPaneId: "%3",
-		})
-	})
+		});
+	});
 
 	it("clears stored prompt params on session.deleted", async () => {
 		const eventHandler = createEventHandler({
@@ -1366,31 +1419,33 @@ describe("createEventHandler - event forwarding", () => {
 				},
 			} as never,
 			hooks: {} as never,
-		})
-		const sessionID = "ses_prompt_params_deleted"
+		});
+		const sessionID = "ses_prompt_params_deleted";
 		setSessionPromptParams(sessionID, {
 			temperature: 0.4,
 			topP: 0.7,
 			options: { reasoningEffort: "high" },
-		})
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.deleted",
-				properties: { info: { id: sessionID } },
-			},
-		}))
-		expect(getSessionPromptParams(sessionID)).toBeUndefined()
-	})
-})
+		});
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.deleted",
+					properties: { info: { id: sessionID } },
+				},
+			}),
+		);
+		expect(getSessionPromptParams(sessionID)).toBeUndefined();
+	});
+});
 
 describe("createEventHandler - retry dedupe lifecycle", () => {
 	it("re-handles same retry key after session recovers to idle status", async () => {
-		const sessionID = "ses_retry_recovery_rearm"
-		setMainSession(sessionID)
-		const abortCalls: string[] = []
-		const promptCalls: string[] = []
-		const modelFallback = createModelFallbackHook()
-		clearPendingModelFallback(modelFallback, sessionID)
+		const sessionID = "ses_retry_recovery_rearm";
+		setMainSession(sessionID);
+		const abortCalls: string[] = [];
+		const promptCalls: string[] = [];
+		const modelFallback = createModelFallbackHook();
+		clearPendingModelFallback(modelFallback, sessionID);
 
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({
@@ -1398,12 +1453,12 @@ describe("createEventHandler - retry dedupe lifecycle", () => {
 				client: {
 					session: {
 						abort: async ({ path }: { path: { id: string } }) => {
-							abortCalls.push(path.id)
-							return {}
+							abortCalls.push(path.id);
+							return {};
 						},
 						prompt: async ({ path }: { path: { id: string } }) => {
-							promptCalls.push(path.id)
-							return {}
+							promptCalls.push(path.id);
+							return {};
 						},
 					},
 				},
@@ -1422,7 +1477,7 @@ describe("createEventHandler - retry dedupe lifecycle", () => {
 				modelFallback,
 				stopContinuationGuard: { isStopped: () => false },
 			}),
-		})
+		});
 
 		const chatMessageHandler = createChatMessageHandler({
 			ctx: asChatMessageHandlerContext({
@@ -1446,41 +1501,45 @@ describe("createEventHandler - retry dedupe lifecycle", () => {
 				startWork: null,
 				ralphLoop: null,
 			}),
-		})
+		});
 
 		const retryStatus = {
 			type: "retry",
 			attempt: 1,
 			message: "All credentials for model claude-opus-4-7-thinking are cooling down [retrying in 7m 56s attempt #1]",
 			next: 476,
-		} as const
+		} as const;
 
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "message.updated",
-				properties: {
-					info: {
-						id: "msg_user_retry_rearm",
-						sessionID,
-						role: "user",
-						modelID: "claude-opus-4-7-thinking",
-						providerID: "anthropic",
-						agent: "Sisyphus - Ultraworker",
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "message.updated",
+					properties: {
+						info: {
+							id: "msg_user_retry_rearm",
+							sessionID,
+							role: "user",
+							modelID: "claude-opus-4-7-thinking",
+							providerID: "anthropic",
+							agent: "Sisyphus - Ultraworker",
+						},
 					},
 				},
-			},
-		}))
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: {
-					sessionID,
-					status: retryStatus,
+			}),
+		);
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: {
+						sessionID,
+						status: retryStatus,
+					},
 				},
-			},
-		}))
+			}),
+		);
 
-		const firstOutput = { message: {}, parts: [] as Array<{ type: string; text?: string }> }
+		const firstOutput = { message: {}, parts: [] as Array<{ type: string; text?: string }> };
 		await chatMessageHandler(
 			{
 				sessionID,
@@ -1488,33 +1547,37 @@ describe("createEventHandler - retry dedupe lifecycle", () => {
 				model: { providerID: "anthropic", modelID: "claude-opus-4-7-thinking" },
 			},
 			firstOutput,
-		)
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: {
-					sessionID,
-					status: { type: "idle" },
+		);
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: {
+						sessionID,
+						status: { type: "idle" },
+					},
 				},
-			},
-		}))
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.status",
-				properties: {
-					sessionID,
-					status: retryStatus,
+			}),
+		);
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.status",
+					properties: {
+						sessionID,
+						status: retryStatus,
+					},
 				},
-			},
-		}))
-		expect(abortCalls).toEqual([sessionID, sessionID])
-		expect(promptCalls).toEqual([sessionID, sessionID])
-	})
-})
+			}),
+		);
+		expect(abortCalls).toEqual([sessionID, sessionID]);
+		expect(promptCalls).toEqual([sessionID, sessionID]);
+	});
+});
 
 describe("createEventHandler - event hook isolation", () => {
 	it("continues dispatching later event hooks when an earlier hook throws", async () => {
-		const runtimeFallbackCalls: EventInput[] = []
+		const runtimeFallbackCalls: EventInput[] = [];
 
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({
@@ -1535,32 +1598,36 @@ describe("createEventHandler - event hook isolation", () => {
 			hooks: createEventHandlerHooks({
 				autoUpdateChecker: {
 					event: async () => {
-						throw new Error("upstream hook failed")
+						throw new Error("upstream hook failed");
 					},
 				},
 				runtimeFallback: {
 					event: async (input: EventInput) => {
-						runtimeFallbackCalls.push(input)
+						runtimeFallbackCalls.push(input);
 					},
 				},
 				stopContinuationGuard: { isStopped: () => false },
 			}),
-		})
-		await expect(eventHandler(asEventHandlerInput({
-				event: {
-					type: "session.error",
-					properties: {
-						sessionID: "ses_hook_isolation",
-						error: { name: "Error", message: "retry me" },
+		});
+		await expect(
+			eventHandler(
+				asEventHandlerInput({
+					event: {
+						type: "session.error",
+						properties: {
+							sessionID: "ses_hook_isolation",
+							error: { name: "Error", message: "retry me" },
+						},
 					},
-				},
-			}))).resolves.toBeUndefined()
-		expect(runtimeFallbackCalls).toHaveLength(1)
-		expect(runtimeFallbackCalls[0]?.event.type).toBe("session.error")
-	})
+				}),
+			),
+		).resolves.toBeUndefined();
+		expect(runtimeFallbackCalls).toHaveLength(1);
+		expect(runtimeFallbackCalls[0]?.event.type).toBe("session.error");
+	});
 
 	it("preserves hook fan-out order while isolating individual hook failures", async () => {
-		const calls: string[] = []
+		const calls: string[] = [];
 
 		const eventHandler = createEventHandler({
 			ctx: asEventHandlerContext({
@@ -1581,51 +1648,53 @@ describe("createEventHandler - event hook isolation", () => {
 			hooks: createEventHandlerHooks({
 				autoUpdateChecker: {
 					event: async () => {
-						calls.push("autoUpdateChecker")
+						calls.push("autoUpdateChecker");
 					},
 				},
 				legacyPluginToast: {
 					event: async () => {
-						calls.push("legacyPluginToast")
-						throw new Error("toast failed")
+						calls.push("legacyPluginToast");
+						throw new Error("toast failed");
 					},
 				},
 				claudeCodeHooks: {
 					event: async () => {
-						calls.push("claudeCodeHooks")
+						calls.push("claudeCodeHooks");
 					},
 				},
 				backgroundNotificationHook: {
 					event: async () => {
-						calls.push("backgroundNotificationHook")
+						calls.push("backgroundNotificationHook");
 					},
 				},
 				sessionNotification: async () => {
-					calls.push("sessionNotification")
+					calls.push("sessionNotification");
 				},
 				runtimeFallback: {
 					event: async () => {
-						calls.push("runtimeFallback")
+						calls.push("runtimeFallback");
 					},
 				},
 				writeExistingFileGuard: {
 					event: async () => {
-						calls.push("writeExistingFileGuard")
+						calls.push("writeExistingFileGuard");
 					},
 				},
 				stopContinuationGuard: { isStopped: () => false },
 			}),
-		})
+		});
 
-		await eventHandler(asEventHandlerInput({
-			event: {
-				type: "session.error",
-				properties: {
-					sessionID: "ses_hook_order",
-					error: { name: "Error", message: "retry me" },
+		await eventHandler(
+			asEventHandlerInput({
+				event: {
+					type: "session.error",
+					properties: {
+						sessionID: "ses_hook_order",
+						error: { name: "Error", message: "retry me" },
+					},
 				},
-			},
-		}))
+			}),
+		);
 
 		expect(calls).toEqual([
 			"autoUpdateChecker",
@@ -1635,6 +1704,6 @@ describe("createEventHandler - event hook isolation", () => {
 			"sessionNotification",
 			"runtimeFallback",
 			"writeExistingFileGuard",
-		])
-	})
-})
+		]);
+	});
+});

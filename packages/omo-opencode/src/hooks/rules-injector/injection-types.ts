@@ -15,17 +15,12 @@ export type RuleToInject = {
 };
 
 export type DynamicTruncator = {
-	truncate: (
-		sessionID: string,
-		content: string,
-	) => Promise<{ result: string; truncated: boolean }>;
+	truncate: (sessionID: string, content: string) => Promise<{ result: string; truncated: boolean }>;
 };
 
 export type RuleFileReader = (path: string, encoding: "utf-8") => string;
 
-export type RuleStatReader = (
-	path: string,
-) => { readonly mtimeMs: number; readonly size: number };
+export type RuleStatReader = (path: string) => { readonly mtimeMs: number; readonly size: number };
 
 export interface ParsedRuleEntry {
 	mtimeMs: number;

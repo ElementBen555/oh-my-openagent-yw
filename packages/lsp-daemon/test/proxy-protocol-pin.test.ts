@@ -9,7 +9,9 @@ describe("lsp-daemon MCP proxy protocol pins", () => {
 		const out: string[] = [];
 
 		await runMcpStdioProxy({
-			input: inputStream([{ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2024-11-05" } }]),
+			input: inputStream([
+				{ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2024-11-05" } },
+			]),
 			output: collectingWritable(out),
 			paths: inertPaths(),
 			ensure: noSpawn,

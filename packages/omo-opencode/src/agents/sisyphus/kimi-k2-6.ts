@@ -27,32 +27,27 @@
  *   8. <style>             - Tone + output contract + token_economy
  */
 
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
+import {
+	buildAgentIdentitySection,
+	buildAntiDuplicationSection,
+	buildAntiPatternsSection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildExploreSection,
+	buildHardBlocksSection,
+	buildKeyTriggersSection,
+	buildLibrarianSection,
+	buildNonClaudePlannerSection,
+	buildOracleSection,
+	buildToolSelectionTable,
+	categorizeTools,
 } from "../dynamic-agent-prompt-builder";
 import { KIMI_TOOL_LOOP_GUARD } from "../kimi-tool-loop-guard";
-import {
-  buildAgentIdentitySection,
-  buildKeyTriggersSection,
-  buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
-  buildDelegationTable,
-  buildCategorySkillsDelegationGuide,
-  buildOracleSection,
-  buildHardBlocksSection,
-  buildAntiPatternsSection,
-  buildAntiDuplicationSection,
-  buildNonClaudePlannerSection,
-  categorizeTools,
-} from "../dynamic-agent-prompt-builder";
 
 function buildKimiK26TasksSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `<tasks>
+	if (useTaskSystem) {
+		return `<tasks>
 Create tasks for V2/V3 work (≥3 distinct files OR any delegated/cross-cutting work).
 Skip tasks for V1 trivial fixes, single-step requests, and pure exploration/answer turns.
 
@@ -65,9 +60,9 @@ Workflow when tasks exist:
 When asking for clarification:
 - State what you understood, what's unclear, 2-3 options with effort/implications, and your recommendation.
 </tasks>`;
-  }
+	}
 
-  return `<tasks>
+	return `<tasks>
 Create todos for V2/V3 work (≥3 distinct files OR any delegated/cross-cutting work).
 Skip todos for V1 trivial fixes, single-step requests, and pure exploration/answer turns.
 
@@ -83,41 +78,34 @@ When asking for clarification:
 }
 
 export function buildKimiK26SisyphusPrompt(
-  model: string,
-  availableAgents: AvailableAgent[],
-  availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	model: string,
+	availableAgents: AvailableAgent[],
+	availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
-  const toolSelection = buildToolSelectionTable(
-    availableAgents,
-    availableTools,
-    availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
-  const tasksSection = buildKimiK26TasksSection(useTaskSystem);
-  const todoHookNote = useTaskSystem
-    ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
-    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+	const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills);
+	const exploreSection = buildExploreSection(availableAgents);
+	const librarianSection = buildLibrarianSection(availableAgents);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const oracleSection = buildOracleSection(availableAgents);
+	const hardBlocks = buildHardBlocksSection();
+	const antiPatterns = buildAntiPatternsSection();
+	const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
+	const tasksSection = buildKimiK26TasksSection(useTaskSystem);
+	const todoHookNote = useTaskSystem
+		? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
+		: "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
 
-  const agentIdentity = buildAgentIdentitySection(
-    "Sisyphus",
-    "Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
-  );
+	const agentIdentity = buildAgentIdentitySection(
+		"Sisyphus",
+		"Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
+	);
 
-  const identityBlock = `<identity>
+	const identityBlock = `<identity>
 You are Sisyphus - an AI orchestrator from OhMyOpenCode.
 
 You are a senior SF Bay Area engineer. You delegate, verify, and ship. Your code is indistinguishable from a senior engineer's work.
@@ -136,13 +124,13 @@ K2.x post-training context: you were trained with Toggle RL for token efficiency
 ${todoHookNote}
 </identity>`;
 
-  const constraintsBlock = `<constraints>
+	const constraintsBlock = `<constraints>
 ${hardBlocks}
 
 ${antiPatterns}
 </constraints>`;
 
-  const intentBlock = `<intent>
+	const intentBlock = `<intent>
 Every message passes through this gate before any action.
 Your default reasoning effort is minimal. For anything beyond a trivial lookup, pause and work through Steps 0-3 deliberately.
 
@@ -237,7 +225,7 @@ This rule does NOT skip the gate. It shapes the OUTPUT.
 </re_entry_rule>
 </intent>`;
 
-  const exploreBlock = `<explore>
+	const exploreBlock = `<explore>
 ## Exploration & Research
 
 ### Codebase maturity (assess on first encounter with a new repo or module)
@@ -324,7 +312,7 @@ ${buildAntiDuplicationSection()}
 Stop searching when: you have enough context, same info repeating, 2 iterations with no new data, or direct answer found.
 </explore>`;
 
-  const executionLoopBlock = `<execution_loop>
+	const executionLoopBlock = `<execution_loop>
 ## Execution Loop
 
 Every implementation task follows this cycle. No exceptions.
@@ -438,7 +426,7 @@ Progress: report at phase transitions - before exploration, after discovery, bef
 1-2 sentences each, outcome-based. Include one specific detail. Not upfront narration or scripted preambles.
 </execution_loop>`;
 
-  const delegationBlock = `<delegation>
+	const delegationBlock = `<delegation>
 ## Delegation System
 
 ### Pre-delegation:
@@ -474,12 +462,16 @@ Keep IDs separate: background task IDs (\`bg_...\`) are for \`background_output(
 
 This preserves full context, avoids repeated exploration, saves 70%+ tokens.
 
-${oracleSection ? `### Oracle
+${
+	oracleSection
+		? `### Oracle
 
-${oracleSection}` : ""}
+${oracleSection}`
+		: ""
+}
 </delegation>`;
 
-  const styleBlock = `<style>
+	const styleBlock = `<style>
 ## Tone
 
 Write in complete, natural sentences. Avoid sentence fragments, bullet-only responses, and terse shorthand.
@@ -522,7 +514,7 @@ the "State your interpretation: 'I read this as...'" mandate.
 </token_economy>
 </style>`;
 
-  return `${agentIdentity}
+	return `${agentIdentity}
 ${identityBlock}
 
 ${constraintsBlock}

@@ -1,6 +1,6 @@
+import { withLspClient } from "../lsp/client-wrapper.js";
 import { DEFAULT_MAX_REFERENCES } from "../lsp/constants.js";
 import { formatLocation } from "../lsp/formatters.js";
-import { withLspClient } from "../lsp/client-wrapper.js";
 import { missingDependencyResult } from "../missing-dependency-result.js";
 import { clientOptions, optionalBoolean, requireNumber, requireString } from "./parameters.js";
 import { text } from "./result.js";

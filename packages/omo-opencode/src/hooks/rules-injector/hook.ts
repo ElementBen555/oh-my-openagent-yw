@@ -1,10 +1,7 @@
 import type { PluginInput } from "@opencode-ai/plugin";
 import { createDynamicTruncator } from "../../shared/dynamic-truncator";
 import { resolveSessionEventID } from "../../shared/event-session-id";
-import {
-	createSessionCacheStore,
-	createSessionRuleScanCacheStore,
-} from "./cache";
+import { createSessionCacheStore, createSessionRuleScanCacheStore } from "./cache";
 import { clearParsedRuleCache, createRuleInjectionProcessor } from "./injector";
 import { getRuleInjectionFilePath } from "./output-path";
 import { clearProjectRootCache } from "./project-root-finder";
@@ -42,8 +39,7 @@ export function createRulesInjectorHook(
 ) {
 	const truncator = createDynamicTruncator(ctx, modelCacheState);
 	const { getSessionCache, clearSessionCache } = createSessionCacheStore();
-	const { getSessionRuleScanCache, clearSessionRuleScanCache } =
-		createSessionRuleScanCacheStore();
+	const { getSessionRuleScanCache, clearSessionRuleScanCache } = createSessionRuleScanCacheStore();
 	const transcriptHydration = createTranscriptHydrationStore({
 		client: ctx.client,
 	});
@@ -53,9 +49,7 @@ export function createRulesInjectorHook(
 		getSessionCache,
 		getSessionRuleScanCache,
 		transcriptHydration,
-		ruleFinderOptions: options?.skipClaudeUserRules
-			? { skipClaudeUserRules: true }
-			: undefined,
+		ruleFinderOptions: options?.skipClaudeUserRules ? { skipClaudeUserRules: true } : undefined,
 	});
 
 	function clearSessionState(sessionID: string): void {
@@ -65,10 +59,7 @@ export function createRulesInjectorHook(
 		clearParsedRuleCache();
 	}
 
-	const toolExecuteAfter = async (
-		input: ToolExecuteInput,
-		output: ToolExecuteOutput,
-	) => {
+	const toolExecuteAfter = async (input: ToolExecuteInput, output: ToolExecuteOutput) => {
 		const toolName = input.tool.toLowerCase();
 
 		if (TRACKED_TOOLS.includes(toolName)) {
@@ -79,10 +70,7 @@ export function createRulesInjectorHook(
 		}
 	};
 
-	const toolExecuteBefore = async (
-		input: ToolExecuteInput,
-		output: ToolExecuteBeforeOutput,
-	): Promise<void> => {
+	const toolExecuteBefore = async (input: ToolExecuteInput, output: ToolExecuteBeforeOutput): Promise<void> => {
 		void input;
 		void output;
 	};

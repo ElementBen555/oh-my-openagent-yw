@@ -3,27 +3,27 @@
  * categorized tasks, gated on personal manual QA of the artifact's surface.
  */
 
-import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri"
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard"
+import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
 
 function buildTaskSystemGuide(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `Create tasks before any non-trivial work (2+ steps, uncertain scope, multiple items).
+	if (useTaskSystem) {
+		return `Create tasks before any non-trivial work (2+ steps, uncertain scope, multiple items).
 
 Workflow:
 1. Call \`task_create\` with atomic steps at the start of work the category asked for.
 2. Before each step, call \`task_update(status="in_progress")\`. One step in progress at a time.
 3. After each step, call \`task_update(status="completed")\` immediately. Never batch completions.
-4. If scope changes, update the task list before proceeding.`
-  }
+4. If scope changes, update the task list before proceeding.`;
+	}
 
-  return `Create todos before any non-trivial work (2+ steps, uncertain scope, multiple items).
+	return `Create todos before any non-trivial work (2+ steps, uncertain scope, multiple items).
 
 Workflow:
 1. Call \`todowrite\` with atomic steps at the start of work the category asked for.
 2. Before each step, mark the item \`in_progress\`. One step in progress at a time.
 3. After each step, mark it \`completed\` immediately. Never batch completions.
-4. If scope changes, update the todo list before proceeding.`
+4. If scope changes, update the todo list before proceeding.`;
 }
 
 const SISYPHUS_JUNIOR_GPT_5_5_TEMPLATE = `You are Sisyphus-Junior, a focused task executor based on GPT-5.5. A primary orchestrator has delegated a categorized task to you, and your job is to complete that task within this turn using the guidance provided by the category-specific context appended to these instructions.
@@ -281,20 +281,17 @@ The \`skill\` tool loads specialized instruction packs. Load any skill whose dec
 # Category context
 
 The block below (injected at runtime by the harness) tells you the specific category mode you are operating in: deep, quick, ultrabrain, writing, or another. Read it carefully before starting work. It may adjust your exploration budget, your completion criteria, or your output style. Category instructions override the defaults above where they contradict.
-`
+`;
 
-export function buildGpt55SisyphusJuniorPrompt(
-  useTaskSystem: boolean,
-  promptAppend?: string,
-): string {
-  const personality = ""
-  const taskSystemGuide = buildTaskSystemGuide(useTaskSystem)
+export function buildGpt55SisyphusJuniorPrompt(useTaskSystem: boolean, promptAppend?: string): string {
+	const personality = "";
+	const taskSystemGuide = buildTaskSystemGuide(useTaskSystem);
 
-  const base = SISYPHUS_JUNIOR_GPT_5_5_TEMPLATE.replace(
-    "{{ personality }}",
-    personality,
-  ).replace("{{ taskSystemGuide }}", taskSystemGuide)
+	const base = SISYPHUS_JUNIOR_GPT_5_5_TEMPLATE.replace("{{ personality }}", personality).replace(
+		"{{ taskSystemGuide }}",
+		taskSystemGuide,
+	);
 
-  if (!promptAppend) return base
-  return `${base}\n\n${resolvePromptAppend(promptAppend)}`
+	if (!promptAppend) return base;
+	return `${base}\n\n${resolvePromptAppend(promptAppend)}`;
 }

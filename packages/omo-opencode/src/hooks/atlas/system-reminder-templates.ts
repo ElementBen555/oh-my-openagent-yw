@@ -1,4 +1,4 @@
-import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive"
+import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive";
 
 export const DIRECT_WORK_REMINDER = `
 
@@ -20,7 +20,7 @@ Going forward: \`task()\` for implementation. Fan out in PARALLEL when independe
 tasks remain — do not dispatch them one at a time.
 
 ---
-`
+`;
 
 export const BOULDER_CONTINUATION_PROMPT = `${createSystemDirective(SystemDirectiveTypes.BOULDER_CONTINUATION)}
 
@@ -32,7 +32,7 @@ RULES:
 - Use the notepad at .omo/notepads/{PLAN_NAME}/ to record learnings
 - Do not stop until all tasks are complete
 - If a task is blocked by missing external input, unavailable credentials, access limits, or a decision only the user can make, you MUST edit the plan file in this turn and change that task's checkbox from \`- [ ]\` to \`- [~]\` before moving on
-- A text-only explanation of a blocker is NOT progress. The \`- [~]\` checkbox edit is mandatory and must happen via a real file-editing tool call`
+- A text-only explanation of a blocker is NOT progress. The \`- [~]\` checkbox edit is mandatory and must happen via a real file-editing tool call`;
 
 export const BOULDER_COMPLETE_PROMPT = `<system-reminder>
 BOULDER COMPLETE: plan "{PLAN_NAME}" is fully checked.
@@ -43,7 +43,7 @@ Per-task breakdown:
 {TASK_BREAKDOWN}
 
 Per your <boulder_completion_response> instructions, print the final ORCHESTRATION COMPLETE summary in your next turn. This nudge fires at most once.
-</system-reminder>`
+</system-reminder>`;
 
 export const VERIFICATION_REMINDER = `**THE SUBAGENT JUST CLAIMED THIS TASK IS DONE. THEY ARE PROBABLY LYING.**
 
@@ -107,7 +107,7 @@ ALL three must be YES. "Probably" = NO. "I think so" = NO. Investigate until CER
 - **Any NO** - Reject: resume with \`task_id\`, fix the specific issue.
 - **Unsure** - Reject: "unsure" = "no". Investigate until you have a definitive answer.
 
-**DO NOT proceed to the next task until all 4 phases are complete and the gate passes.**`
+**DO NOT proceed to the next task until all 4 phases are complete and the gate passes.**`;
 
 export const VERIFICATION_REMINDER_GEMINI = `**THE SUBAGENT HAS FINISHED. THEIR WORK IS EXTREMELY SUSPICIOUS.**
 
@@ -166,7 +166,7 @@ If Phase 1 found issues but Phase 2 passes: Phase 2 is WRONG. Fix the code.
 
 ALL three must be YES. "Probably" = NO. "I think so" = NO.
 
-**DO NOT proceed to the next task until all 4 phases are complete.**`
+**DO NOT proceed to the next task until all 4 phases are complete.**`;
 
 export const ORCHESTRATOR_DELEGATION_REQUIRED = `
 
@@ -211,7 +211,7 @@ Allowed direct operations:
 Everything else: DELEGATE.
 
 ---
-`
+`;
 
 export const SINGLE_TASK_DIRECTIVE = `
 
@@ -239,4 +239,4 @@ Work systematically. Each unit must be verified before proceeding.
 Complete the first logical unit. Report progress. Await further instruction if needed.
 
 **REMEMBER:** Prometheus already decomposed the work. Execute what you receive.
-`
+`;

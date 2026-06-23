@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-process"
+export * from "@oh-my-opencode/omo-codex/install/codex-process";

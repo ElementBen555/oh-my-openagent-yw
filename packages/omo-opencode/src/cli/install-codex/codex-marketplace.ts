@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-marketplace"
+export * from "@oh-my-opencode/omo-codex/install/codex-marketplace";

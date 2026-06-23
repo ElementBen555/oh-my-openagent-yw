@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skills/init-deep"
+export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skills/init-deep";

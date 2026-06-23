@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/skill/scope-priority"
+export * from "@oh-my-opencode/skills-loader-core/skill/scope-priority";

@@ -1,68 +1,60 @@
-import type { PluginInput } from "@opencode-ai/plugin"
-import { existsSync, readFileSync } from "node:fs"
-import { log } from "../../shared/logger"
-import { HOOK_NAME } from "./constants"
-import { ULTRAWORK_VERIFICATION_PROMISE } from "./constants"
-import { isOracleVerified } from "./oracle-verification-detector"
-import { withTimeout } from "./with-timeout"
+import { existsSync, readFileSync } from "node:fs";
+import type { PluginInput } from "@opencode-ai/plugin";
+import { log } from "../../shared/logger";
+import { HOOK_NAME, ULTRAWORK_VERIFICATION_PROMISE } from "./constants";
+import { isOracleVerified } from "./oracle-verification-detector";
+import { withTimeout } from "./with-timeout";
 
 interface OpenCodeSessionMessage {
-	info?: { role?: string }
-	parts?: Array<{ type: string; text?: string }>
+	info?: { role?: string };
+	parts?: Array<{ type: string; text?: string }>;
 }
 
 interface TranscriptEntry {
-	type?: string
-	timestamp?: string
-	content?: string
-	tool_output?: { output?: string } | string
+	type?: string;
+	timestamp?: string;
+	content?: string;
+	tool_output?: { output?: string } | string;
 }
 
 function extractTranscriptEntryText(entry: TranscriptEntry): string {
-	if (typeof entry.content === "string") return entry.content
-	if (typeof entry.tool_output === "string") return entry.tool_output
-	if (entry.tool_output && typeof entry.tool_output === "object" && typeof entry.tool_output.output === "string") return entry.tool_output.output
-	return ""
+	if (typeof entry.content === "string") return entry.content;
+	if (typeof entry.tool_output === "string") return entry.tool_output;
+	if (entry.tool_output && typeof entry.tool_output === "object" && typeof entry.tool_output.output === "string")
+		return entry.tool_output.output;
+	return "";
 }
 
 function escapeRegex(str: string): string {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function buildPromisePattern(promise: string): RegExp {
-	return new RegExp(`<promise>\\s*${escapeRegex(promise)}\\s*</promise>`, "is")
+	return new RegExp(`<promise>\\s*${escapeRegex(promise)}\\s*</promise>`, "is");
 }
 
-function shouldInspectSessionMessagePart(
-	partType: string,
-	promise: string,
-	partText: string,
-): boolean {
+function shouldInspectSessionMessagePart(partType: string, promise: string, partText: string): boolean {
 	if (partType === "text") {
-		return true
+		return true;
 	}
 
 	if (partType !== "tool_result") {
-		return false
+		return false;
 	}
 
-	return promise === ULTRAWORK_VERIFICATION_PROMISE && isOracleVerified(partText)
+	return promise === ULTRAWORK_VERIFICATION_PROMISE && isOracleVerified(partText);
 }
 
-function shouldInspectTranscriptEntry(
-	entry: TranscriptEntry,
-	promise: string,
-	entryText: string,
-): boolean {
+function shouldInspectTranscriptEntry(entry: TranscriptEntry, promise: string, entryText: string): boolean {
 	if (entry.type === "assistant" || entry.type === "text") {
-		return true
+		return true;
 	}
 
 	if (entry.type !== "tool_result") {
-		return false
+		return false;
 	}
 
-	return promise === ULTRAWORK_VERIFICATION_PROMISE && isOracleVerified(entryText)
+	return promise === ULTRAWORK_VERIFICATION_PROMISE && isOracleVerified(entryText);
 }
 
 export function detectCompletionInTranscript(
@@ -70,48 +62,47 @@ export function detectCompletionInTranscript(
 	promise: string,
 	startedAt?: string,
 ): boolean {
-	if (!transcriptPath) return false
+	if (!transcriptPath) return false;
 
 	try {
-		if (!existsSync(transcriptPath)) return false
+		if (!existsSync(transcriptPath)) return false;
 
-		const content = readFileSync(transcriptPath, "utf-8")
-		const pattern = buildPromisePattern(promise)
-		const lines = content.split("\n").filter((line: string) => line.trim())
+		const content = readFileSync(transcriptPath, "utf-8");
+		const pattern = buildPromisePattern(promise);
+		const lines = content.split("\n").filter((line: string) => line.trim());
 
 		for (const line of lines) {
 			try {
-				const entry = JSON.parse(line) as TranscriptEntry
-				if (entry.type === "user") continue
-				if (startedAt && entry.timestamp && entry.timestamp < startedAt) continue
-				const entryText = extractTranscriptEntryText(entry)
-				if (!entryText) continue
-				if (!shouldInspectTranscriptEntry(entry, promise, entryText)) continue
-				if (pattern.test(entryText)) return true
+				const entry = JSON.parse(line) as TranscriptEntry;
+				if (entry.type === "user") continue;
+				if (startedAt && entry.timestamp && entry.timestamp < startedAt) continue;
+				const entryText = extractTranscriptEntryText(entry);
+				if (!entryText) continue;
+				if (!shouldInspectTranscriptEntry(entry, promise, entryText)) continue;
+				if (pattern.test(entryText)) return true;
 			} catch (error) {
 				if (!(error instanceof Error)) {
-					throw error
+					throw error;
 				}
-				continue
 			}
 		}
-		return false
+		return false;
 	} catch (error) {
 		if (!(error instanceof Error)) {
-			throw error
+			throw error;
 		}
-		return false
+		return false;
 	}
 }
 
 export async function detectCompletionInSessionMessages(
 	ctx: PluginInput,
 	options: {
-		sessionID: string
-		promise: string
-		apiTimeoutMs: number
-		directory: string
-		sinceMessageIndex?: number
+		sessionID: string;
+		promise: string;
+		apiTimeoutMs: number;
+		directory: string;
+		sinceMessageIndex?: number;
 	},
 ): Promise<boolean> {
 	try {
@@ -121,52 +112,54 @@ export async function detectCompletionInSessionMessages(
 				query: { directory: options.directory },
 			}),
 			options.apiTimeoutMs,
-		)
+		);
 
-		const messagesResponse: unknown = response
+		const messagesResponse: unknown = response;
 		const responseData =
 			typeof messagesResponse === "object" && messagesResponse !== null && "data" in messagesResponse
 				? (messagesResponse as { data?: unknown }).data
-				: undefined
+				: undefined;
 
 		const messageArray: unknown[] = Array.isArray(messagesResponse)
 			? messagesResponse
 			: Array.isArray(responseData)
 				? responseData
-				: []
+				: [];
 
 		const scopedMessages =
 			typeof options.sinceMessageIndex === "number" && options.sinceMessageIndex >= 0
 				? messageArray.slice(Math.min(options.sinceMessageIndex, messageArray.length))
-				: messageArray
+				: messageArray;
 
-		const assistantMessages = (scopedMessages as OpenCodeSessionMessage[]).filter((msg) => msg.info?.role === "assistant")
-		if (assistantMessages.length === 0) return false
+		const assistantMessages = (scopedMessages as OpenCodeSessionMessage[]).filter(
+			(msg) => msg.info?.role === "assistant",
+		);
+		if (assistantMessages.length === 0) return false;
 
-		const pattern = buildPromisePattern(options.promise)
+		const pattern = buildPromisePattern(options.promise);
 		for (let index = assistantMessages.length - 1; index >= 0; index -= 1) {
-			const assistant = assistantMessages[index]
-			if (!assistant.parts) continue
+			const assistant = assistantMessages[index];
+			if (!assistant.parts) continue;
 
 			for (const part of assistant.parts) {
-				const partText = part.text ?? ""
-				if (!partText) continue
-				if (!shouldInspectSessionMessagePart(part.type, options.promise, partText)) continue
+				const partText = part.text ?? "";
+				if (!partText) continue;
+				if (!shouldInspectSessionMessagePart(part.type, options.promise, partText)) continue;
 				if (pattern.test(partText)) {
-					return true
+					return true;
 				}
 			}
 		}
 
-		return false
+		return false;
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : String(error)
+		const errorMessage = error instanceof Error ? error.message : String(error);
 		setTimeout(() => {
 			log(`[${HOOK_NAME}] Session messages check failed`, {
 				sessionID: options.sessionID,
 				error: errorMessage,
-			})
-		}, 0)
-		return false
+			});
+		}, 0);
+		return false;
 	}
 }

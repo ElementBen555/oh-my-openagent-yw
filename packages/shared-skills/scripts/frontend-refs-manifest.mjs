@@ -6,16 +6,83 @@ export const sharedSkillsRoot = join(here, "..");
 export const frontendSkillRoot = join(sharedSkillsRoot, "skills", "frontend");
 export const upstreamsRoot = join(sharedSkillsRoot, "upstreams");
 
-export const designOriginals = ["README.md", "_INDEX.md", "design-system-architecture.md", "react-dev-tooling-skill.md"];
+export const designOriginals = [
+	"README.md",
+	"_INDEX.md",
+	"design-system-architecture.md",
+	"react-dev-tooling-skill.md",
+];
 
 export const brandStems = [
-	"airbnb", "airtable", "apple", "binance", "bmw", "bugatti", "cal", "claude", "clay", "clickhouse",
-	"cohere", "coinbase", "composio", "cursor", "elevenlabs", "expo", "ferrari", "figma", "framer", "hashicorp",
-	"ibm", "intercom", "kraken", "lamborghini", "linear.app", "lovable", "mastercard", "meta", "minimax", "mintlify",
-	"miro", "mistral.ai", "mongodb", "nike", "notion", "nvidia", "ollama", "opencode.ai", "pinterest", "playstation",
-	"posthog", "raycast", "renault", "replicate", "resend", "revolut", "runwayml", "sanity", "sentry", "shopify",
-	"spacex", "spotify", "starbucks", "stripe", "supabase", "superhuman", "tesla", "theverge", "together.ai", "uber",
-	"vercel", "vodafone", "voltagent", "warp", "webflow", "wired", "wise", "x.ai", "zapier",
+	"airbnb",
+	"airtable",
+	"apple",
+	"binance",
+	"bmw",
+	"bugatti",
+	"cal",
+	"claude",
+	"clay",
+	"clickhouse",
+	"cohere",
+	"coinbase",
+	"composio",
+	"cursor",
+	"elevenlabs",
+	"expo",
+	"ferrari",
+	"figma",
+	"framer",
+	"hashicorp",
+	"ibm",
+	"intercom",
+	"kraken",
+	"lamborghini",
+	"linear.app",
+	"lovable",
+	"mastercard",
+	"meta",
+	"minimax",
+	"mintlify",
+	"miro",
+	"mistral.ai",
+	"mongodb",
+	"nike",
+	"notion",
+	"nvidia",
+	"ollama",
+	"opencode.ai",
+	"pinterest",
+	"playstation",
+	"posthog",
+	"raycast",
+	"renault",
+	"replicate",
+	"resend",
+	"revolut",
+	"runwayml",
+	"sanity",
+	"sentry",
+	"shopify",
+	"spacex",
+	"spotify",
+	"starbucks",
+	"stripe",
+	"supabase",
+	"superhuman",
+	"tesla",
+	"theverge",
+	"together.ai",
+	"uber",
+	"vercel",
+	"vodafone",
+	"voltagent",
+	"warp",
+	"webflow",
+	"wired",
+	"wise",
+	"x.ai",
+	"zapier",
 ];
 
 export const tasteSkillFiles = {
@@ -93,7 +160,10 @@ export function designMaterializeMap() {
 
 export function uiUxDbMaterializeMap() {
 	const map = {};
-	map["references/ui-ux-db/README.md"] = { upstream: "ui-ux-pro-max", source: ".claude/skills/ui-ux-pro-max/SKILL.md" };
+	map["references/ui-ux-db/README.md"] = {
+		upstream: "ui-ux-pro-max",
+		source: ".claude/skills/ui-ux-pro-max/SKILL.md",
+	};
 	for (const name of uiUxDbScripts) {
 		map[`references/ui-ux-db/scripts/${name}`] = {
 			upstream: "ui-ux-pro-max",

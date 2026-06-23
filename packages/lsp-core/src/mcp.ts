@@ -2,15 +2,15 @@ import type { Readable, Writable } from "node:stream";
 import {
 	errorResponse,
 	isPlainRecord,
-	jsonRpcId,
-	messageFromError,
-	runJsonRpcStdioServer,
-	successResponse,
 	type JsonRpcError,
 	type JsonRpcId,
 	type JsonRpcResponse,
 	type JsonRpcResult,
+	jsonRpcId,
 	type McpToolDescriptor,
+	messageFromError,
+	runJsonRpcStdioServer,
+	successResponse,
 } from "@oh-my-opencode/mcp-stdio-core";
 import { coerceToolArguments, executeLspTool, LSP_MCP_TOOLS } from "./tools.js";
 

@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-tasklist/list"
+export * from "@oh-my-opencode/team-core/team-tasklist/list";

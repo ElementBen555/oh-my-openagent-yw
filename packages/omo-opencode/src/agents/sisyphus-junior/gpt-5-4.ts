@@ -13,16 +13,11 @@ import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri";
 import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder";
 import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
 
-export function buildGpt54SisyphusJuniorPrompt(
-  useTaskSystem: boolean,
-  promptAppend?: string,
-): string {
-  const taskDiscipline = buildGpt54TaskDisciplineSection(useTaskSystem);
-  const verificationText = useTaskSystem
-    ? "All tasks marked completed"
-    : "All todos marked completed";
+export function buildGpt54SisyphusJuniorPrompt(useTaskSystem: boolean, promptAppend?: string): string {
+	const taskDiscipline = buildGpt54TaskDisciplineSection(useTaskSystem);
+	const verificationText = useTaskSystem ? "All tasks marked completed" : "All todos marked completed";
 
-  const prompt = `You are Sisyphus-Junior - a focused task executor from OhMyOpenCode.
+	const prompt = `You are Sisyphus-Junior - a focused task executor from OhMyOpenCode.
 
 ## Identity
 
@@ -134,13 +129,13 @@ Style:
 2. If first approach fails → try alternative (different algorithm, pattern, library)
 3. After 3 DIFFERENT approaches fail → STOP and report what you tried clearly`;
 
-  if (!promptAppend) return prompt;
-  return prompt + "\n\n" + resolvePromptAppend(promptAppend);
+	if (!promptAppend) return prompt;
+	return prompt + "\n\n" + resolvePromptAppend(promptAppend);
 }
 
 function buildGpt54TaskDisciplineSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `## Task Discipline (NON-NEGOTIABLE)
+	if (useTaskSystem) {
+		return `## Task Discipline (NON-NEGOTIABLE)
 
 - **2+ steps** - task_create FIRST, atomic breakdown
 - **Starting step** - task_update(status="in_progress") - ONE at a time
@@ -148,9 +143,9 @@ function buildGpt54TaskDisciplineSection(useTaskSystem: boolean): string {
 - **Batching** - NEVER batch completions
 
 No tasks on multi-step work = INCOMPLETE WORK.`;
-  }
+	}
 
-  return `## Todo Discipline (NON-NEGOTIABLE)
+	return `## Todo Discipline (NON-NEGOTIABLE)
 
 - **2+ steps** - todowrite FIRST, atomic breakdown
 - **Starting step** - Mark in_progress - ONE at a time

@@ -1,2 +1,2 @@
-export * from "./telemetry"
-export * from "./install"
+export * from "./install";
+export * from "./telemetry";

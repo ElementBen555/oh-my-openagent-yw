@@ -1,63 +1,55 @@
+import { appendFileSync, chmodSync, existsSync, renameSync, statSync, unlinkSync, writeFileSync } from "fs";
 import {
-  appendFileSync,
-  chmodSync,
-  existsSync,
-  renameSync,
-  statSync,
-  unlinkSync,
-  writeFileSync,
-} from "fs"
-import {
-  ensureReplyListenerStateDir,
-  REPLY_LISTENER_SECURE_FILE_MODE,
-  getReplyListenerLogFilePath,
-} from "./reply-listener-paths"
+	ensureReplyListenerStateDir,
+	getReplyListenerLogFilePath,
+	REPLY_LISTENER_SECURE_FILE_MODE,
+} from "./reply-listener-paths";
 
-const MAX_REPLY_LISTENER_LOG_SIZE_BYTES = 1024 * 1024
+const MAX_REPLY_LISTENER_LOG_SIZE_BYTES = 1024 * 1024;
 
 function ignoreReplyListenerLogError(error: unknown): void {
-  if (error instanceof Error) return
-  throw error
+	if (error instanceof Error) return;
+	throw error;
 }
 
 export function writeSecureReplyListenerFile(filePath: string, content: string): void {
-  ensureReplyListenerStateDir()
-  writeFileSync(filePath, content, { mode: REPLY_LISTENER_SECURE_FILE_MODE })
+	ensureReplyListenerStateDir();
+	writeFileSync(filePath, content, { mode: REPLY_LISTENER_SECURE_FILE_MODE });
 
-  try {
-    chmodSync(filePath, REPLY_LISTENER_SECURE_FILE_MODE)
-  } catch (error) {
-    ignoreReplyListenerLogError(error)
-  }
+	try {
+		chmodSync(filePath, REPLY_LISTENER_SECURE_FILE_MODE);
+	} catch (error) {
+		ignoreReplyListenerLogError(error);
+	}
 }
 
 function rotateReplyListenerLogIfNeeded(logPath: string): void {
-  try {
-    if (!existsSync(logPath)) return
+	try {
+		if (!existsSync(logPath)) return;
 
-    const stats = statSync(logPath)
-    if (stats.size <= MAX_REPLY_LISTENER_LOG_SIZE_BYTES) return
+		const stats = statSync(logPath);
+		if (stats.size <= MAX_REPLY_LISTENER_LOG_SIZE_BYTES) return;
 
-    const backupPath = `${logPath}.old`
-    if (existsSync(backupPath)) {
-      unlinkSync(backupPath)
-    }
-    renameSync(logPath, backupPath)
-  } catch (error) {
-    ignoreReplyListenerLogError(error)
-  }
+		const backupPath = `${logPath}.old`;
+		if (existsSync(backupPath)) {
+			unlinkSync(backupPath);
+		}
+		renameSync(logPath, backupPath);
+	} catch (error) {
+		ignoreReplyListenerLogError(error);
+	}
 }
 
 export function logReplyListenerMessage(message: string): void {
-  try {
-    ensureReplyListenerStateDir()
-    const logFilePath = getReplyListenerLogFilePath()
-    rotateReplyListenerLogIfNeeded(logFilePath)
-    const timestamp = new Date().toISOString()
-    appendFileSync(logFilePath, `[${timestamp}] ${message}\n`, {
-      mode: REPLY_LISTENER_SECURE_FILE_MODE,
-    })
-  } catch (error) {
-    ignoreReplyListenerLogError(error)
-  }
+	try {
+		ensureReplyListenerStateDir();
+		const logFilePath = getReplyListenerLogFilePath();
+		rotateReplyListenerLogIfNeeded(logFilePath);
+		const timestamp = new Date().toISOString();
+		appendFileSync(logFilePath, `[${timestamp}] ${message}\n`, {
+			mode: REPLY_LISTENER_SECURE_FILE_MODE,
+		});
+	} catch (error) {
+		ignoreReplyListenerLogError(error);
+	}
 }

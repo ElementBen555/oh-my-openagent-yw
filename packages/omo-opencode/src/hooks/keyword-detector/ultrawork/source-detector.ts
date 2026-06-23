@@ -9,19 +9,19 @@
  * 5. Everything else (Claude, etc.) → default.ts
  */
 
-import { isGeminiModel, isGlmModel, isGptModel } from "../../../agents/types"
+import { isGeminiModel, isGlmModel, isGptModel } from "../../../agents/types";
 
 /**
  * Checks if agent is a planner-type agent.
  * Planners don't need ultrawork injection (they ARE the planner).
  */
 export function isPlannerAgent(agentName?: string): boolean {
-  if (!agentName) return false
-  const lowerName = agentName.toLowerCase()
-  if (lowerName.includes("prometheus") || lowerName.includes("planner")) return true
+	if (!agentName) return false;
+	const lowerName = agentName.toLowerCase();
+	if (lowerName.includes("prometheus") || lowerName.includes("planner")) return true;
 
-  const normalized = lowerName.replace(/[_-]+/g, " ")
-  return /\bplan\b/.test(normalized)
+	const normalized = lowerName.replace(/[_-]+/g, " ");
+	return /\bplan\b/.test(normalized);
 }
 
 /**
@@ -29,43 +29,39 @@ export function isPlannerAgent(agentName?: string): boolean {
  * Non-OMO agents should not receive keyword injection.
  */
 export function isNonOmoAgent(agentName?: string): boolean {
-  if (!agentName) return false
-  const lowerName = agentName.toLowerCase()
-  return lowerName.includes("builder") || lowerName === "plan"
+	if (!agentName) return false;
+	const lowerName = agentName.toLowerCase();
+	return lowerName.includes("builder") || lowerName === "plan";
 }
 
-export { isGptModel, isGeminiModel, isGlmModel }
+export { isGeminiModel, isGlmModel, isGptModel };
 
 /** Ultrawork message source type */
-export type UltraworkSource = "planner" | "gpt" | "gemini" | "glm" | "default"
+export type UltraworkSource = "planner" | "gpt" | "gemini" | "glm" | "default";
 
 /**
  * Determines which ultrawork message source to use.
  */
-export function getUltraworkSource(
-  agentName?: string,
-  modelID?: string
-): UltraworkSource {
-  // Priority 1: Planner agents
-  if (isPlannerAgent(agentName)) {
-    return "planner"
-  }
+export function getUltraworkSource(agentName?: string, modelID?: string): UltraworkSource {
+	// Priority 1: Planner agents
+	if (isPlannerAgent(agentName)) {
+		return "planner";
+	}
 
-  // Priority 2: GPT models
-  if (modelID && isGptModel(modelID)) {
-    return "gpt"
-  }
+	// Priority 2: GPT models
+	if (modelID && isGptModel(modelID)) {
+		return "gpt";
+	}
 
+	// Priority 3: Gemini models
+	if (modelID && isGeminiModel(modelID)) {
+		return "gemini";
+	}
 
-  // Priority 3: Gemini models
-  if (modelID && isGeminiModel(modelID)) {
-    return "gemini"
-  }
+	if (modelID && isGlmModel(modelID)) {
+		return "glm";
+	}
 
-  if (modelID && isGlmModel(modelID)) {
-    return "glm"
-  }
-
-  // Default: Claude and other models
-  return "default"
+	// Default: Claude and other models
+	return "default";
 }

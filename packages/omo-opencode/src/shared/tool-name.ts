@@ -1,1 +1,1 @@
-export { transformToolName } from "@oh-my-opencode/utils"
+export { transformToolName } from "@oh-my-opencode/utils";

@@ -1,13 +1,13 @@
-import { readConnectedProvidersCache } from "./connected-providers-cache"
-import { log } from "./logger"
-import { fuzzyMatchModel } from "./model-availability"
+import { readConnectedProvidersCache } from "./connected-providers-cache";
+import { log } from "./logger";
+import { fuzzyMatchModel } from "./model-availability";
 
-type FallbackEntry = { providers: string[]; model: string }
+type FallbackEntry = { providers: string[]; model: string };
 
 type ResolvedFallbackModel = {
-	provider: string
-	model: string
-}
+	provider: string;
+	model: string;
+};
 
 export function resolveFirstAvailableFallback(
 	fallbackChain: FallbackEntry[],
@@ -15,20 +15,20 @@ export function resolveFirstAvailableFallback(
 ): ResolvedFallbackModel | null {
 	for (const entry of fallbackChain) {
 		for (const provider of entry.providers) {
-			const matchedModel = fuzzyMatchModel(entry.model, availableModels, [provider])
+			const matchedModel = fuzzyMatchModel(entry.model, availableModels, [provider]);
 			log("[resolveFirstAvailableFallback] attempt", {
 				provider,
 				requestedModel: entry.model,
 				resolvedModel: matchedModel,
-			})
+			});
 
 			if (matchedModel !== null) {
 				log("[resolveFirstAvailableFallback] resolved", {
 					provider,
 					requestedModel: entry.model,
 					resolvedModel: matchedModel,
-				})
-				return { provider, model: matchedModel }
+				});
+				return { provider, model: matchedModel };
 			}
 		}
 	}
@@ -39,64 +39,58 @@ export function resolveFirstAvailableFallback(
 			providers: entry.providers,
 		})),
 		availableCount: availableModels.size,
-	})
+	});
 
-	return null
+	return null;
 }
 
-export function isAnyFallbackModelAvailable(
-	fallbackChain: FallbackEntry[],
-	availableModels: Set<string>,
-): boolean {
+export function isAnyFallbackModelAvailable(fallbackChain: FallbackEntry[], availableModels: Set<string>): boolean {
 	if (resolveFirstAvailableFallback(fallbackChain, availableModels) !== null) {
-		return true
+		return true;
 	}
 
-	const connectedProviders = readConnectedProvidersCache()
+	const connectedProviders = readConnectedProvidersCache();
 	if (connectedProviders) {
-		const connectedSet = new Set(connectedProviders)
+		const connectedSet = new Set(connectedProviders);
 		for (const entry of fallbackChain) {
 			if (entry.providers.some((p) => connectedSet.has(p))) {
 				log(
 					"[isAnyFallbackModelAvailable] WARNING: No fuzzy match found for any model in fallback chain, but provider is connected. Agent may fail at runtime.",
 					{ chain: fallbackChain.map((entryItem) => entryItem.model), availableCount: availableModels.size },
-				)
-				return true
+				);
+				return true;
 			}
 		}
 	}
 
-	return false
+	return false;
 }
 
-export function isAnyProviderConnected(
-	providers: string[],
-	availableModels: Set<string>,
-): boolean {
+export function isAnyProviderConnected(providers: string[], availableModels: Set<string>): boolean {
 	if (availableModels.size > 0) {
-		const providerSet = new Set(providers)
+		const providerSet = new Set(providers);
 		for (const model of availableModels) {
-			const [provider] = model.split("/")
+			const [provider] = model.split("/");
 			if (providerSet.has(provider)) {
 				log("[isAnyProviderConnected] found model from required provider", {
 					provider,
 					model,
-				})
-				return true
+				});
+				return true;
 			}
 		}
 	}
 
-	const connectedProviders = readConnectedProvidersCache()
+	const connectedProviders = readConnectedProvidersCache();
 	if (connectedProviders) {
-		const connectedSet = new Set(connectedProviders)
+		const connectedSet = new Set(connectedProviders);
 		for (const provider of providers) {
 			if (connectedSet.has(provider)) {
-				log("[isAnyProviderConnected] provider connected via cache", { provider })
-				return true
+				log("[isAnyProviderConnected] provider connected via cache", { provider });
+				return true;
 			}
 		}
 	}
 
-	return false
+	return false;
 }

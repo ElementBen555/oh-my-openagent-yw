@@ -1,16 +1,16 @@
-import { describe, expect, test } from "bun:test"
-import type { PluginInput } from "@opencode-ai/plugin"
-import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value"
-import { handleDetectedCompletion } from "./completion-handler"
-import { continueIteration } from "./iteration-continuation"
-import { latestAssistantTurnMadeNoProgress } from "./no-progress-turn-detector"
-import { handlePendingVerification } from "./pending-verification-handler"
-import { createIterationSession, selectSessionInTui } from "./session-reset-strategy"
-import type { RalphLoopState } from "./types"
-import { handleFailedVerification } from "./verification-failure-handler"
-import { ULTRAWORK_VERIFICATION_PROMISE } from "./constants"
+import { describe, expect, test } from "bun:test";
+import type { PluginInput } from "@opencode-ai/plugin";
+import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value";
+import { handleDetectedCompletion } from "./completion-handler";
+import { ULTRAWORK_VERIFICATION_PROMISE } from "./constants";
+import { continueIteration } from "./iteration-continuation";
+import { latestAssistantTurnMadeNoProgress } from "./no-progress-turn-detector";
+import { handlePendingVerification } from "./pending-verification-handler";
+import { createIterationSession, selectSessionInTui } from "./session-reset-strategy";
+import type { RalphLoopState } from "./types";
+import { handleFailedVerification } from "./verification-failure-handler";
 
-const NON_ERROR_FAILURE = { reason: "non-error failure" }
+const NON_ERROR_FAILURE = { reason: "non-error failure" };
 
 function createState(overrides: Partial<RalphLoopState> = {}): RalphLoopState {
 	return {
@@ -21,7 +21,7 @@ function createState(overrides: Partial<RalphLoopState> = {}): RalphLoopState {
 		session_id: "session-123",
 		completion_promise: "DONE",
 		...overrides,
-	}
+	};
 }
 
 describe("ralph-loop catch fallbacks", () => {
@@ -31,22 +31,22 @@ describe("ralph-loop catch fallbacks", () => {
 			client: {
 				session: {
 					messages: async () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 				},
 			},
-		})
+		});
 
 		// when
 		const result = await latestAssistantTurnMadeNoProgress(ctx, {
 			sessionID: "session-123",
 			directory: "/tmp",
 			apiTimeoutMs: 100,
-		})
+		});
 
 		// then
-		expect(result).toBe(false)
-	})
+		expect(result).toBe(false);
+	});
 
 	test("#given continuation prompt lookup throws a non-Error #when continuing iteration #then dispatch rejection is returned", async () => {
 		// given
@@ -55,12 +55,12 @@ describe("ralph-loop catch fallbacks", () => {
 			client: {
 				session: {
 					messages: async () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 					promptAsync: async () => ({}),
 				},
 			},
-		})
+		});
 
 		// when
 		const result = await continueIteration(ctx, createState(), {
@@ -71,11 +71,11 @@ describe("ralph-loop catch fallbacks", () => {
 			loopState: {
 				setSessionID: () => createState({ session_id: "session-new" }),
 			},
-		})
+		});
 
 		// then
-		expect(result).toEqual({ status: "dispatch_rejected", error: NON_ERROR_FAILURE })
-	})
+		expect(result).toEqual({ status: "dispatch_rejected", error: NON_ERROR_FAILURE });
+	});
 
 	test("#given reset session APIs throw non-Errors #when best-effort reset helpers run #then fallback values are returned", async () => {
 		// given
@@ -83,27 +83,27 @@ describe("ralph-loop catch fallbacks", () => {
 			client: {
 				session: {
 					create: async () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 				},
 			},
-		})
+		});
 		const selectClient = unsafeTestValue<PluginInput["client"]>({
 			tui: {
 				selectSession: async () => {
-					throw NON_ERROR_FAILURE
+					throw NON_ERROR_FAILURE;
 				},
 			},
-		})
+		});
 
 		// when
-		const createdSessionID = await createIterationSession(createCtx, "session-parent", "/tmp")
-		const selected = await selectSessionInTui(selectClient, "session-123")
+		const createdSessionID = await createIterationSession(createCtx, "session-parent", "/tmp");
+		const selected = await selectSessionInTui(selectClient, "session-123");
 
 		// then
-		expect(createdSessionID).toBeNull()
-		expect(selected).toBe(false)
-	})
+		expect(createdSessionID).toBeNull();
+		expect(selected).toBe(false);
+	});
 
 	test("#given verification retry reads throw a non-Error #when handling failed verification #then handler returns false", async () => {
 		// given
@@ -111,11 +111,11 @@ describe("ralph-loop catch fallbacks", () => {
 			client: {
 				session: {
 					messages: async () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 				},
 			},
-		})
+		});
 
 		// when
 		const result = await handleFailedVerification(ctx, {
@@ -130,24 +130,24 @@ describe("ralph-loop catch fallbacks", () => {
 				incrementIteration: () => createState({ iteration: 2 }),
 				clear: () => true,
 			},
-		})
+		});
 
 		// then
-		expect(result).toBe(false)
-	})
+		expect(result).toBe(false);
+	});
 
 	test("#given completion toast throws a non-Error #when completion is handled #then loop still clears", async () => {
 		// given
-		let cleared = false
+		let cleared = false;
 		const ctx = unsafeTestValue<PluginInput>({
 			client: {
 				tui: {
 					showToast: () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 				},
 			},
-		})
+		});
 
 		// when
 		await handleDetectedCompletion(ctx, {
@@ -155,18 +155,18 @@ describe("ralph-loop catch fallbacks", () => {
 			state: createState(),
 			loopState: {
 				clear: () => {
-					cleared = true
-					return true
+					cleared = true;
+					return true;
 				},
 				markVerificationPending: () => createState({ verification_pending: true }),
 			},
 			directory: "/tmp",
 			apiTimeoutMs: 100,
-		})
+		});
 
 		// then
-		expect(cleared).toBe(true)
-	})
+		expect(cleared).toBe(true);
+	});
 
 	test("#given pending verification scan throws a non-Error #when parent idles #then handler resolves", async () => {
 		// given
@@ -174,11 +174,11 @@ describe("ralph-loop catch fallbacks", () => {
 			client: {
 				session: {
 					messages: async () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 				},
 			},
-		})
+		});
 
 		// when
 		const result = handlePendingVerification(ctx, {
@@ -195,41 +195,45 @@ describe("ralph-loop catch fallbacks", () => {
 			},
 			directory: "/tmp",
 			apiTimeoutMs: 100,
-		})
+		});
 
 		// then
-		await expect(result).resolves.toBeUndefined()
-	})
+		await expect(result).resolves.toBeUndefined();
+	});
 
 	test("#given recovered verification completion toast throws a non-Error #when parent evidence completes loop #then loop still clears", async () => {
 		// given
-		let cleared = false
+		let cleared = false;
 		const ctx = unsafeTestValue<PluginInput>({
 			client: {
 				session: {
 					messages: async () => ({
-						data: [{
-							info: { role: "assistant" },
-							parts: [{
-								type: "text",
-								text: [
-									"Agent: Oracle",
-									`<promise>${ULTRAWORK_VERIFICATION_PROMISE}</promise>`,
-									"<task_metadata>",
-									"session_id: ses_oracle",
-									"</task_metadata>",
-								].join("\n"),
-							}],
-						}],
+						data: [
+							{
+								info: { role: "assistant" },
+								parts: [
+									{
+										type: "text",
+										text: [
+											"Agent: Oracle",
+											`<promise>${ULTRAWORK_VERIFICATION_PROMISE}</promise>`,
+											"<task_metadata>",
+											"session_id: ses_oracle",
+											"</task_metadata>",
+										].join("\n"),
+									},
+								],
+							},
+						],
 					}),
 				},
 				tui: {
 					showToast: () => {
-						throw NON_ERROR_FAILURE
+						throw NON_ERROR_FAILURE;
 					},
 				},
 			},
-		})
+		});
 
 		// when
 		await handlePendingVerification(ctx, {
@@ -245,16 +249,16 @@ describe("ralph-loop catch fallbacks", () => {
 				clearVerificationState: () => createState(),
 				incrementIteration: () => createState({ iteration: 2 }),
 				clear: () => {
-					cleared = true
-					return true
+					cleared = true;
+					return true;
 				},
 				setVerificationSessionID: () => createState({ verification_session_id: "ses_oracle" }),
 			},
 			directory: "/tmp",
 			apiTimeoutMs: 100,
-		})
+		});
 
 		// then
-		expect(cleared).toBe(true)
-	})
-})
+		expect(cleared).toBe(true);
+	});
+});

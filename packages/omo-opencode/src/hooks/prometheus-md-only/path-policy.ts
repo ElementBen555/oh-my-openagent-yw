@@ -1,6 +1,6 @@
-import { relative, resolve, isAbsolute } from "node:path"
+import { isAbsolute, relative, resolve } from "node:path";
 
-import { ALLOWED_EXTENSIONS } from "./constants"
+import { ALLOWED_EXTENSIONS } from "./constants";
 
 /**
  * Cross-platform path validator for Prometheus file writes.
@@ -12,28 +12,26 @@ import { ALLOWED_EXTENSIONS } from "./constants"
  * - Nested project paths (e.g., parent/.omo/... when ctx.directory is parent)
  */
 export function isAllowedFile(filePath: string, workspaceRoot: string): boolean {
-  // 1. Resolve to absolute path
-  const resolved = resolve(workspaceRoot, filePath)
+	// 1. Resolve to absolute path
+	const resolved = resolve(workspaceRoot, filePath);
 
-  // 2. Get relative path from workspace root
-  const rel = relative(workspaceRoot, resolved)
+	// 2. Get relative path from workspace root
+	const rel = relative(workspaceRoot, resolved);
 
-  // 3. Reject if escapes root (starts with ".." or is absolute)
-  if (rel.startsWith("..") || isAbsolute(rel)) {
-    return false
-  }
+	// 3. Reject if escapes root (starts with ".." or is absolute)
+	if (rel.startsWith("..") || isAbsolute(rel)) {
+		return false;
+	}
 
-  if (!/(^|[/\\])\.omo([/\\]|$)/i.test(rel)) {
-    return false
-  }
+	if (!/(^|[/\\])\.omo([/\\]|$)/i.test(rel)) {
+		return false;
+	}
 
-  // 5. Check extension matches one of ALLOWED_EXTENSIONS (case-insensitive)
-  const hasAllowedExtension = ALLOWED_EXTENSIONS.some(
-    ext => resolved.toLowerCase().endsWith(ext.toLowerCase())
-  )
-  if (!hasAllowedExtension) {
-    return false
-  }
+	// 5. Check extension matches one of ALLOWED_EXTENSIONS (case-insensitive)
+	const hasAllowedExtension = ALLOWED_EXTENSIONS.some((ext) => resolved.toLowerCase().endsWith(ext.toLowerCase()));
+	if (!hasAllowedExtension) {
+		return false;
+	}
 
-  return true
+	return true;
 }

@@ -1,6 +1,6 @@
-import type { JSX } from "react"
+import { Network, Shield, Sparkles, Sword, Terminal, Users, Wrench } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { Network, Users, Terminal, Wrench, Sparkles, Sword, Shield } from "lucide-react"
+import type { JSX } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 

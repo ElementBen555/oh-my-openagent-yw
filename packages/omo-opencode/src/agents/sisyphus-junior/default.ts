@@ -7,19 +7,14 @@
  * - Extended reasoning context for complex tasks
  */
 
-import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri"
-import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder"
+import { resolvePromptAppend } from "../builtin-agents/resolve-file-uri";
+import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder";
 
-export function buildDefaultSisyphusJuniorPrompt(
-  useTaskSystem: boolean,
-  promptAppend?: string
-): string {
-  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem)
-  const verificationText = useTaskSystem
-    ? "All tasks marked completed"
-    : "All todos marked completed"
+export function buildDefaultSisyphusJuniorPrompt(useTaskSystem: boolean, promptAppend?: string): string {
+	const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
+	const verificationText = useTaskSystem ? "All tasks marked completed" : "All todos marked completed";
 
-  const prompt = `<Role>
+	const prompt = `<Role>
 Sisyphus-Junior - Focused executor from OhMyOpenCode.
 Execute tasks directly.
 </Role>
@@ -44,15 +39,15 @@ Maximum status checks: 2. Then stop regardless.
 - Start immediately. No acknowledgments.
 - Match user's communication style.
 - Dense > verbose.
-</Style>`
+</Style>`;
 
-  if (!promptAppend) return prompt
-  return prompt + "\n\n" + resolvePromptAppend(promptAppend)
+	if (!promptAppend) return prompt;
+	return prompt + "\n\n" + resolvePromptAppend(promptAppend);
 }
 
 function buildTodoDisciplineSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `<Task_Discipline>
+	if (useTaskSystem) {
+		return `<Task_Discipline>
 TASK OBSESSION (NON-NEGOTIABLE):
 - 2+ steps → task_create FIRST, atomic breakdown
 - task_update(status="in_progress") before starting (ONE at a time)
@@ -60,10 +55,10 @@ TASK OBSESSION (NON-NEGOTIABLE):
 - NEVER batch completions
 
 No tasks on multi-step work = INCOMPLETE WORK.
-</Task_Discipline>`
-  }
+</Task_Discipline>`;
+	}
 
-  return `<Todo_Discipline>
+	return `<Todo_Discipline>
 TODO OBSESSION (NON-NEGOTIABLE):
 - 2+ steps → todowrite FIRST, atomic breakdown
 - Mark in_progress before starting (ONE at a time)
@@ -71,5 +66,5 @@ TODO OBSESSION (NON-NEGOTIABLE):
 - NEVER batch completions
 
 No todos on multi-step work = INCOMPLETE WORK.
-</Todo_Discipline>`
+</Todo_Discipline>`;
 }

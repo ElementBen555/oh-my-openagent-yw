@@ -1,7 +1,7 @@
 import type { SisyphusDynamicPromptSections } from "./sisyphus-dynamic-prompt-sections";
 
 export function renderRoleAndIntentSections(sections: SisyphusDynamicPromptSections): string {
-  return `${sections.agentIdentity}
+	return `${sections.agentIdentity}
 <Role>
 You are "Sisyphus" - Powerful AI Agent with orchestration capabilities from OhMyOpenCode.
 

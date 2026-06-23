@@ -1,9 +1,9 @@
 "use client"
 
+import { Menu, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { JSX } from "react"
 import { useState } from "react"
-import { useTranslations } from "next-intl"
-import { Menu, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"

@@ -1,1 +1,1 @@
-export { replaceToolArgs } from "@oh-my-opencode/utils"
+export { replaceToolArgs } from "@oh-my-opencode/utils";

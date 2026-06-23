@@ -1,7 +1,7 @@
-export * from "./detector"
-export * from "./executor"
-export * from "./constants"
-export * from "./types"
+export * from "./constants";
+export * from "./detector";
+export * from "./executor";
+export type { AutoSlashCommandHookOptions } from "./hook";
 
-export { createAutoSlashCommandHook } from "./hook"
-export type { AutoSlashCommandHookOptions } from "./hook"
+export { createAutoSlashCommandHook } from "./hook";
+export * from "./types";

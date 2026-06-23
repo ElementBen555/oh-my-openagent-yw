@@ -11,19 +11,19 @@
  * - gpt-5-5.ts: Native GPT-5.5 prompt with Codex-style sections
  */
 
-export { buildDefaultSisyphusPrompt, buildTaskManagementSection } from "./default";
+export { buildClaudeFable5SisyphusPrompt } from "./claude-fable-5";
 export { buildClaudeOpus47SisyphusPrompt } from "./claude-opus-4-7";
 export { buildClaudeOpus48SisyphusPrompt } from "./claude-opus-4-8";
-export { buildClaudeFable5SisyphusPrompt } from "./claude-fable-5";
+export { buildDefaultSisyphusPrompt, buildTaskManagementSection } from "./default";
 export {
-  buildGeminiToolMandate,
-  buildGeminiDelegationOverride,
-  buildGeminiVerificationOverride,
-  buildGeminiIntentGateEnforcement,
-  buildGeminiToolGuide,
-  buildGeminiToolCallExamples,
+	buildGeminiDelegationOverride,
+	buildGeminiIntentGateEnforcement,
+	buildGeminiToolCallExamples,
+	buildGeminiToolGuide,
+	buildGeminiToolMandate,
+	buildGeminiVerificationOverride,
 } from "./gemini";
+export { buildGlm52SisyphusPrompt } from "./glm-5-2";
 export { buildGpt54SisyphusPrompt } from "./gpt-5-4";
 export { buildGpt55SisyphusPrompt } from "./gpt-5-5";
-export { buildGlm52SisyphusPrompt } from "./glm-5-2";
 export { buildKimiK26SisyphusPrompt } from "./kimi-k2-6";

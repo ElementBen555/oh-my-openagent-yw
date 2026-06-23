@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/openclaw-core/session-registry"
+export * from "@oh-my-opencode/openclaw-core/session-registry";

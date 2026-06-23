@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getStats, formatStats } from "@/lib/stats"
+import { formatStats, getStats } from "@/lib/stats"
 
 const FALLBACK = {
   stars: "37.3k",

@@ -1,12 +1,12 @@
-import en, { type TranslationKey } from "./en"
-import zh from "./zh"
+import en, { type TranslationKey } from "./en";
+import zh from "./zh";
 
-export type { TranslationKey }
-export type SupportedLocale = "en" | "zh"
-export type LocaleMessages = Record<TranslationKey, string>
+export type { TranslationKey };
+export type SupportedLocale = "en" | "zh";
+export type LocaleMessages = Record<TranslationKey, string>;
 
-type LocaleMap = Record<SupportedLocale, LocaleMessages>
+type LocaleMap = Record<SupportedLocale, LocaleMessages>;
 export const locales: LocaleMap = {
-  en,
-  zh,
-}
+	en,
+	zh,
+};

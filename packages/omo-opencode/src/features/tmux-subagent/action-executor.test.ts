@@ -1,16 +1,16 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test"
-import type { TmuxConfig } from "../../config/schema"
-import { executeActionWithDeps } from "./action-executor-core"
-import type { ActionExecutorDeps, ExecuteContext } from "./action-executor-core"
-import type { WindowState } from "./types"
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import type { TmuxConfig } from "../../config/schema";
+import type { ActionExecutorDeps, ExecuteContext } from "./action-executor-core";
+import { executeActionWithDeps } from "./action-executor-core";
+import type { WindowState } from "./types";
 
-type SpawnPaneResult = Awaited<ReturnType<ActionExecutorDeps["spawnTmuxPane"]>>
+type SpawnPaneResult = Awaited<ReturnType<ActionExecutorDeps["spawnTmuxPane"]>>;
 
-const mockSpawnTmuxPane = mock(async (): Promise<SpawnPaneResult> => ({ success: true, paneId: "%7" }))
-const mockCloseTmuxPane = mock(async () => true)
-const mockEnforceMainPaneWidth = mock(async () => undefined)
-const mockReplaceTmuxPane = mock(async () => ({ success: true, paneId: "%7" }))
-const mockApplyLayout = mock(async () => undefined)
+const mockSpawnTmuxPane = mock(async (): Promise<SpawnPaneResult> => ({ success: true, paneId: "%7" }));
+const mockCloseTmuxPane = mock(async () => true);
+const mockEnforceMainPaneWidth = mock(async () => undefined);
+const mockReplaceTmuxPane = mock(async () => ({ success: true, paneId: "%7" }));
+const mockApplyLayout = mock(async () => undefined);
 
 const mockDeps: ActionExecutorDeps = {
 	spawnTmuxPane: mockSpawnTmuxPane,
@@ -18,7 +18,7 @@ const mockDeps: ActionExecutorDeps = {
 	enforceMainPaneWidth: mockEnforceMainPaneWidth,
 	replaceTmuxPane: mockReplaceTmuxPane,
 	applyLayout: mockApplyLayout,
-}
+};
 
 function createConfig(overrides?: Partial<TmuxConfig>): TmuxConfig {
 	return {
@@ -29,7 +29,7 @@ function createConfig(overrides?: Partial<TmuxConfig>): TmuxConfig {
 		main_pane_min_width: 120,
 		agent_pane_min_width: 40,
 		...overrides,
-	}
+	};
 }
 
 function createWindowState(overrides?: Partial<WindowState>): WindowState {
@@ -47,7 +47,7 @@ function createWindowState(overrides?: Partial<WindowState>): WindowState {
 		},
 		agentPanes: [],
 		...overrides,
-	}
+	};
 }
 
 function createContext(overrides?: Partial<ExecuteContext>): ExecuteContext {
@@ -57,18 +57,18 @@ function createContext(overrides?: Partial<ExecuteContext>): ExecuteContext {
 		serverUrl: "http://localhost:4096",
 		windowState: createWindowState(),
 		...overrides,
-	}
+	};
 }
 
 describe("executeAction", () => {
 	beforeEach(() => {
-		mockSpawnTmuxPane.mockClear()
-		mockCloseTmuxPane.mockClear()
-		mockEnforceMainPaneWidth.mockClear()
-		mockReplaceTmuxPane.mockClear()
-		mockApplyLayout.mockClear()
-		mockSpawnTmuxPane.mockImplementation(async () => ({ success: true, paneId: "%7" }))
-	})
+		mockSpawnTmuxPane.mockClear();
+		mockCloseTmuxPane.mockClear();
+		mockEnforceMainPaneWidth.mockClear();
+		mockReplaceTmuxPane.mockClear();
+		mockApplyLayout.mockClear();
+		mockSpawnTmuxPane.mockImplementation(async () => ({ success: true, paneId: "%7" }));
+	});
 
 	test("enforces main pane width with configured percentage after successful spawn", async () => {
 		// given
@@ -83,18 +83,18 @@ describe("executeAction", () => {
 			},
 			createContext(),
 			mockDeps,
-		)
+		);
 
 		// then
-		expect(result).toEqual({ success: true, paneId: "%7" })
-		expect(mockApplyLayout).not.toHaveBeenCalled()
-		expect(mockEnforceMainPaneWidth).toHaveBeenCalledTimes(1)
-		expect(mockEnforceMainPaneWidth).toHaveBeenCalledWith("%0", 220, 55)
-	})
+		expect(result).toEqual({ success: true, paneId: "%7" });
+		expect(mockApplyLayout).not.toHaveBeenCalled();
+		expect(mockEnforceMainPaneWidth).toHaveBeenCalledTimes(1);
+		expect(mockEnforceMainPaneWidth).toHaveBeenCalledWith("%0", 220, 55);
+	});
 
 	test("does not apply layout when spawn fails", async () => {
 		// given
-		mockSpawnTmuxPane.mockImplementation(async (): Promise<SpawnPaneResult> => ({ success: false }))
+		mockSpawnTmuxPane.mockImplementation(async (): Promise<SpawnPaneResult> => ({ success: false }));
 
 		// when
 		const result = await executeActionWithDeps(
@@ -107,12 +107,12 @@ describe("executeAction", () => {
 			},
 			createContext(),
 			mockDeps,
-		)
+		);
 
 		// then
-		expect(result).toEqual({ success: false, paneId: undefined })
-		expect(mockApplyLayout).not.toHaveBeenCalled()
-		expect(mockEnforceMainPaneWidth).not.toHaveBeenCalled()
-		mockSpawnTmuxPane.mockImplementation(async (): Promise<SpawnPaneResult> => ({ success: true, paneId: "%7" }))
-	})
-})
+		expect(result).toEqual({ success: false, paneId: undefined });
+		expect(mockApplyLayout).not.toHaveBeenCalled();
+		expect(mockEnforceMainPaneWidth).not.toHaveBeenCalled();
+		mockSpawnTmuxPane.mockImplementation(async (): Promise<SpawnPaneResult> => ({ success: true, paneId: "%7" }));
+	});
+});

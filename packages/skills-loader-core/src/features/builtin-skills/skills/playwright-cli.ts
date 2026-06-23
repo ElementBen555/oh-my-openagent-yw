@@ -1,4 +1,4 @@
-import type { BuiltinSkill } from "../types"
+import type { BuiltinSkill } from "../types";
 
 /**
  * Playwright CLI skill - token-efficient CLI alternative to the MCP-based playwright skill.
@@ -9,9 +9,10 @@ import type { BuiltinSkill } from "../types"
  * The binary is still called `playwright-cli` (see allowedTools).
  */
 export const playwrightCliSkill: BuiltinSkill = {
-  name: "playwright",
-  description: "MUST USE for any browser-related tasks. Browser automation via playwright-cli - verification, browsing, information gathering, web scraping, testing, screenshots, and all browser interactions.",
-  template: `# Browser Automation with playwright-cli
+	name: "playwright",
+	description:
+		"MUST USE for any browser-related tasks. Browser automation via playwright-cli - verification, browsing, information gathering, web scraping, testing, screenshots, and all browser interactions.",
+	template: `# Browser Automation with playwright-cli
 
 ## Quick start
 
@@ -264,5 +265,5 @@ playwright-cli close
 * **Test generation** [references/test-generation.md](references/test-generation.md)
 * **Tracing** [references/tracing.md](references/tracing.md)
 * **Video recording** [references/video-recording.md](references/video-recording.md)`,
-  allowedTools: ["Bash(playwright-cli:*)"],
-}
+	allowedTools: ["Bash(playwright-cli:*)"],
+};

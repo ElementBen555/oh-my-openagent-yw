@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skills/team-mode"
+export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skills/team-mode";

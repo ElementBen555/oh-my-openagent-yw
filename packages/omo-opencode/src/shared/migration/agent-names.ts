@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/utils/migration/agent-names"
+export * from "@oh-my-opencode/utils/migration/agent-names";

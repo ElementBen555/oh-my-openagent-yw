@@ -1,1 +1,1 @@
-export { getEditLineNumber, collectLineRefs, detectOverlappingRanges } from "@oh-my-opencode/hashline-core"
+export { collectLineRefs, detectOverlappingRanges, getEditLineNumber } from "@oh-my-opencode/hashline-core";

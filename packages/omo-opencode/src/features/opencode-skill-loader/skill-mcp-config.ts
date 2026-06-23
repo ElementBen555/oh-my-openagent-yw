@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/opencode-skill-loader/skill-mcp-config"
+export * from "@oh-my-opencode/skills-loader-core/opencode-skill-loader/skill-mcp-config";

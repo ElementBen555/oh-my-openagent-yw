@@ -1,7 +1,7 @@
 import type { Readable, Writable } from "node:stream";
+import { handleLspMcpRequest, type JsonRpcId, type JsonRpcResponse } from "@oh-my-opencode/lsp-core/mcp";
 import { jsonRpcId, runJsonRpcStdioServer, successResponse } from "@oh-my-opencode/mcp-stdio-core";
 import { isPlainRecord } from "@oh-my-opencode/mcp-stdio-core/record";
-import { handleLspMcpRequest, type JsonRpcId, type JsonRpcResponse } from "@oh-my-opencode/lsp-core/mcp";
 
 import {
 	type CallToolOptions,
@@ -48,7 +48,11 @@ async function handleProxyRequest(parsed: unknown, callOptions: CallToolOptions)
 	if (!toolCall) return handleLspMcpRequest(parsed);
 
 	const result = await callToolViaDaemon(toolCall.name, toolCall.args, callOptions);
-	return successResponse(toolCall.id, { content: result.content, isError: result.isError ?? false, details: result.details });
+	return successResponse(toolCall.id, {
+		content: result.content,
+		isError: result.isError ?? false,
+		details: result.details,
+	});
 }
 
 function asToolCall(parsed: unknown): ToolCall | null {

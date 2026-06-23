@@ -1,1 +1,1 @@
-export const PLUGIN_NAME = "oh-my-openagent"
+export const PLUGIN_NAME = "oh-my-openagent";

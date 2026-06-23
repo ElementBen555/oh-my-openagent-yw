@@ -1,9 +1,5 @@
-import { shouldApplyRule } from "./matcher";
-import {
-	getCachedMatchReason,
-	setCachedMatchReason,
-	type MatchDecisionCache,
-} from "./match-decision-cache";
+import { getCachedMatchReason, type MatchDecisionCache, setCachedMatchReason } from "./match-decision-cache";
+import type { shouldApplyRule } from "./matcher";
 
 export function getRuleMatchReason(input: {
 	matchDecisionCache: MatchDecisionCache;
@@ -30,11 +26,7 @@ export function getRuleMatchReason(input: {
 		return cachedMatchReason;
 	}
 
-	const matchResult = input.shouldApplyRuleImpl(
-		input.metadata,
-		input.resolved,
-		input.projectRoot,
-	);
+	const matchResult = input.shouldApplyRuleImpl(input.metadata, input.resolved, input.projectRoot);
 	if (!matchResult.applies) {
 		setCachedMatchReason(
 			input.matchDecisionCache,

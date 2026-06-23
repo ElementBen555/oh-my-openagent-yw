@@ -1,6 +1,6 @@
 export {
-	createRuleInjectionProcessor,
 	type CreateRuleInjectionProcessorDeps,
+	createRuleInjectionProcessor,
 } from "./injection-processor";
 export type {
 	DynamicTruncator,

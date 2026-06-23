@@ -1,104 +1,96 @@
 /// <reference types="bun-types" />
 
-import { afterEach, describe, expect, it } from "bun:test"
-import { lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
-import { spawnSync } from "bun"
+import { afterEach, describe, expect, it } from "bun:test";
+import { lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "bun";
+import { validateArchiveEntries } from "./archive-entry-validator";
+import { extractTarGz } from "./binary-downloader";
+import { extractZip } from "./zip-extractor";
 
-import { extractTarGz } from "./binary-downloader"
-import { validateArchiveEntries } from "./archive-entry-validator"
-import { extractZip } from "./zip-extractor"
-
-const testDirs: string[] = []
+const testDirs: string[] = [];
 
 function createTestDir(): string {
-	const dir = mkdtempSync(join(tmpdir(), "archive-entry-validator-"))
-	testDirs.push(dir)
-	return dir
+	const dir = mkdtempSync(join(tmpdir(), "archive-entry-validator-"));
+	testDirs.push(dir);
+	return dir;
 }
 
 function runPythonScript(scriptPath: string, args: readonly string[], cwd?: string): void {
-	const result = spawnSync(["python3", scriptPath, ...args], { cwd, stderr: "pipe", stdout: "pipe" })
+	const result = spawnSync(["python3", scriptPath, ...args], { cwd, stderr: "pipe", stdout: "pipe" });
 	if (result.exitCode !== 0) {
-		throw new Error(result.stderr.toString())
+		throw new Error(result.stderr.toString());
 	}
 }
 
 function writePythonScript(dir: string, filename: string, content: string): string {
-	const scriptPath = join(dir, filename)
-	writeFileSync(scriptPath, content)
-	return scriptPath
+	const scriptPath = join(dir, filename);
+	writeFileSync(scriptPath, content);
+	return scriptPath;
 }
 
 afterEach(() => {
 	for (const dir of testDirs.splice(0)) {
-		rmSync(dir, { recursive: true, force: true })
+		rmSync(dir, { recursive: true, force: true });
 	}
-})
+});
 
 describe("validateArchiveEntries", () => {
 	it("rejects absolute paths and traversal entries", () => {
 		//#given
-		const destDir = "/tmp/archive-root"
+		const destDir = "/tmp/archive-root";
 
 		//#when
-		const rejectAbsolutePath = () =>
-			validateArchiveEntries([{ path: "/etc/passwd", type: "file" }], destDir)
+		const rejectAbsolutePath = () => validateArchiveEntries([{ path: "/etc/passwd", type: "file" }], destDir);
 		const rejectTraversalPath = () =>
-			validateArchiveEntries([{ path: "nested/../../evil.txt", type: "file" }], destDir)
+			validateArchiveEntries([{ path: "nested/../../evil.txt", type: "file" }], destDir);
 
 		//#then
-		expect(rejectAbsolutePath).toThrow(/absolute path/i)
-		expect(rejectTraversalPath).toThrow(/path traversal/i)
-	})
+		expect(rejectAbsolutePath).toThrow(/absolute path/i);
+		expect(rejectTraversalPath).toThrow(/path traversal/i);
+	});
 
 	it("rejects symlink targets that escape the extraction directory", () => {
 		//#given
-		const destDir = "/tmp/archive-root"
+		const destDir = "/tmp/archive-root";
 
 		//#when
 		const rejectEscapeSymlink = () =>
-			validateArchiveEntries(
-				[{ path: "bin/tool", type: "symlink", linkPath: "../../outside/tool" }],
-				destDir
-			)
+			validateArchiveEntries([{ path: "bin/tool", type: "symlink", linkPath: "../../outside/tool" }], destDir);
 
 		//#then
-		expect(rejectEscapeSymlink).toThrow(/symlink target/i)
-	})
+		expect(rejectEscapeSymlink).toThrow(/symlink target/i);
+	});
 
 	it("rejects hard-link targets that escape the extraction directory", () => {
 		//#given
-		const destDir = "/tmp/archive-root"
+		const destDir = "/tmp/archive-root";
 
 		//#when
 		const rejectEscapeHardLink = () =>
-			validateArchiveEntries(
-				[{ path: "bin/tool", type: "hardlink", linkPath: "../../etc/passwd" }],
-				destDir
-			)
+			validateArchiveEntries([{ path: "bin/tool", type: "hardlink", linkPath: "../../etc/passwd" }], destDir);
 
 		//#then
-		expect(rejectEscapeHardLink).toThrow(/hard link target/i)
-	})
+		expect(rejectEscapeHardLink).toThrow(/hard link target/i);
+	});
 
 	it("accepts contained files, directories, and symlinks", () => {
 		//#given
-		const destDir = "/tmp/archive-root"
+		const destDir = "/tmp/archive-root";
 		const entries = [
 			{ path: "bin/", type: "directory" as const },
 			{ path: "bin/tool", type: "file" as const },
 			{ path: "bin/tool-link", type: "symlink" as const, linkPath: "tool" },
-		]
+		];
 
 		//#when
-		const validateContainedEntries = () => validateArchiveEntries(entries, destDir)
+		const validateContainedEntries = () => validateArchiveEntries(entries, destDir);
 
 		//#then
-		expect(validateContainedEntries).not.toThrow()
-	})
-})
+		expect(validateContainedEntries).not.toThrow();
+	});
+});
 
 // The 3 tests in this block spawn `python3` to create malicious archive
 // fixtures. The Windows CI runner (windows-latest) does not have Python
@@ -112,10 +104,10 @@ describe("validateArchiveEntries", () => {
 describe.skipIf(process.platform === "win32", "archive extraction preflight", () => {
 	it("rejects tar archives with traversal entries before extraction", async () => {
 		//#given
-		const rootDir = createTestDir()
-		const archivePath = join(rootDir, "malicious.tar.gz")
-		const destDir = join(rootDir, "dest")
-		mkdirSync(destDir, { recursive: true })
+		const rootDir = createTestDir();
+		const archivePath = join(rootDir, "malicious.tar.gz");
+		const destDir = join(rootDir, "dest");
+		mkdirSync(destDir, { recursive: true });
 		const scriptPath = writePythonScript(
 			rootDir,
 			"make-malicious-tar.py",
@@ -128,28 +120,28 @@ describe.skipIf(process.platform === "win32", "archive extraction preflight", ()
 				"    info = tarfile.TarInfo('../escape.txt')",
 				"    info.size = len(data)",
 				"    archive.addfile(info, io.BytesIO(data))",
-			].join("\n")
-		)
-		runPythonScript(scriptPath, [archivePath])
+			].join("\n"),
+		);
+		runPythonScript(scriptPath, [archivePath]);
 
 		//#when
-		let errorMessage = ""
+		let errorMessage = "";
 		try {
-			await extractTarGz(archivePath, destDir)
+			await extractTarGz(archivePath, destDir);
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : String(error)
+			errorMessage = error instanceof Error ? error.message : String(error);
 		}
 
 		//#then
-		expect(errorMessage).toMatch(/path traversal/i)
-	})
+		expect(errorMessage).toMatch(/path traversal/i);
+	});
 
 	it("rejects tar archives with hard-link traversal before extraction", async () => {
 		//#given
-		const rootDir = createTestDir()
-		const archivePath = join(rootDir, "malicious-hard-link.tar.gz")
-		const destDir = join(rootDir, "dest")
-		mkdirSync(destDir, { recursive: true })
+		const rootDir = createTestDir();
+		const archivePath = join(rootDir, "malicious-hard-link.tar.gz");
+		const destDir = join(rootDir, "dest");
+		mkdirSync(destDir, { recursive: true });
 		const scriptPath = writePythonScript(
 			rootDir,
 			"make-malicious-hard-link-tar.py",
@@ -161,28 +153,28 @@ describe.skipIf(process.platform === "win32", "archive extraction preflight", ()
 				"    info.type = tarfile.LNKTYPE",
 				"    info.linkname = '../../etc/passwd'",
 				"    archive.addfile(info)",
-			].join("\n")
-		)
-		runPythonScript(scriptPath, [archivePath])
+			].join("\n"),
+		);
+		runPythonScript(scriptPath, [archivePath]);
 
 		//#when
-		let errorMessage = ""
+		let errorMessage = "";
 		try {
-			await extractTarGz(archivePath, destDir)
+			await extractTarGz(archivePath, destDir);
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : String(error)
+			errorMessage = error instanceof Error ? error.message : String(error);
 		}
 
 		//#then
-		expect(errorMessage).toMatch(/hard link target|path traversal/i)
-	})
+		expect(errorMessage).toMatch(/hard link target|path traversal/i);
+	});
 
 	it("rejects zip archives with symlink escapes before extraction", async () => {
 		//#given
-		const rootDir = createTestDir()
-		const archivePath = join(rootDir, "malicious.zip")
-		const destDir = join(rootDir, "dest")
-		mkdirSync(destDir, { recursive: true })
+		const rootDir = createTestDir();
+		const archivePath = join(rootDir, "malicious.zip");
+		const destDir = join(rootDir, "dest");
+		mkdirSync(destDir, { recursive: true });
 		const scriptPath = writePythonScript(
 			rootDir,
 			"make-malicious-zip.py",
@@ -196,35 +188,35 @@ describe.skipIf(process.platform === "win32", "archive extraction preflight", ()
 				"entry.external_attr = (stat.S_IFLNK | 0o777) << 16",
 				"archive.writestr(entry, '../../escape.txt')",
 				"archive.close()",
-			].join("\n")
-		)
-		runPythonScript(scriptPath, [archivePath])
+			].join("\n"),
+		);
+		runPythonScript(scriptPath, [archivePath]);
 
 		//#when
-		let errorMessage = ""
+		let errorMessage = "";
 		try {
-			await extractZip(archivePath, destDir)
+			await extractZip(archivePath, destDir);
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : String(error)
+			errorMessage = error instanceof Error ? error.message : String(error);
 		}
 
 		//#then
-		expect(errorMessage).toMatch(/symlink target/i)
-	})
+		expect(errorMessage).toMatch(/symlink target/i);
+	});
 
 	it("extracts safe tar and zip archives into the destination directory", async () => {
 		//#given
-		const rootDir = createTestDir()
-		const sourceDir = join(rootDir, "source")
-		const tarArchivePath = join(rootDir, "safe.tar.gz")
-		const zipArchivePath = join(rootDir, "safe.zip")
-		const tarDestDir = join(rootDir, "tar-dest")
-		const zipDestDir = join(rootDir, "zip-dest")
-		mkdirSync(join(sourceDir, "bin"), { recursive: true })
-		mkdirSync(tarDestDir, { recursive: true })
-		mkdirSync(zipDestDir, { recursive: true })
-		writeFileSync(join(sourceDir, "bin", "tool.txt"), "safe")
-		symlinkSync("tool.txt", join(sourceDir, "bin", "tool-link"))
+		const rootDir = createTestDir();
+		const sourceDir = join(rootDir, "source");
+		const tarArchivePath = join(rootDir, "safe.tar.gz");
+		const zipArchivePath = join(rootDir, "safe.zip");
+		const tarDestDir = join(rootDir, "tar-dest");
+		const zipDestDir = join(rootDir, "zip-dest");
+		mkdirSync(join(sourceDir, "bin"), { recursive: true });
+		mkdirSync(tarDestDir, { recursive: true });
+		mkdirSync(zipDestDir, { recursive: true });
+		writeFileSync(join(sourceDir, "bin", "tool.txt"), "safe");
+		symlinkSync("tool.txt", join(sourceDir, "bin", "tool-link"));
 		const tarScriptPath = writePythonScript(
 			rootDir,
 			"make-safe-tar.py",
@@ -234,8 +226,8 @@ describe.skipIf(process.platform === "win32", "archive extraction preflight", ()
 				"archive_path, source_dir = sys.argv[1], sys.argv[2]",
 				"with tarfile.open(archive_path, 'w:gz') as archive:",
 				"    archive.add(source_dir, arcname='.')",
-			].join("\n")
-		)
+			].join("\n"),
+		);
 		const zipScriptPath = writePythonScript(
 			rootDir,
 			"make-safe-zip.py",
@@ -249,19 +241,19 @@ describe.skipIf(process.platform === "win32", "archive extraction preflight", ()
 				"    info.create_system = 3",
 				"    info.external_attr = 0o120777 << 16",
 				"    archive.writestr(info, 'tool.txt')",
-			].join("\n")
-		)
-		runPythonScript(tarScriptPath, [tarArchivePath, sourceDir])
-		runPythonScript(zipScriptPath, [zipArchivePath, sourceDir])
+			].join("\n"),
+		);
+		runPythonScript(tarScriptPath, [tarArchivePath, sourceDir]);
+		runPythonScript(zipScriptPath, [zipArchivePath, sourceDir]);
 
 		//#when
-		await extractTarGz(tarArchivePath, tarDestDir)
-		await extractZip(zipArchivePath, zipDestDir)
+		await extractTarGz(tarArchivePath, tarDestDir);
+		await extractZip(zipArchivePath, zipDestDir);
 
 		//#then
-		expect(readFileSync(join(tarDestDir, "bin", "tool.txt"), "utf8")).toBe("safe")
-		expect(readFileSync(join(zipDestDir, "bin", "tool.txt"), "utf8")).toBe("safe")
-		expect(lstatSync(join(tarDestDir, "bin", "tool-link")).isSymbolicLink()).toBe(true)
-		expect(lstatSync(join(zipDestDir, "bin", "tool-link")).isSymbolicLink()).toBe(true)
-	})
-})
+		expect(readFileSync(join(tarDestDir, "bin", "tool.txt"), "utf8")).toBe("safe");
+		expect(readFileSync(join(zipDestDir, "bin", "tool.txt"), "utf8")).toBe("safe");
+		expect(lstatSync(join(tarDestDir, "bin", "tool-link")).isSymbolicLink()).toBe(true);
+		expect(lstatSync(join(zipDestDir, "bin", "tool-link")).isSymbolicLink()).toBe(true);
+	});
+});

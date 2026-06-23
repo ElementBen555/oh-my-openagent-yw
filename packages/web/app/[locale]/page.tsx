@@ -1,7 +1,7 @@
 export { landingMetadata as metadata } from "@/app/_components/landing-page"
 
-import type { JSX } from "react"
 import { setRequestLocale } from "next-intl/server"
+import type { JSX } from "react"
 import { LandingPage } from "@/app/_components/landing-page"
 
 export default async function LocaleLandingPage({

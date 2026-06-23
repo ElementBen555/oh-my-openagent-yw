@@ -1,15 +1,15 @@
-import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive"
-import { getAgentDisplayName } from "../../shared/agent-display-names"
+import { getAgentDisplayName } from "../../shared/agent-display-names";
+import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive";
 
-export const HOOK_NAME = "prometheus-md-only"
+export const HOOK_NAME = "prometheus-md-only";
 
-export const PROMETHEUS_AGENT = "prometheus"
+export const PROMETHEUS_AGENT = "prometheus";
 
-export const ALLOWED_EXTENSIONS = [".md"]
+export const ALLOWED_EXTENSIONS = [".md"];
 
-export const ALLOWED_PATH_PREFIX = ".omo"
+export const ALLOWED_PATH_PREFIX = ".omo";
 
-export const BLOCKED_TOOLS = ["Write", "Edit", "write", "edit"]
+export const BLOCKED_TOOLS = ["Write", "Edit", "write", "edit"];
 
 /**
  * XML-tag wrapper used to mark the planning-context boundary in prompts
@@ -17,8 +17,8 @@ export const BLOCKED_TOOLS = ["Write", "Edit", "write", "edit"]
  * the `[SYSTEM DIRECTIVE: ...]` bracket syntax that Azure OpenAI Prompt Shield
  * flags as indirect prompt injection in user-role content (#4036).
  */
-export const PLANNING_CONTEXT_OPEN = `<planning-context source="prometheus-read-only">`
-export const PLANNING_CONTEXT_CLOSE = `</planning-context>`
+export const PLANNING_CONTEXT_OPEN = `<planning-context source="prometheus-read-only">`;
+export const PLANNING_CONTEXT_CLOSE = `</planning-context>`;
 
 export const PLANNING_CONSULT_WARNING = `
 
@@ -41,7 +41,7 @@ ${PLANNING_CONTEXT_CLOSE}
 
 ---
 
-`
+`;
 
 export const PROMETHEUS_WORKFLOW_REMINDER = `
 
@@ -86,4 +86,4 @@ If you skipped steps, STOP NOW. Go back and complete them.
 
 ---
 
-`
+`;

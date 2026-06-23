@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-package-layout"
+export * from "@oh-my-opencode/omo-codex/install/codex-package-layout";

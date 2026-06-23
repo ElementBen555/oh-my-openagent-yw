@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/utils/command-executor/embedded-commands"
+export * from "@oh-my-opencode/utils/command-executor/embedded-commands";

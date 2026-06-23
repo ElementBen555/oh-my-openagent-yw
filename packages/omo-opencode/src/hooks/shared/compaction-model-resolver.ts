@@ -1,34 +1,36 @@
-import type { OhMyOpenCodeConfig } from "../../config"
-import { getSessionAgent } from "../../features/claude-code-session-state"
-import { getAgentConfigKey } from "../../shared/agent-display-names"
+import type { OhMyOpenCodeConfig } from "../../config";
+import { getSessionAgent } from "../../features/claude-code-session-state";
+import { getAgentConfigKey } from "../../shared/agent-display-names";
 
 export function resolveCompactionModel(
-  pluginConfig: OhMyOpenCodeConfig,
-  sessionID: string,
-  originalProviderID: string,
-  originalModelID: string
+	pluginConfig: OhMyOpenCodeConfig,
+	sessionID: string,
+	originalProviderID: string,
+	originalModelID: string,
 ): { providerID: string; modelID: string } {
-  const sessionAgentName = getSessionAgent(sessionID)
-  
-  if (!sessionAgentName || !pluginConfig.agents) {
-    return { providerID: originalProviderID, modelID: originalModelID }
-  }
+	const sessionAgentName = getSessionAgent(sessionID);
 
-  const agentConfigKey = getAgentConfigKey(sessionAgentName)
-  const agentConfig = (pluginConfig.agents as Record<string, { compaction?: { model?: string } } | undefined>)[agentConfigKey]
-  const compactionConfig = agentConfig?.compaction
+	if (!sessionAgentName || !pluginConfig.agents) {
+		return { providerID: originalProviderID, modelID: originalModelID };
+	}
 
-  if (!compactionConfig?.model) {
-    return { providerID: originalProviderID, modelID: originalModelID }
-  }
+	const agentConfigKey = getAgentConfigKey(sessionAgentName);
+	const agentConfig = (pluginConfig.agents as Record<string, { compaction?: { model?: string } } | undefined>)[
+		agentConfigKey
+	];
+	const compactionConfig = agentConfig?.compaction;
 
-  const modelParts = compactionConfig.model.split("/")
-  if (modelParts.length < 2) {
-    return { providerID: originalProviderID, modelID: originalModelID }
-  }
+	if (!compactionConfig?.model) {
+		return { providerID: originalProviderID, modelID: originalModelID };
+	}
 
-  return {
-    providerID: modelParts[0],
-    modelID: modelParts.slice(1).join("/"),
-  }
+	const modelParts = compactionConfig.model.split("/");
+	if (modelParts.length < 2) {
+		return { providerID: originalProviderID, modelID: originalModelID };
+	}
+
+	return {
+		providerID: modelParts[0],
+		modelID: modelParts.slice(1).join("/"),
+	};
 }

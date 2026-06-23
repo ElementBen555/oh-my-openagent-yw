@@ -1,51 +1,51 @@
-import type { PluginInput } from "@opencode-ai/plugin"
-import { updateConnectedProvidersCache } from "../../../shared/connected-providers-cache"
-import { isModelCacheAvailable } from "../../../shared/model-availability"
-import { log } from "../../../shared/logger"
-import { ignoreToastError } from "./ignore-toast-error"
+import type { PluginInput } from "@opencode-ai/plugin";
+import { updateConnectedProvidersCache } from "../../../shared/connected-providers-cache";
+import { log } from "../../../shared/logger";
+import { isModelCacheAvailable } from "../../../shared/model-availability";
+import { ignoreToastError } from "./ignore-toast-error";
 
-const CACHE_UPDATE_TIMEOUT_MS = 10000
+const CACHE_UPDATE_TIMEOUT_MS = 10000;
 
 export async function updateAndShowConnectedProvidersCacheStatus(ctx: PluginInput): Promise<void> {
-  const hadCache = isModelCacheAvailable()
+	const hadCache = isModelCacheAvailable();
 
-  if (!hadCache) {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined
-    try {
-      await Promise.race([
-        updateConnectedProvidersCache(ctx.client),
-        new Promise<never>((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error("Cache update timed out")), CACHE_UPDATE_TIMEOUT_MS)
-        }),
-      ])
-    } catch (err) {
-      const message = err instanceof Error ? String(err) : String(err)
-      log("[auto-update-checker] Connected providers cache creation failed", { error: message })
-    } finally {
-      if (timeoutId) clearTimeout(timeoutId)
-    }
+	if (!hadCache) {
+		let timeoutId: ReturnType<typeof setTimeout> | undefined;
+		try {
+			await Promise.race([
+				updateConnectedProvidersCache(ctx.client),
+				new Promise<never>((_, reject) => {
+					timeoutId = setTimeout(() => reject(new Error("Cache update timed out")), CACHE_UPDATE_TIMEOUT_MS);
+				}),
+			]);
+		} catch (err) {
+			const message = err instanceof Error ? String(err) : String(err);
+			log("[auto-update-checker] Connected providers cache creation failed", { error: message });
+		} finally {
+			if (timeoutId) clearTimeout(timeoutId);
+		}
 
-    if (!isModelCacheAvailable()) {
-      await ctx.client.tui
-        .showToast({
-          body: {
-            title: "Connected Providers Cache",
-            message: "Failed to build provider cache. Restart OpenCode to retry.",
-            variant: "warning" as const,
-            duration: 8000,
-          },
-        })
-        .catch(ignoreToastError)
+		if (!isModelCacheAvailable()) {
+			await ctx.client.tui
+				.showToast({
+					body: {
+						title: "Connected Providers Cache",
+						message: "Failed to build provider cache. Restart OpenCode to retry.",
+						variant: "warning" as const,
+						duration: 8000,
+					},
+				})
+				.catch(ignoreToastError);
 
-      log("[auto-update-checker] Connected providers cache toast shown (creation failed)")
-    } else {
-      log("[auto-update-checker] Connected providers cache created on first run")
-    }
-  } else {
-    updateConnectedProvidersCache(ctx.client).catch((err) => {
-      const message = err instanceof Error ? String(err) : String(err)
-      log("[auto-update-checker] Background cache update failed", { error: message })
-    })
-    log("[auto-update-checker] Connected providers cache exists, updating in background")
-  }
+			log("[auto-update-checker] Connected providers cache toast shown (creation failed)");
+		} else {
+			log("[auto-update-checker] Connected providers cache created on first run");
+		}
+	} else {
+		updateConnectedProvidersCache(ctx.client).catch((err) => {
+			const message = err instanceof Error ? String(err) : String(err);
+			log("[auto-update-checker] Background cache update failed", { error: message });
+		});
+		log("[auto-update-checker] Connected providers cache exists, updating in background");
+	}
 }

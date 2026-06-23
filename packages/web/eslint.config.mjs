@@ -1,6 +1,6 @@
-import globals from "globals"
 import nextPlugin from "@next/eslint-plugin-next"
 import prettier from "eslint-config-prettier/flat"
+import globals from "globals"
 import tseslint from "typescript-eslint"
 
 const nextCoreWebVitalsConfig = {

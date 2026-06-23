@@ -1,1 +1,1 @@
-export { containsPath, isWithinProject } from "@oh-my-opencode/utils"
+export { containsPath, isWithinProject } from "@oh-my-opencode/utils";

@@ -1,1 +1,1 @@
-export { isRecord } from "@oh-my-opencode/utils"
+export { isRecord } from "@oh-my-opencode/utils";

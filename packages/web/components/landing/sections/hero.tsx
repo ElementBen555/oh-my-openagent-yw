@@ -1,11 +1,11 @@
-import type { JSX } from "react"
 import { getTranslations } from "next-intl/server"
-import { getStats, formatStats } from "@/lib/stats"
+import type { JSX } from "react"
+import { GithubIcon } from "@/components/icons/github-icon"
 import { HeroStats } from "@/components/landing/hero-stats"
 import { InstallCommand } from "@/components/landing/install-command"
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
-import { GithubIcon } from "@/components/icons/github-icon"
+import { formatStats, getStats } from "@/lib/stats"
 
 const FALLBACK_STATS = {
   stars: "40k+",

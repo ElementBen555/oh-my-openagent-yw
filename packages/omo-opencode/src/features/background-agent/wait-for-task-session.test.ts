@@ -1,95 +1,96 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, test } from "bun:test";
 
-import type { BackgroundTaskStatus } from "./types"
-import { waitForTaskSessionID } from "./wait-for-task-session"
+import type { BackgroundTaskStatus } from "./types";
+import { waitForTaskSessionID } from "./wait-for-task-session";
 
 interface TaskSnapshot {
-  sessionID?: string
-  status?: BackgroundTaskStatus
+	sessionID?: string;
+	status?: BackgroundTaskStatus;
 }
 
 function createManager(responses: TaskSnapshot[]) {
-  let index = 0
+	let index = 0;
 
-  return {
-    getTask(_taskID: string): TaskSnapshot {
-      const response = responses[Math.min(index, responses.length - 1)]
-      index += 1
-      return response
-    },
-  }
+	return {
+		getTask(_taskID: string): TaskSnapshot {
+			const response = responses[Math.min(index, responses.length - 1)];
+			index += 1;
+			return response;
+		},
+	};
 }
 
 describe("waitForTaskSessionID", () => {
-  test("#given task already has a session id #when waiting #then it returns immediately", async () => {
-    // given
-    const manager = createManager([{ sessionId: "ses_ready_123", status: "running" }])
+	test("#given task already has a session id #when waiting #then it returns immediately", async () => {
+		// given
+		const manager = createManager([{ sessionId: "ses_ready_123", status: "running" }]);
 
-    // when
-    const sessionID = await waitForTaskSessionID(manager, "bg_ready")
+		// when
+		const sessionID = await waitForTaskSessionID(manager, "bg_ready");
 
-    // then
-    expect(sessionID).toBe("ses_ready_123")
-  })
+		// then
+		expect(sessionID).toBe("ses_ready_123");
+	});
 
-  test("#given session appears later #when waiting #then it polls until resolved", async () => {
-    // given
-    const manager = createManager([
-      { status: "running" },
-      { status: "running" },
-      { sessionId: "ses_late_123", status: "running" },
-    ])
+	test("#given session appears later #when waiting #then it polls until resolved", async () => {
+		// given
+		const manager = createManager([
+			{ status: "running" },
+			{ status: "running" },
+			{ sessionId: "ses_late_123", status: "running" },
+		]);
 
-    // when
-    const sessionID = await waitForTaskSessionID(manager, "bg_late", {
-      intervalMs: 1,
-      timeoutMs: 100,
-    })
+		// when
+		const sessionID = await waitForTaskSessionID(manager, "bg_late", {
+			intervalMs: 1,
+			timeoutMs: 100,
+		});
 
-    // then
-    expect(sessionID).toBe("ses_late_123")
-  })
+		// then
+		expect(sessionID).toBe("ses_late_123");
+	});
 
-  test("#given aborted signal #when waiting #then it returns undefined", async () => {
-    // given
-    const controller = new AbortController()
-    controller.abort()
-    const manager = createManager([{ status: "running" }])
+	test("#given aborted signal #when waiting #then it returns undefined", async () => {
+		// given
+		const controller = new AbortController();
+		controller.abort();
+		const manager = createManager([{ status: "running" }]);
 
-    // when
-    const sessionID = await waitForTaskSessionID(manager, "bg_abort", {
-      signal: controller.signal,
-    })
+		// when
+		const sessionID = await waitForTaskSessionID(manager, "bg_abort", {
+			signal: controller.signal,
+		});
 
-    // then
-    expect(sessionID).toBeUndefined()
-  })
+		// then
+		expect(sessionID).toBeUndefined();
+	});
 
-  test("#given task never resolves #when waiting past timeout #then it returns undefined", async () => {
-    // given
-    const manager = createManager([{ status: "running" }, { status: "running" }, { status: "running" }])
+	test("#given task never resolves #when waiting past timeout #then it returns undefined", async () => {
+		// given
+		const manager = createManager([{ status: "running" }, { status: "running" }, { status: "running" }]);
 
-    // when
-    const sessionID = await waitForTaskSessionID(manager, "bg_timeout", {
-      intervalMs: 1,
-      timeoutMs: 3,
-    })
+		// when
+		const sessionID = await waitForTaskSessionID(manager, "bg_timeout", {
+			intervalMs: 1,
+			timeoutMs: 3,
+		});
 
-    // then
-    expect(sessionID).toBeUndefined()
-  })
+		// then
+		expect(sessionID).toBeUndefined();
+	});
 
-  test.each(["error", "cancelled", "interrupt"] satisfies BackgroundTaskStatus[])(
-    "#given %s task state #when waiting #then it returns undefined",
-    async (status: BackgroundTaskStatus) => {
-      // given
-      const manager = createManager([{ status }])
+	test.each([
+		"error",
+		"cancelled",
+		"interrupt",
+	] satisfies BackgroundTaskStatus[])("#given %s task state #when waiting #then it returns undefined", async (status: BackgroundTaskStatus) => {
+		// given
+		const manager = createManager([{ status }]);
 
-      // when
-      const sessionID = await waitForTaskSessionID(manager, `bg_${status}`)
+		// when
+		const sessionID = await waitForTaskSessionID(manager, `bg_${status}`);
 
-      // then
-      expect(sessionID).toBeUndefined()
-    }
-  )
-})
+		// then
+		expect(sessionID).toBeUndefined();
+	});
+});

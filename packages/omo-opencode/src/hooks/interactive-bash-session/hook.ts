@@ -1,122 +1,115 @@
 import type { PluginInput } from "@opencode-ai/plugin";
-import { saveInteractiveBashSessionState, clearInteractiveBashSessionState } from "./storage";
-import { buildSessionReminderMessage } from "./constants";
-import type { InteractiveBashSessionState } from "./types";
-import { parseTmuxCommand } from "./tmux-command-parser";
-import { getOrCreateState, isOmoSession, killAllTrackedSessions } from "./state-manager";
 import { subagentSessions } from "../../features/claude-code-session-state";
 import { resolveSessionEventID } from "../../shared/event-session-id";
+import { buildSessionReminderMessage } from "./constants";
+import { getOrCreateState, isOmoSession, killAllTrackedSessions } from "./state-manager";
+import { clearInteractiveBashSessionState, saveInteractiveBashSessionState } from "./storage";
+import { parseTmuxCommand } from "./tmux-command-parser";
+import type { InteractiveBashSessionState } from "./types";
 
 interface ToolExecuteInput {
-  tool: string;
-  sessionID: string;
-  callID: string;
-  args?: Record<string, unknown>;
+	tool: string;
+	sessionID: string;
+	callID: string;
+	args?: Record<string, unknown>;
 }
 
 interface ToolExecuteOutput {
-  title: string;
-  output: string;
-  metadata: unknown;
+	title: string;
+	output: string;
+	metadata: unknown;
 }
 
 interface EventInput {
-  event: {
-    type: string;
-    properties?: unknown;
-  };
+	event: {
+		type: string;
+		properties?: unknown;
+	};
 }
 
 export function createInteractiveBashSessionHook(ctx: PluginInput) {
-  const sessionStates = new Map<string, InteractiveBashSessionState>();
+	const sessionStates = new Map<string, InteractiveBashSessionState>();
 
-  function getOrCreateStateLocal(sessionID: string): InteractiveBashSessionState {
-    return getOrCreateState(sessionID, sessionStates);
-  }
+	function getOrCreateStateLocal(sessionID: string): InteractiveBashSessionState {
+		return getOrCreateState(sessionID, sessionStates);
+	}
 
-  async function killAllTrackedSessionsLocal(
-    state: InteractiveBashSessionState,
-  ): Promise<void> {
-    await killAllTrackedSessions(state);
-    
-    for (const sessionId of subagentSessions) {
-      ctx.client.session.abort({ path: { id: sessionId } }).catch(() => {})
-    }
-  }
+	async function killAllTrackedSessionsLocal(state: InteractiveBashSessionState): Promise<void> {
+		await killAllTrackedSessions(state);
 
-  const toolExecuteAfter = async (
-    input: ToolExecuteInput,
-    output: ToolExecuteOutput,
-  ) => {
-    const { tool, sessionID, args } = input;
-    const toolLower = tool.toLowerCase();
+		for (const sessionId of subagentSessions) {
+			ctx.client.session.abort({ path: { id: sessionId } }).catch(() => {});
+		}
+	}
 
-    if (toolLower !== "interactive_bash") {
-      return;
-    }
+	const toolExecuteAfter = async (input: ToolExecuteInput, output: ToolExecuteOutput) => {
+		const { tool, sessionID, args } = input;
+		const toolLower = tool.toLowerCase();
 
-    if (typeof args?.tmux_command !== "string") {
-      return;
-    }
+		if (toolLower !== "interactive_bash") {
+			return;
+		}
 
-    const tmuxCommand = args.tmux_command;
-    const { subCommand, sessionName } = parseTmuxCommand(tmuxCommand);
-    const state = getOrCreateStateLocal(sessionID);
-    let stateChanged = false;
+		if (typeof args?.tmux_command !== "string") {
+			return;
+		}
 
-    const toolOutput = output?.output ?? ""
-    if (toolOutput.startsWith("Error:")) {
-      return
-    }
+		const tmuxCommand = args.tmux_command;
+		const { subCommand, sessionName } = parseTmuxCommand(tmuxCommand);
+		const state = getOrCreateStateLocal(sessionID);
+		let stateChanged = false;
 
-    const isNewSession = subCommand === "new-session";
-    const isKillSession = subCommand === "kill-session";
-    const isKillServer = subCommand === "kill-server";
+		const toolOutput = output?.output ?? "";
+		if (toolOutput.startsWith("Error:")) {
+			return;
+		}
 
-    if (isNewSession && isOmoSession(sessionName)) {
-      state.tmuxSessions.add(sessionName);
-      stateChanged = true;
-    } else if (isKillSession && isOmoSession(sessionName)) {
-      state.tmuxSessions.delete(sessionName);
-      stateChanged = true;
-    } else if (isKillServer) {
-      state.tmuxSessions.clear();
-      stateChanged = true;
-    }
+		const isNewSession = subCommand === "new-session";
+		const isKillSession = subCommand === "kill-session";
+		const isKillServer = subCommand === "kill-server";
 
-    if (stateChanged) {
-      state.updatedAt = Date.now();
-      saveInteractiveBashSessionState(state);
-    }
+		if (isNewSession && isOmoSession(sessionName)) {
+			state.tmuxSessions.add(sessionName);
+			stateChanged = true;
+		} else if (isKillSession && isOmoSession(sessionName)) {
+			state.tmuxSessions.delete(sessionName);
+			stateChanged = true;
+		} else if (isKillServer) {
+			state.tmuxSessions.clear();
+			stateChanged = true;
+		}
 
-    const isSessionOperation = isNewSession || isKillSession || isKillServer;
-    if (isSessionOperation) {
-      const reminder = buildSessionReminderMessage(
-        Array.from(state.tmuxSessions),
-      );
-      if (reminder) {
-        output.output += reminder;
-      }
-    }
-  };
+		if (stateChanged) {
+			state.updatedAt = Date.now();
+			saveInteractiveBashSessionState(state);
+		}
 
-  const eventHandler = async ({ event }: EventInput) => {
-    const props = event.properties as Record<string, unknown> | undefined;
+		const isSessionOperation = isNewSession || isKillSession || isKillServer;
+		if (isSessionOperation) {
+			const reminder = buildSessionReminderMessage(Array.from(state.tmuxSessions));
+			if (reminder) {
+				output.output += reminder;
+			}
+		}
+	};
 
-    if (event.type === "session.deleted") {
-      const sessionID = resolveSessionEventID(props);
+	const eventHandler = async ({ event }: EventInput) => {
+		const props = event.properties as Record<string, unknown> | undefined;
 
-      if (sessionID) {
-        const state = getOrCreateStateLocal(sessionID);
-        await killAllTrackedSessionsLocal(state);
-        sessionStates.delete(sessionID);
-        clearInteractiveBashSessionState(sessionID);
-      }
-    }
-  };
+		if (event.type === "session.deleted") {
+			const sessionID = resolveSessionEventID(props);
 
-  return {
-    "tool.execute.after": toolExecuteAfter,
-    event: eventHandler,
-  };
+			if (sessionID) {
+				const state = getOrCreateStateLocal(sessionID);
+				await killAllTrackedSessionsLocal(state);
+				sessionStates.delete(sessionID);
+				clearInteractiveBashSessionState(sessionID);
+			}
+		}
+	};
+
+	return {
+		"tool.execute.after": toolExecuteAfter,
+		event: eventHandler,
+	};
 }

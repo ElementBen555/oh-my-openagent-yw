@@ -14,70 +14,58 @@
  *   helpers identical to the 4.7 variant so content stays in sync.
  */
 
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildAgentIdentitySection,
-  buildKeyTriggersSection,
-  buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
-  buildDelegationTable,
-  buildCategorySkillsDelegationGuide,
-  buildOracleSection,
-  buildHardBlocksSection,
-  buildAntiPatternsSection,
-  buildParallelDelegationSection,
-  buildNonClaudePlannerSection,
-  buildAntiDuplicationSection,
-  categorizeTools,
+	buildAgentIdentitySection,
+	buildAntiDuplicationSection,
+	buildAntiPatternsSection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildExploreSection,
+	buildHardBlocksSection,
+	buildKeyTriggersSection,
+	buildLibrarianSection,
+	buildNonClaudePlannerSection,
+	buildOracleSection,
+	buildParallelDelegationSection,
+	buildToolSelectionTable,
+	categorizeTools,
 } from "../dynamic-agent-prompt-builder";
 import { buildTaskManagementSection } from "./default";
 
 export function buildClaudeOpus48SisyphusPrompt(
-  model: string,
-  availableAgents: AvailableAgent[],
-  availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	model: string,
+	availableAgents: AvailableAgent[],
+	availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
-  const toolSelection = buildToolSelectionTable(
-    availableAgents,
-    availableTools,
-    availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const parallelDelegationSection = buildParallelDelegationSection(model, availableCategories);
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
-  const taskManagementSection = buildTaskManagementSection(useTaskSystem);
-  const todoHookNote = useTaskSystem
-    ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
-    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
-  const browserQaInstruction = availableSkills.some((skill) => skill.name === "playwright")
-    ? "**Web / browser / UI work** → load the `playwright` skill and DRIVE A REAL BROWSER. Open the page. Click the elements. Fill the forms. WATCH THE CONSOLE. Screenshot if helpful. Visual changes NOT RENDERED in a browser are NOT VALIDATED."
-    : "**Web / browser / UI work** → use the available browser automation surface and DRIVE A REAL BROWSER. Open the page. Click the elements. Fill the forms. WATCH THE CONSOLE. Screenshot if helpful. Visual changes NOT RENDERED in a browser are NOT VALIDATED.";
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+	const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills);
+	const exploreSection = buildExploreSection(availableAgents);
+	const librarianSection = buildLibrarianSection(availableAgents);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const oracleSection = buildOracleSection(availableAgents);
+	const hardBlocks = buildHardBlocksSection();
+	const antiPatterns = buildAntiPatternsSection();
+	const parallelDelegationSection = buildParallelDelegationSection(model, availableCategories);
+	const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
+	const taskManagementSection = buildTaskManagementSection(useTaskSystem);
+	const todoHookNote = useTaskSystem
+		? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
+		: "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
+	const browserQaInstruction = availableSkills.some((skill) => skill.name === "playwright")
+		? "**Web / browser / UI work** → load the `playwright` skill and DRIVE A REAL BROWSER. Open the page. Click the elements. Fill the forms. WATCH THE CONSOLE. Screenshot if helpful. Visual changes NOT RENDERED in a browser are NOT VALIDATED."
+		: "**Web / browser / UI work** → use the available browser automation surface and DRIVE A REAL BROWSER. Open the page. Click the elements. Fill the forms. WATCH THE CONSOLE. Screenshot if helpful. Visual changes NOT RENDERED in a browser are NOT VALIDATED.";
 
-  const agentIdentity = buildAgentIdentitySection(
-    "Sisyphus",
-    "Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
-  );
+	const agentIdentity = buildAgentIdentitySection(
+		"Sisyphus",
+		"Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
+	);
 
-  return `${agentIdentity}
+	return `${agentIdentity}
 <Role>
 You are **Sisyphus** - Powerful AI Agent with orchestration capabilities from OhMyOpenCode.
 

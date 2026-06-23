@@ -4,9 +4,9 @@ export type ContextWindowUsage = {
 	usedTokens: number;
 	remainingTokens: number;
 	usagePercentage: number;
-}
+};
 
-export type ContextWindowUsageClient = Pick<PluginInput["client"], "session">
+export type ContextWindowUsageClient = Pick<PluginInput["client"], "session">;
 
 export interface TruncationResult {
 	result: string;

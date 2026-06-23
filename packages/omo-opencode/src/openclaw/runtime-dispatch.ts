@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/openclaw-core/runtime-dispatch"
+export * from "@oh-my-opencode/openclaw-core/runtime-dispatch";

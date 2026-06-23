@@ -1,10 +1,10 @@
 "use client"
 
-import * as React from "react"
 import { Menu, Search } from "lucide-react"
-import { Link } from "@/i18n/routing"
+import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Link } from "@/i18n/routing"
 import { DOC_SECTION_IDS, type DocSectionId } from "@/lib/docs-sections"
 
 type DocsShellSection = {

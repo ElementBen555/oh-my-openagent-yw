@@ -14,7 +14,7 @@
  */
 
 export function buildGeminiToolMandate(): string {
-  return `<TOOL_CALL_MANDATE>
+	return `<TOOL_CALL_MANDATE>
 ## YOU MUST USE TOOLS. THIS IS NOT OPTIONAL.
 
 **The user expects you to ACT using tools, not REASON internally.** Every response to a task MUST contain tool_use blocks. A response without tool calls is a FAILED response.
@@ -40,7 +40,7 @@ Then ACTUALLY CALL those tools using the JSON tool schema. Produce the tool_use 
 }
 
 export function buildGeminiToolGuide(): string {
-  return `<GEMINI_TOOL_GUIDE>
+	return `<GEMINI_TOOL_GUIDE>
 ## Tool Usage Guide - WHEN and HOW to Call Each Tool
 
 You have access to tools via function calling. This guide defines WHEN to call each one.
@@ -95,7 +95,7 @@ You have access to tools via function calling. This guide defines WHEN to call e
 }
 
 export function buildGeminiToolCallExamples(): string {
-  return `<GEMINI_TOOL_CALL_EXAMPLES>
+	return `<GEMINI_TOOL_CALL_EXAMPLES>
 ## Correct Tool Calling Patterns - Follow These Examples
 
 ### Example 1: User asks about code → Read FIRST, then answer
@@ -170,7 +170,7 @@ export function buildGeminiToolCallExamples(): string {
 }
 
 export function buildGeminiDelegationOverride(): string {
-  return `<GEMINI_DELEGATION_OVERRIDE>
+	return `<GEMINI_DELEGATION_OVERRIDE>
 ## DELEGATION IS MANDATORY - YOU ARE NOT AN IMPLEMENTER
 
 **You have a strong tendency to do work yourself. RESIST THIS.**
@@ -187,7 +187,7 @@ You are an ORCHESTRATOR. When you implement code directly instead of delegating,
 }
 
 export function buildGeminiVerificationOverride(): string {
-  return `<GEMINI_VERIFICATION_OVERRIDE>
+	return `<GEMINI_VERIFICATION_OVERRIDE>
 ## YOUR SELF-ASSESSMENT IS UNRELIABLE - VERIFY WITH TOOLS
 
 **When you believe something is "done" or "correct" - you are probably wrong.**
@@ -211,7 +211,7 @@ Your internal confidence estimator is miscalibrated toward optimism. What feels 
 }
 
 export function buildGeminiIntentGateEnforcement(): string {
-  return `<GEMINI_INTENT_GATE_ENFORCEMENT>
+	return `<GEMINI_INTENT_GATE_ENFORCEMENT>
 ## YOU MUST CLASSIFY INTENT BEFORE ACTING. NO EXCEPTIONS.
 
 **Your failure mode: You skip intent classification and jump straight to implementation.**

@@ -1,6 +1,6 @@
+import { withLspClient } from "../lsp/client-wrapper.js";
 import { DEFAULT_MAX_SYMBOLS } from "../lsp/constants.js";
 import { formatDocumentSymbol, formatSymbolInfo } from "../lsp/formatters.js";
-import { withLspClient } from "../lsp/client-wrapper.js";
 import type { DocumentSymbol, SymbolInfo } from "../lsp/types.js";
 import { missingDependencyResult } from "../missing-dependency-result.js";
 import { clientOptions, optionalNumber, optionalString, requireString } from "./parameters.js";

@@ -1,8 +1,8 @@
-export * from "./types"
-export * from "./team-worktree"
+export * from "./team-worktree";
+export * from "./types";
 
-import { setTeamCoreLogger } from "@oh-my-opencode/team-core"
+import { setTeamCoreLogger } from "@oh-my-opencode/team-core";
 
-import { log } from "../../shared/logger"
+import { log } from "../../shared/logger";
 
-setTeamCoreLogger(log)
+setTeamCoreLogger(log);

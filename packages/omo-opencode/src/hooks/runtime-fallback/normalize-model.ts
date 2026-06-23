@@ -1,4 +1,4 @@
-import { isRecord } from "../../shared/record-type-guard"
+import { isRecord } from "../../shared/record-type-guard";
 
 /**
  * Normalize a session model value into a canonical "<providerID>/<id>" string.
@@ -12,23 +12,20 @@ import { isRecord } from "../../shared/record-type-guard"
  * usable provider/model pair can be derived.
  */
 export function normalizeModelToCanonicalString(model: unknown): string | undefined {
-  if (typeof model === "string") {
-    const trimmed = model.trim()
-    return trimmed ? trimmed : undefined
-  }
+	if (typeof model === "string") {
+		const trimmed = model.trim();
+		return trimmed ? trimmed : undefined;
+	}
 
-  if (isRecord(model)) {
-    const providerID = typeof model.providerID === "string" ? model.providerID.trim() : undefined
-    const rawModelID = typeof model.id === "string"
-      ? model.id
-      : typeof model.modelID === "string"
-        ? model.modelID
-        : undefined
-    const modelID = rawModelID?.trim()
-    if (providerID && modelID) {
-      return `${providerID}/${modelID}`
-    }
-  }
+	if (isRecord(model)) {
+		const providerID = typeof model.providerID === "string" ? model.providerID.trim() : undefined;
+		const rawModelID =
+			typeof model.id === "string" ? model.id : typeof model.modelID === "string" ? model.modelID : undefined;
+		const modelID = rawModelID?.trim();
+		if (providerID && modelID) {
+			return `${providerID}/${modelID}`;
+		}
+	}
 
-  return undefined
+	return undefined;
 }

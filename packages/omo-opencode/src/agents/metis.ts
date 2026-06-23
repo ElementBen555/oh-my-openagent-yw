@@ -1,10 +1,10 @@
-import type { AgentConfig } from "@opencode-ai/sdk"
-import type { AgentMode, AgentPromptMetadata } from "./types"
-import { buildClaudeThinkingConfig, isKimiK27Model } from "./types"
-import { buildAntiDuplicationSection } from "./dynamic-agent-prompt-builder"
-import { createAgentToolRestrictions } from "../shared/permission-compat"
+import type { AgentConfig } from "@opencode-ai/sdk";
+import { createAgentToolRestrictions } from "../shared/permission-compat";
+import { buildAntiDuplicationSection } from "./dynamic-agent-prompt-builder";
+import type { AgentMode, AgentPromptMetadata } from "./types";
+import { buildClaudeThinkingConfig, isKimiK27Model } from "./types";
 
-const MODE: AgentMode = "subagent"
+const MODE: AgentMode = "subagent";
 
 /**
  * Metis - Plan Consultant Agent
@@ -291,7 +291,7 @@ call_omo_agent(subagent_type="librarian", prompt="I'm looking for proven impleme
 - Provide actionable directives for Prometheus
 - Include QA automation directives in every output
 - Ensure acceptance criteria are agent-executable (commands, not human actions)
-`
+`;
 
 export const METIS_K2_7_SYSTEM_PROMPT = `<role>
 You are Metis, the pre-planning consultant from OhMyOpenCode, running on Kimi K2.7. Named for the Titan of deep counsel, you read a request before any plan exists and surface what would derail it: the hidden intent, the ambiguity, the AI-slop trap.
@@ -387,47 +387,40 @@ For Build and Research, run the exploration yourself before questioning. Prompt 
 **NEVER**: skip intent classification; ask a generic question ("what's the scope?"); proceed past an unresolved ambiguity; assume facts about the codebase instead of checking; or hand Prometheus vague, placeholder-heavy, or human-in-the-loop acceptance criteria.
 
 **ALWAYS**: classify first; be specific ("change UserService only, or AuthService too?"); explore before asking for Build and Research intents; give Prometheus actionable directives; and include the agent-executable QA directives in every output.
-</critical_rules>`
+</critical_rules>`;
 
-const metisRestrictions = createAgentToolRestrictions([
-  "write",
-  "edit",
-  "apply_patch",
-])
+const metisRestrictions = createAgentToolRestrictions(["write", "edit", "apply_patch"]);
 
 export function createMetisAgent(model: string): AgentConfig {
-  const prompt = isKimiK27Model(model) ? METIS_K2_7_SYSTEM_PROMPT : METIS_SYSTEM_PROMPT
-  return {
-    description:
-      "Pre-planning consultant that analyzes requests to identify hidden intentions, ambiguities, and AI failure points. (Metis - OhMyOpenCode)",
-    mode: MODE,
-    model,
-    temperature: 0.3,
-    ...metisRestrictions,
-    prompt,
-    ...buildClaudeThinkingConfig(model),
-  } as AgentConfig
+	const prompt = isKimiK27Model(model) ? METIS_K2_7_SYSTEM_PROMPT : METIS_SYSTEM_PROMPT;
+	return {
+		description:
+			"Pre-planning consultant that analyzes requests to identify hidden intentions, ambiguities, and AI failure points. (Metis - OhMyOpenCode)",
+		mode: MODE,
+		model,
+		temperature: 0.3,
+		...metisRestrictions,
+		prompt,
+		...buildClaudeThinkingConfig(model),
+	} as AgentConfig;
 }
-createMetisAgent.mode = MODE
+createMetisAgent.mode = MODE;
 
 export const metisPromptMetadata: AgentPromptMetadata = {
-  category: "advisor",
-  cost: "EXPENSIVE",
-  triggers: [
-    {
-      domain: "Pre-planning analysis",
-      trigger: "Complex task requiring scope clarification, ambiguous requirements",
-    },
-  ],
-  useWhen: [
-    "Before planning non-trivial tasks",
-    "When user request is ambiguous or open-ended",
-    "To prevent AI over-engineering patterns",
-  ],
-  avoidWhen: [
-    "Simple, well-defined tasks",
-    "User has already provided detailed requirements",
-  ],
-  promptAlias: "Metis",
-  keyTrigger: "Ambiguous or complex request → consult Metis before Prometheus",
-}
+	category: "advisor",
+	cost: "EXPENSIVE",
+	triggers: [
+		{
+			domain: "Pre-planning analysis",
+			trigger: "Complex task requiring scope clarification, ambiguous requirements",
+		},
+	],
+	useWhen: [
+		"Before planning non-trivial tasks",
+		"When user request is ambiguous or open-ended",
+		"To prevent AI over-engineering patterns",
+	],
+	avoidWhen: ["Simple, well-defined tasks", "User has already provided detailed requirements"],
+	promptAlias: "Metis",
+	keyTrigger: "Ambiguous or complex request → consult Metis before Prometheus",
+};

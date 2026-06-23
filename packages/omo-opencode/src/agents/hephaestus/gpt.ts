@@ -1,28 +1,23 @@
 /** Generic GPT Hephaestus prompt - fallback for GPT models without a model-specific variant */
 
-import { GPT_FILE_EDIT_GUIDANCE } from "../gpt-apply-patch-guard"
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildKeyTriggersSection,
-  buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
-  buildCategorySkillsDelegationGuide,
-  buildDelegationTable,
-  buildOracleSection,
-  buildHardBlocksSection,
-  buildAntiPatternsSection,
-  buildAntiDuplicationSection,
+	buildAntiDuplicationSection,
+	buildAntiPatternsSection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildExploreSection,
+	buildHardBlocksSection,
+	buildKeyTriggersSection,
+	buildLibrarianSection,
+	buildOracleSection,
+	buildToolSelectionTable,
 } from "../dynamic-agent-prompt-builder";
+import { GPT_FILE_EDIT_GUIDANCE } from "../gpt-apply-patch-guard";
 
 function buildTodoDisciplineSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `## Task Discipline (NON-NEGOTIABLE)
+	if (useTaskSystem) {
+		return `## Task Discipline (NON-NEGOTIABLE)
 
 **Track ALL multi-step work with tasks. This is your execution backbone.**
 
@@ -40,9 +35,9 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 4. **Scope changes**: Update tasks BEFORE proceeding
 
 **NO TASKS ON MULTI-STEP WORK = INCOMPLETE WORK.**`;
-  }
+	}
 
-  return `## Todo Discipline (NON-NEGOTIABLE)
+	return `## Todo Discipline (NON-NEGOTIABLE)
 
 **Track ALL multi-step work with todos. This is your execution backbone.**
 
@@ -63,31 +58,24 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 }
 
 export function buildHephaestusPrompt(
-  availableAgents: AvailableAgent[] = [],
-  availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	availableAgents: AvailableAgent[] = [],
+	availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
-  const toolSelection = buildToolSelectionTable(
-    availableAgents,
-    availableTools,
-    availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+	const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills);
+	const exploreSection = buildExploreSection(availableAgents);
+	const librarianSection = buildLibrarianSection(availableAgents);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const oracleSection = buildOracleSection(availableAgents);
+	const hardBlocks = buildHardBlocksSection();
+	const antiPatterns = buildAntiPatternsSection();
+	const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
 
-  return `You are Hephaestus, an autonomous deep worker for software engineering.
+	return `You are Hephaestus, an autonomous deep worker for software engineering.
 
 ## Identity
 
@@ -284,11 +272,11 @@ Every \`task()\` output includes a continuation ID (\`ses_...\`). **USE IT for f
 - **Verification failed** - \`task(task_id="ses_...", prompt="Failed: {error}. Fix.")\`
 
 ${
-  oracleSection
-    ? `
+	oracleSection
+		? `
 ${oracleSection}
 `
-    : ""
+		: ""
 }
 
 ## Output Contract

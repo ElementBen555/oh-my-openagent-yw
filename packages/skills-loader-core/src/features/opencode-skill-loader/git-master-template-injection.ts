@@ -1,10 +1,10 @@
-import type { GitMasterConfig } from "../../types"
-import { assertValidGitEnvPrefix } from "../../config/git-env-prefix"
-import { detectShellType, buildEnvPrefix, type ShellType } from "../../shared/shell-env"
+import { assertValidGitEnvPrefix } from "../../config/git-env-prefix";
+import { buildEnvPrefix, detectShellType, type ShellType } from "../../shared/shell-env";
+import type { GitMasterConfig } from "../../types";
 
-const BASH_CODE_BLOCK_PATTERN = /```bash\r?\n([\s\S]*?)```/g
-const LEADING_GIT_COMMAND_PATTERN = /^([ \t]*(?:[A-Za-z_][A-Za-z0-9_]*=[^ \t]+\s+)*)git(?=[ \t]|$)/gm
-const INLINE_GIT_COMMAND_PATTERN = /([;&|()][ \t]*)git(?=[ \t]|$)/g
+const BASH_CODE_BLOCK_PATTERN = /```bash\r?\n([\s\S]*?)```/g;
+const LEADING_GIT_COMMAND_PATTERN = /^([ \t]*(?:[A-Za-z_][A-Za-z0-9_]*=[^ \t]+\s+)*)git(?=[ \t]|$)/gm;
+const INLINE_GIT_COMMAND_PATTERN = /([;&|()][ \t]*)git(?=[ \t]|$)/g;
 
 /**
  * Parse a bash-format env prefix string ("VAR=value VAR2=value2") into a Record.
@@ -12,16 +12,16 @@ const INLINE_GIT_COMMAND_PATTERN = /([;&|()][ \t]*)git(?=[ \t]|$)/g
  * already validates the format is shell-safe alphanumeric assignments).
  */
 export function parseBashEnvPrefix(prefix: string): Record<string, string> {
-	const result: Record<string, string> = {}
-	const pairs = prefix.trim().split(/\s+/)
+	const result: Record<string, string> = {};
+	const pairs = prefix.trim().split(/\s+/);
 	for (const pair of pairs) {
-		const eqIndex = pair.indexOf("=")
-		if (eqIndex === -1) continue
-		const key = pair.slice(0, eqIndex)
-		const value = pair.slice(eqIndex + 1)
-		result[key] = value
+		const eqIndex = pair.indexOf("=");
+		if (eqIndex === -1) continue;
+		const key = pair.slice(0, eqIndex);
+		const value = pair.slice(eqIndex + 1);
+		result[key] = value;
 	}
-	return result
+	return result;
 }
 
 /**
@@ -35,30 +35,30 @@ export function parseBashEnvPrefix(prefix: string): Record<string, string> {
  * For csh/tcsh, we use setenv syntax since csh does not support inline VAR=value.
  */
 export function buildShellAwareGitPrefix(bashPrefix: string, shellType?: ShellType): string {
-	if (!bashPrefix) return ""
-	const resolvedShellType = shellType ?? detectShellType()
+	if (!bashPrefix) return "";
+	const resolvedShellType = shellType ?? detectShellType();
 	if (resolvedShellType === "unix") {
-		return bashPrefix
+		return bashPrefix;
 	}
-	const envRecord = parseBashEnvPrefix(bashPrefix)
-	return buildEnvPrefix(envRecord, resolvedShellType)
+	const envRecord = parseBashEnvPrefix(bashPrefix);
+	return buildEnvPrefix(envRecord, resolvedShellType);
 }
 
 export function injectGitMasterConfig(template: string, config?: GitMasterConfig): string {
-	const commitFooter = config?.commit_footer ?? true
-	const includeCoAuthoredBy = config?.include_co_authored_by ?? true
-	const gitEnvPrefix = assertValidGitEnvPrefix(config?.git_env_prefix ?? "GIT_MASTER=1")
+	const commitFooter = config?.commit_footer ?? true;
+	const includeCoAuthoredBy = config?.include_co_authored_by ?? true;
+	const gitEnvPrefix = assertValidGitEnvPrefix(config?.git_env_prefix ?? "GIT_MASTER=1");
 
-	const shellType = detectShellType()
-	const shellPrefix = gitEnvPrefix ? buildShellAwareGitPrefix(gitEnvPrefix, shellType) : ""
-	const codeBlockLang = shellType === "powershell" ? "pwsh" : shellType === "csh" ? "csh" : "bash"
-	const skipBashBlockPrefixing = shellType === "powershell" || shellType === "cmd" || shellType === "csh"
+	const shellType = detectShellType();
+	const shellPrefix = gitEnvPrefix ? buildShellAwareGitPrefix(gitEnvPrefix, shellType) : "";
+	const codeBlockLang = shellType === "powershell" ? "pwsh" : shellType === "csh" ? "csh" : "bash";
+	const skipBashBlockPrefixing = shellType === "powershell" || shellType === "cmd" || shellType === "csh";
 
-	let result = gitEnvPrefix ? injectGitEnvPrefix(template, shellPrefix, codeBlockLang) : template
+	let result = gitEnvPrefix ? injectGitEnvPrefix(template, shellPrefix, codeBlockLang) : template;
 
 	if (commitFooter || includeCoAuthoredBy) {
-		const injection = buildCommitFooterInjection(commitFooter, includeCoAuthoredBy, shellPrefix)
-		const insertionPoint = result.indexOf("```\n</execution>")
+		const injection = buildCommitFooterInjection(commitFooter, includeCoAuthoredBy, shellPrefix);
+		const insertionPoint = result.indexOf("```\n</execution>");
 
 		result =
 			insertionPoint !== -1
@@ -67,14 +67,14 @@ export function injectGitMasterConfig(template: string, config?: GitMasterConfig
 					injection +
 					"\n</execution>" +
 					result.slice(insertionPoint + "```\n</execution>".length)
-				: result + "\n\n" + injection
+				: result + "\n\n" + injection;
 	}
 
 	if (gitEnvPrefix && !skipBashBlockPrefixing) {
-		result = prefixGitCommandsInBashCodeBlocks(result, shellPrefix)
+		result = prefixGitCommandsInBashCodeBlocks(result, shellPrefix);
 	}
 
-	return result
+	return result;
 }
 
 function injectGitEnvPrefix(template: string, prefix: string, codeBlockLang: string): string {
@@ -97,26 +97,21 @@ function injectGitEnvPrefix(template: string, prefix: string, codeBlockLang: str
 		"",
 		"**NO EXCEPTIONS. Every `git` invocation must include this prefix.**",
 		`</git_env_prefix>`,
-	].join("\n")
+	].join("\n");
 
-	const modeDetectionMarker = "## MODE DETECTION (FIRST STEP)"
-	const markerIndex = template.indexOf(modeDetectionMarker)
+	const modeDetectionMarker = "## MODE DETECTION (FIRST STEP)";
+	const markerIndex = template.indexOf(modeDetectionMarker);
 	if (markerIndex !== -1) {
-		return (
-			template.slice(0, markerIndex) +
-			envPrefixSection +
-			"\n\n---\n\n" +
-			template.slice(markerIndex)
-		)
+		return template.slice(0, markerIndex) + envPrefixSection + "\n\n---\n\n" + template.slice(markerIndex);
 	}
 
-	return envPrefixSection + "\n\n---\n\n" + template
+	return envPrefixSection + "\n\n---\n\n" + template;
 }
 
 function prefixGitCommandsInBashCodeBlocks(template: string, prefix: string): string {
 	return template.replace(BASH_CODE_BLOCK_PATTERN, (block, codeBlock: string) => {
-		return block.replace(codeBlock, prefixGitCommandsInCodeBlock(codeBlock, prefix))
-	})
+		return block.replace(codeBlock, prefixGitCommandsInCodeBlock(codeBlock, prefix));
+	});
 }
 
 function prefixGitCommandsInCodeBlock(codeBlock: string, prefix: string): string {
@@ -124,13 +119,13 @@ function prefixGitCommandsInCodeBlock(codeBlock: string, prefix: string): string
 		.split("\n")
 		.map((line) => {
 			if (line.includes(prefix)) {
-				return line
+				return line;
 			}
 			return line
 				.replace(LEADING_GIT_COMMAND_PATTERN, `$1${prefix} git`)
-				.replace(INLINE_GIT_COMMAND_PATTERN, `$1${prefix} git`)
+				.replace(INLINE_GIT_COMMAND_PATTERN, `$1${prefix} git`);
 		})
-		.join("\n")
+		.join("\n");
 }
 
 function buildCommitFooterInjection(
@@ -138,62 +133,62 @@ function buildCommitFooterInjection(
 	includeCoAuthoredBy: boolean,
 	gitEnvPrefix: string,
 ): string {
-	const sections: string[] = []
-	const cmdPrefix = gitEnvPrefix ? `${gitEnvPrefix} ` : ""
+	const sections: string[] = [];
+	const cmdPrefix = gitEnvPrefix ? `${gitEnvPrefix} ` : "";
 
-	sections.push("### 5.5 Commit Footer & Co-Author")
-	sections.push("")
-	sections.push("Add Sisyphus attribution to EVERY commit:")
-	sections.push("")
+	sections.push("### 5.5 Commit Footer & Co-Author");
+	sections.push("");
+	sections.push("Add Sisyphus attribution to EVERY commit:");
+	sections.push("");
 
 	if (commitFooter) {
 		const footerText =
 			typeof commitFooter === "string"
 				? commitFooter
-				: "Ultraworked with [Sisyphus](https://github.com/code-yeongyu/oh-my-openagent)"
-		sections.push("1. **Footer in commit body:**")
-		sections.push("```")
-		sections.push(footerText)
-		sections.push("```")
-		sections.push("")
+				: "Ultraworked with [Sisyphus](https://github.com/code-yeongyu/oh-my-openagent)";
+		sections.push("1. **Footer in commit body:**");
+		sections.push("```");
+		sections.push(footerText);
+		sections.push("```");
+		sections.push("");
 	}
 
 	if (includeCoAuthoredBy) {
-		sections.push(`${commitFooter ? "2" : "1"}. **Co-authored-by trailer:**`)
-		sections.push("```")
-		sections.push("Co-authored-by: Sisyphus <clio-agent@sisyphuslabs.ai>")
-		sections.push("```")
-		sections.push("")
+		sections.push(`${commitFooter ? "2" : "1"}. **Co-authored-by trailer:**`);
+		sections.push("```");
+		sections.push("Co-authored-by: Sisyphus <clio-agent@sisyphuslabs.ai>");
+		sections.push("```");
+		sections.push("");
 	}
 
 	if (commitFooter && includeCoAuthoredBy) {
 		const footerText =
 			typeof commitFooter === "string"
 				? commitFooter
-				: "Ultraworked with [Sisyphus](https://github.com/code-yeongyu/oh-my-openagent)"
-		sections.push("**Example (both enabled):**")
-		sections.push("```bash")
+				: "Ultraworked with [Sisyphus](https://github.com/code-yeongyu/oh-my-openagent)";
+		sections.push("**Example (both enabled):**");
+		sections.push("```bash");
 		sections.push(
-			`${cmdPrefix}git commit -m "{Commit Message}" -m "${footerText}" -m "Co-authored-by: Sisyphus <clio-agent@sisyphuslabs.ai>"`
-		)
-		sections.push("```")
+			`${cmdPrefix}git commit -m "{Commit Message}" -m "${footerText}" -m "Co-authored-by: Sisyphus <clio-agent@sisyphuslabs.ai>"`,
+		);
+		sections.push("```");
 	} else if (commitFooter) {
 		const footerText =
 			typeof commitFooter === "string"
 				? commitFooter
-				: "Ultraworked with [Sisyphus](https://github.com/code-yeongyu/oh-my-openagent)"
-		sections.push("**Example:**")
-		sections.push("```bash")
-		sections.push(`${cmdPrefix}git commit -m "{Commit Message}" -m "${footerText}"`)
-		sections.push("```")
+				: "Ultraworked with [Sisyphus](https://github.com/code-yeongyu/oh-my-openagent)";
+		sections.push("**Example:**");
+		sections.push("```bash");
+		sections.push(`${cmdPrefix}git commit -m "{Commit Message}" -m "${footerText}"`);
+		sections.push("```");
 	} else if (includeCoAuthoredBy) {
-		sections.push("**Example:**")
-		sections.push("```bash")
+		sections.push("**Example:**");
+		sections.push("```bash");
 		sections.push(
-			`${cmdPrefix}git commit -m "{Commit Message}" -m "Co-authored-by: Sisyphus <clio-agent@sisyphuslabs.ai>"`
-		)
-		sections.push("```")
+			`${cmdPrefix}git commit -m "{Commit Message}" -m "Co-authored-by: Sisyphus <clio-agent@sisyphuslabs.ai>"`,
+		);
+		sections.push("```");
 	}
 
-	return sections.join("\n")
+	return sections.join("\n");
 }

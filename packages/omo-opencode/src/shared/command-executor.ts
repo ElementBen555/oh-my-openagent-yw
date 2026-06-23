@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/utils/command-executor"
+export * from "@oh-my-opencode/utils/command-executor";

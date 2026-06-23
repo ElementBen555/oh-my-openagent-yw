@@ -13,12 +13,7 @@ export function getCachedMatchReason(
 	realPath: string,
 	statFingerprint: string | null,
 ): string | null | undefined {
-	const cacheKey = matchDecisionCacheKey(
-		projectRoot,
-		resolvedFilePath,
-		realPath,
-		statFingerprint,
-	);
+	const cacheKey = matchDecisionCacheKey(projectRoot, resolvedFilePath, realPath, statFingerprint);
 	if (cacheKey === null || !cache.has(cacheKey)) return undefined;
 
 	const cached = cache.get(cacheKey) ?? null;
@@ -35,12 +30,7 @@ export function setCachedMatchReason(
 	statFingerprint: string | null,
 	matchReason: string | null,
 ): void {
-	const cacheKey = matchDecisionCacheKey(
-		projectRoot,
-		resolvedFilePath,
-		realPath,
-		statFingerprint,
-	);
+	const cacheKey = matchDecisionCacheKey(projectRoot, resolvedFilePath, realPath, statFingerprint);
 	if (cacheKey === null) return;
 
 	if (!cache.has(cacheKey) && cache.size >= MAX_MATCH_DECISION_CACHE_ENTRIES) {
@@ -59,7 +49,5 @@ function matchDecisionCacheKey(
 	statFingerprint: string | null,
 ): string | null {
 	if (statFingerprint === null) return null;
-	return [projectRoot ?? "", resolvedFilePath, realPath, statFingerprint].join(
-		"\0",
-	);
+	return [projectRoot ?? "", resolvedFilePath, realPath, statFingerprint].join("\0");
 }

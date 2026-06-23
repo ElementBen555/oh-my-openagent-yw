@@ -1,6 +1,6 @@
 export {
-  parseFallbackModelEntry,
-  parseFallbackModelObjectEntry,
-  findMostSpecificFallbackEntry,
-  buildFallbackChainFromModels,
-} from "@oh-my-opencode/model-core"
+	buildFallbackChainFromModels,
+	findMostSpecificFallbackEntry,
+	parseFallbackModelEntry,
+	parseFallbackModelObjectEntry,
+} from "@oh-my-opencode/model-core";

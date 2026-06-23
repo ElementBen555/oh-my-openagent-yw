@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/utils/classify-path-environment"
+export * from "@oh-my-opencode/utils/classify-path-environment";

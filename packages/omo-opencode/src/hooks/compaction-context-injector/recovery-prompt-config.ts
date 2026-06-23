@@ -1,77 +1,73 @@
-import { stripInvisibleAgentCharacters } from "../../shared/agent-display-names"
-import type { CompactionAgentConfigCheckpoint } from "../../shared/compaction-agent-config-checkpoint"
+import { stripInvisibleAgentCharacters } from "../../shared/agent-display-names";
+import type { CompactionAgentConfigCheckpoint } from "../../shared/compaction-agent-config-checkpoint";
 
 export type RecoveryPromptConfig = CompactionAgentConfigCheckpoint & {
-  agent: string
-}
+	agent: string;
+};
 
 function isCompactionAgent(agent: string | undefined): boolean {
-  return agent?.trim().toLowerCase() === "compaction"
+	return agent?.trim().toLowerCase() === "compaction";
 }
 
 function matchesExpectedModel(
-  actualModel: CompactionAgentConfigCheckpoint["model"],
-  expectedModel: CompactionAgentConfigCheckpoint["model"],
+	actualModel: CompactionAgentConfigCheckpoint["model"],
+	expectedModel: CompactionAgentConfigCheckpoint["model"],
 ): boolean {
-  if (!expectedModel) {
-    return true
-  }
+	if (!expectedModel) {
+		return true;
+	}
 
-  return (
-    actualModel?.providerID === expectedModel.providerID &&
-    actualModel.modelID === expectedModel.modelID
-  )
+	return actualModel?.providerID === expectedModel.providerID && actualModel.modelID === expectedModel.modelID;
 }
 
 function matchesExpectedTools(
-  actualTools: CompactionAgentConfigCheckpoint["tools"],
-  expectedTools: CompactionAgentConfigCheckpoint["tools"],
+	actualTools: CompactionAgentConfigCheckpoint["tools"],
+	expectedTools: CompactionAgentConfigCheckpoint["tools"],
 ): boolean {
-  if (!expectedTools) {
-    return true
-  }
+	if (!expectedTools) {
+		return true;
+	}
 
-  if (!actualTools) {
-    return false
-  }
+	if (!actualTools) {
+		return false;
+	}
 
-  const expectedEntries = Object.entries(expectedTools)
-  if (expectedEntries.length !== Object.keys(actualTools).length) {
-    return false
-  }
+	const expectedEntries = Object.entries(expectedTools);
+	if (expectedEntries.length !== Object.keys(actualTools).length) {
+		return false;
+	}
 
-  return expectedEntries.every(
-    ([toolName, isAllowed]) => actualTools[toolName] === isAllowed,
-  )
+	return expectedEntries.every(([toolName, isAllowed]) => actualTools[toolName] === isAllowed);
 }
 
 export function createExpectedRecoveryPromptConfig(
-  checkpoint: Pick<RecoveryPromptConfig, "agent"> & CompactionAgentConfigCheckpoint,
-  currentPromptConfig: CompactionAgentConfigCheckpoint,
+	checkpoint: Pick<RecoveryPromptConfig, "agent"> & CompactionAgentConfigCheckpoint,
+	currentPromptConfig: CompactionAgentConfigCheckpoint,
 ): RecoveryPromptConfig {
-  const model = checkpoint.model ?? currentPromptConfig.model
-  const tools = checkpoint.tools ?? currentPromptConfig.tools
+	const model = checkpoint.model ?? currentPromptConfig.model;
+	const tools = checkpoint.tools ?? currentPromptConfig.tools;
 
-  return {
-    agent: checkpoint.agent,
-    ...(model ? { model } : {}),
-    ...(tools ? { tools } : {}),
-  }
+	return {
+		agent: checkpoint.agent,
+		...(model ? { model } : {}),
+		...(tools ? { tools } : {}),
+	};
 }
 
 export function isPromptConfigRecovered(
-  actualPromptConfig: CompactionAgentConfigCheckpoint,
-  expectedPromptConfig: RecoveryPromptConfig,
+	actualPromptConfig: CompactionAgentConfigCheckpoint,
+	expectedPromptConfig: RecoveryPromptConfig,
 ): boolean {
-  const actualAgent = actualPromptConfig.agent
-  const agentMatches =
-    typeof actualAgent === "string" &&
-    !isCompactionAgent(actualAgent) &&
-    stripInvisibleAgentCharacters(actualAgent).toLowerCase() === stripInvisibleAgentCharacters(expectedPromptConfig.agent).toLowerCase()
+	const actualAgent = actualPromptConfig.agent;
+	const agentMatches =
+		typeof actualAgent === "string" &&
+		!isCompactionAgent(actualAgent) &&
+		stripInvisibleAgentCharacters(actualAgent).toLowerCase() ===
+			stripInvisibleAgentCharacters(expectedPromptConfig.agent).toLowerCase();
 
-  return (
-    agentMatches &&
-    matchesExpectedModel(actualPromptConfig.model, expectedPromptConfig.model) &&
-    matchesExpectedTools(actualPromptConfig.tools, expectedPromptConfig.tools)
-  )
+	return (
+		agentMatches &&
+		matchesExpectedModel(actualPromptConfig.model, expectedPromptConfig.model) &&
+		matchesExpectedTools(actualPromptConfig.tools, expectedPromptConfig.tools)
+	);
 }

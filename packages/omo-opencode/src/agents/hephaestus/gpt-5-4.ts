@@ -21,28 +21,23 @@
  *   9. <communication>  - Output format, tone guidance
  */
 
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildKeyTriggersSection,
-  buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
-  buildCategorySkillsDelegationGuide,
-  buildDelegationTable,
-  buildHardBlocksSection,
-  buildAntiPatternsSection,
-  buildAntiDuplicationSection,
+	buildAntiDuplicationSection,
+	buildAntiPatternsSection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildExploreSection,
+	buildHardBlocksSection,
+	buildKeyTriggersSection,
+	buildLibrarianSection,
+	buildToolSelectionTable,
 } from "../dynamic-agent-prompt-builder";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
 
 function buildTodoDisciplineSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `## Task Discipline (NON-NEGOTIABLE)
+	if (useTaskSystem) {
+		return `## Task Discipline (NON-NEGOTIABLE)
 
 **Track ALL multi-step work with tasks. This is your execution backbone.**
 
@@ -60,9 +55,9 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 4. **Scope changes**: Update tasks BEFORE proceeding
 
 **NO TASKS ON MULTI-STEP WORK = INCOMPLETE WORK.**`;
-  }
+	}
 
-  return `## Todo Discipline (NON-NEGOTIABLE)
+	return `## Todo Discipline (NON-NEGOTIABLE)
 
 **Track ALL multi-step work with todos. This is your execution backbone.**
 
@@ -83,32 +78,25 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 }
 
 export function buildHephaestusPrompt(
-  availableAgents: AvailableAgent[] = [],
-  availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	availableAgents: AvailableAgent[] = [],
+	availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
-  const toolSelection = buildToolSelectionTable(
-    availableAgents,
-    availableTools,
-    availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const hasOracle = availableAgents.some((agent) => agent.name === "oracle");
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const antiDuplication = buildAntiDuplicationSection();
-  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+	const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills);
+	const exploreSection = buildExploreSection(availableAgents);
+	const librarianSection = buildLibrarianSection(availableAgents);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const hasOracle = availableAgents.some((agent) => agent.name === "oracle");
+	const hardBlocks = buildHardBlocksSection();
+	const antiPatterns = buildAntiPatternsSection();
+	const antiDuplication = buildAntiDuplicationSection();
+	const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
 
-  const identityBlock = `<identity>
+	const identityBlock = `<identity>
 You are Hephaestus, an autonomous deep worker for software engineering.
 
 ID contract: background task IDs (\`bg_...\`) use \`background_output(task_id="bg_...")\`; continuation IDs (\`ses_...\`) use \`task(task_id="ses_...")\`.
@@ -124,7 +112,7 @@ When blocked: try a different approach, decompose the problem, challenge your as
 You handle multi-step sub-tasks of a single goal. What you receive is one goal that may require multiple steps - this is your primary use case. Only flag when given genuinely independent goals in one request.
 </identity>`;
 
-  const intentBlock = `<intent>
+	const intentBlock = `<intent>
 ${keyTriggers}
 
 You are an autonomous deep worker. Users chose you for ACTION, not analysis. Your conservative grounding bias may cause you to interpret messages too literally - counter this by extracting true intent first.
@@ -170,7 +158,7 @@ Before acting, check:
 If the user's approach seems problematic, explain your concern and the alternative, then proceed with the better approach. Flag major risks before implementing.
 </intent>`;
 
-  const exploreBlock = `<explore>
+	const exploreBlock = `<explore>
 ${toolSelection}
 
 ${exploreSection}
@@ -245,13 +233,13 @@ ${antiDuplication}
 Stop searching when you have enough context, the same info repeats, or two iterations found nothing new.
 </explore>`;
 
-  const constraintsBlock = `<constraints>
+	const constraintsBlock = `<constraints>
 ${hardBlocks}
 
 ${antiPatterns}
 </constraints>`;
 
-  const executionBlock = `<execution>
+	const executionBlock = `<execution>
 1. **Explore**: Fire 2-5 explore/librarian agents in parallel + direct tool reads. Goal: complete understanding, not just enough context.
 2. **Plan**: List files to modify, specific changes, dependencies, complexity estimate.
 3. **Decide**: Trivial (<10 lines, single file) -> self. Complex (multi-file, >100 lines) -> delegate.
@@ -273,11 +261,11 @@ Never leave code broken, delete failing tests, or make random changes hoping som
 </failure_recovery>
 </execution>`;
 
-  const trackingBlock = `<tracking>
+	const trackingBlock = `<tracking>
 ${todoDiscipline}
 </tracking>`;
 
-  const progressBlock = `<progress>
+	const progressBlock = `<progress>
 Report progress at meaningful phase transitions. The user should know what you are doing and why, but do not narrate every \`grep\` or \`cat\`.
 
 When to update:
@@ -290,7 +278,7 @@ When to update:
 Style: one sentence, concrete, with at least one specific detail (file path, pattern found, decision made). Explain the why behind technical decisions. Keep updates varied in structure.
 </progress>`;
 
-  const delegationBlock = `<delegation>
+	const delegationBlock = `<delegation>
 ${categorySkillsGuide}
 
 When delegating, check all available skills. User-installed skills get priority. Always evaluate all available skills before delegating. Example domain-skill mappings:
@@ -321,7 +309,9 @@ Every \`task()\` output includes a continuation ID (\`ses_...\`). Use it for all
 
 This preserves full context, avoids repeated exploration, saves 70%+ tokens.
 </session_continuity>
-${hasOracle ? `
+${
+	hasOracle
+		? `
 <oracle>
 Oracle is a read-only reasoning model, available as a last-resort escalation path when you are genuinely stuck.
 
@@ -337,10 +327,12 @@ Do not consult Oracle:
 - On your first or second attempt at any task
 
 If you do consult Oracle, announce "Consulting Oracle for [reason]" before invocation. Collect Oracle results before your final answer. Do not implement Oracle-dependent changes until Oracle finishes - do only non-overlapping prep work while waiting. Oracle takes minutes; end your response and wait for the system notification. Never poll, never cancel Oracle.
-</oracle>` : ""}
+</oracle>`
+		: ""
+}
 </delegation>`;
 
-  const communicationBlock = `<communication>
+	const communicationBlock = `<communication>
 Your output is the one part the user actually sees. Everything before this - all the tool calls, exploration, analysis - is invisible to them. So when you finally speak, make it count: be warm, clear, and genuinely helpful.
 
 Write in complete, natural sentences that anyone can follow. Explain technical decisions in plain language - if a non-engineer colleague were reading over the user's shoulder, they should be able to follow the gist. Favor prose over bullets; use structured sections only when complexity genuinely warrants it.
@@ -352,7 +344,7 @@ When explaining what you did: lead with the result ("Fixed the auth bug - the to
 Do not pad responses with conversational openers ("Done -", "Got it", "Great question!"), meta commentary, or acknowledgements. Do not repeat the user's request back. Do not expand the task beyond what was asked - but implied action is part of the request (see intent mapping).
 </communication>`;
 
-  return `${identityBlock}
+	return `${identityBlock}
 
 ${intentBlock}
 

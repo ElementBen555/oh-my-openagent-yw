@@ -1,180 +1,180 @@
-import { describe, it, expect, beforeEach } from "bun:test"
-import type { RunResult } from "./types"
-import { createJsonOutputManager } from "./json-output"
-import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value"
+import { beforeEach, describe, expect, it } from "bun:test";
+import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value";
+import { createJsonOutputManager } from "./json-output";
+import type { RunResult } from "./types";
 
 interface MockWriteStream {
-  write: (chunk: string) => boolean
-  writes: string[]
+	write: (chunk: string) => boolean;
+	writes: string[];
 }
 
 function createMockWriteStream(): MockWriteStream {
-  const stream: MockWriteStream = {
-    writes: [],
-    write: function (this: MockWriteStream, chunk: string): boolean {
-      this.writes.push(chunk)
-      return true
-    },
-  }
-  return stream
+	const stream: MockWriteStream = {
+		writes: [],
+		write: function (this: MockWriteStream, chunk: string): boolean {
+			this.writes.push(chunk);
+			return true;
+		},
+	};
+	return stream;
 }
 
 function requireWrite(stream: MockWriteStream, index: number): string {
-  const value = stream.writes[index]
-  expect(value).toBeDefined()
-  if (value === undefined) {
-    throw new Error(`Expected write at index ${index}`)
-  }
-  return value
+	const value = stream.writes[index];
+	expect(value).toBeDefined();
+	if (value === undefined) {
+		throw new Error(`Expected write at index ${index}`);
+	}
+	return value;
 }
 
 describe("createJsonOutputManager", () => {
-  let mockStdout: MockWriteStream
-  let mockStderr: MockWriteStream
+	let mockStdout: MockWriteStream;
+	let mockStderr: MockWriteStream;
 
-  beforeEach(() => {
-    mockStdout = createMockWriteStream()
-    mockStderr = createMockWriteStream()
-  })
+	beforeEach(() => {
+		mockStdout = createMockWriteStream();
+		mockStderr = createMockWriteStream();
+	});
 
-  describe("redirectToStderr", () => {
-    it("causes stdout writes to go to stderr", () => {
-      // given
-      const manager = createJsonOutputManager({
-        stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
-        stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
-      })
-      manager.redirectToStderr()
+	describe("redirectToStderr", () => {
+		it("causes stdout writes to go to stderr", () => {
+			// given
+			const manager = createJsonOutputManager({
+				stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
+				stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
+			});
+			manager.redirectToStderr();
 
-      // when
-      mockStdout.write("test message")
+			// when
+			mockStdout.write("test message");
 
-      // then
-      expect(mockStdout.writes).toHaveLength(0)
-      expect(mockStderr.writes).toEqual(["test message"])
-    })
-  })
+			// then
+			expect(mockStdout.writes).toHaveLength(0);
+			expect(mockStderr.writes).toEqual(["test message"]);
+		});
+	});
 
-  describe("restore", () => {
-    it("reverses the redirect", () => {
-      // given
-      const manager = createJsonOutputManager({
-        stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
-        stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
-      })
-      manager.redirectToStderr()
+	describe("restore", () => {
+		it("reverses the redirect", () => {
+			// given
+			const manager = createJsonOutputManager({
+				stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
+				stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
+			});
+			manager.redirectToStderr();
 
-      // when
-      manager.restore()
-      mockStdout.write("restored message")
+			// when
+			manager.restore();
+			mockStdout.write("restored message");
 
-      // then
-      expect(mockStdout.writes).toEqual(["restored message"])
-      expect(mockStderr.writes).toHaveLength(0)
-    })
-  })
+			// then
+			expect(mockStdout.writes).toEqual(["restored message"]);
+			expect(mockStderr.writes).toHaveLength(0);
+		});
+	});
 
-  describe("emitResult", () => {
-    it("writes valid JSON to stdout", () => {
-      // given
-      const result: RunResult = {
-        sessionId: "test-session",
-        success: true,
-        durationMs: 1234,
-        messageCount: 42,
-        summary: "Test summary",
-      }
-      const manager = createJsonOutputManager({
-        stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
-        stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
-      })
+	describe("emitResult", () => {
+		it("writes valid JSON to stdout", () => {
+			// given
+			const result: RunResult = {
+				sessionId: "test-session",
+				success: true,
+				durationMs: 1234,
+				messageCount: 42,
+				summary: "Test summary",
+			};
+			const manager = createJsonOutputManager({
+				stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
+				stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
+			});
 
-      // when
-      manager.emitResult(result)
+			// when
+			manager.emitResult(result);
 
-      // then
-      expect(mockStdout.writes).toHaveLength(1)
-      const emitted = requireWrite(mockStdout, 0)
-      expect(() => JSON.parse(emitted)).not.toThrow()
-    })
+			// then
+			expect(mockStdout.writes).toHaveLength(1);
+			const emitted = requireWrite(mockStdout, 0);
+			expect(() => JSON.parse(emitted)).not.toThrow();
+		});
 
-    it("output matches RunResult schema", () => {
-      // given
-      const result: RunResult = {
-        sessionId: "test-session",
-        success: true,
-        durationMs: 1234,
-        messageCount: 42,
-        summary: "Test summary",
-      }
-      const manager = createJsonOutputManager({
-        stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
-        stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
-      })
+		it("output matches RunResult schema", () => {
+			// given
+			const result: RunResult = {
+				sessionId: "test-session",
+				success: true,
+				durationMs: 1234,
+				messageCount: 42,
+				summary: "Test summary",
+			};
+			const manager = createJsonOutputManager({
+				stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
+				stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
+			});
 
-      // when
-      manager.emitResult(result)
+			// when
+			manager.emitResult(result);
 
-      // then
-      const emitted = requireWrite(mockStdout, 0)
-      const parsed = JSON.parse(emitted) as RunResult
-      expect(parsed).toEqual(result)
-      expect(parsed.sessionId).toBe("test-session")
-      expect(parsed.success).toBe(true)
-      expect(parsed.durationMs).toBe(1234)
-      expect(parsed.messageCount).toBe(42)
-      expect(parsed.summary).toBe("Test summary")
-    })
+			// then
+			const emitted = requireWrite(mockStdout, 0);
+			const parsed = JSON.parse(emitted) as RunResult;
+			expect(parsed).toEqual(result);
+			expect(parsed.sessionId).toBe("test-session");
+			expect(parsed.success).toBe(true);
+			expect(parsed.durationMs).toBe(1234);
+			expect(parsed.messageCount).toBe(42);
+			expect(parsed.summary).toBe("Test summary");
+		});
 
-    it("restores stdout even if redirect was active", () => {
-      // given
-      const result: RunResult = {
-        sessionId: "test-session",
-        success: true,
-        durationMs: 100,
-        messageCount: 1,
-        summary: "Test",
-      }
-      const manager = createJsonOutputManager({
-        stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
-        stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
-      })
-      manager.redirectToStderr()
+		it("restores stdout even if redirect was active", () => {
+			// given
+			const result: RunResult = {
+				sessionId: "test-session",
+				success: true,
+				durationMs: 100,
+				messageCount: 1,
+				summary: "Test",
+			};
+			const manager = createJsonOutputManager({
+				stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
+				stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
+			});
+			manager.redirectToStderr();
 
-      // when
-      manager.emitResult(result)
+			// when
+			manager.emitResult(result);
 
-      // then
-      expect(mockStdout.writes).toHaveLength(1)
-      expect(requireWrite(mockStdout, 0)).toBe(JSON.stringify(result) + "\n")
+			// then
+			expect(mockStdout.writes).toHaveLength(1);
+			expect(requireWrite(mockStdout, 0)).toBe(JSON.stringify(result) + "\n");
 
-      mockStdout.write("after emit")
-      expect(mockStdout.writes).toHaveLength(2)
-      expect(mockStderr.writes).toHaveLength(0)
-    })
-  })
+			mockStdout.write("after emit");
+			expect(mockStdout.writes).toHaveLength(2);
+			expect(mockStderr.writes).toHaveLength(0);
+		});
+	});
 
-  describe("multiple redirects and restores", () => {
-    it("work correctly", () => {
-      // given
-      const manager = createJsonOutputManager({
-        stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
-        stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
-      })
+	describe("multiple redirects and restores", () => {
+		it("work correctly", () => {
+			// given
+			const manager = createJsonOutputManager({
+				stdout: unsafeTestValue<NodeJS.WriteStream>(mockStdout),
+				stderr: unsafeTestValue<NodeJS.WriteStream>(mockStderr),
+			});
 
-      // when
-      manager.redirectToStderr()
-      mockStdout.write("first redirect")
+			// when
+			manager.redirectToStderr();
+			mockStdout.write("first redirect");
 
-      manager.redirectToStderr()
-      mockStdout.write("second redirect")
+			manager.redirectToStderr();
+			mockStdout.write("second redirect");
 
-      manager.restore()
-      mockStdout.write("after restore")
+			manager.restore();
+			mockStdout.write("after restore");
 
-      // then
-      expect(mockStdout.writes).toEqual(["after restore"])
-      expect(mockStderr.writes).toEqual(["first redirect", "second redirect"])
-    })
-  })
-})
+			// then
+			expect(mockStdout.writes).toEqual(["after restore"]);
+			expect(mockStderr.writes).toEqual(["first redirect", "second redirect"]);
+		});
+	});
+});

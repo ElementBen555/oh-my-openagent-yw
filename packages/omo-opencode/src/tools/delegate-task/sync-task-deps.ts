@@ -1,13 +1,13 @@
-import { createSyncSession } from "./sync-session-creator"
-import { sendSyncPrompt } from "./sync-prompt-sender"
-import { pollSyncSession } from "./sync-session-poller"
-import { fetchSyncResult } from "./sync-result-fetcher"
+import { sendSyncPrompt } from "./sync-prompt-sender";
+import { fetchSyncResult } from "./sync-result-fetcher";
+import { createSyncSession } from "./sync-session-creator";
+import { pollSyncSession } from "./sync-session-poller";
 
 export const syncTaskDeps = {
-  createSyncSession,
-  sendSyncPrompt,
-  pollSyncSession,
-  fetchSyncResult,
-}
+	createSyncSession,
+	sendSyncPrompt,
+	pollSyncSession,
+	fetchSyncResult,
+};
 
-export type SyncTaskDeps = typeof syncTaskDeps
+export type SyncTaskDeps = typeof syncTaskDeps;

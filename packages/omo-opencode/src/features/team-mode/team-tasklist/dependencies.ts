@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-tasklist/dependencies"
+export * from "@oh-my-opencode/team-core/team-tasklist/dependencies";

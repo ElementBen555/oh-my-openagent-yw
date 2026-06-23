@@ -1,9 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-	createMatchDecisionCache,
-	getCachedMatchReason,
-	setCachedMatchReason,
-} from "./match-decision-cache";
+import { createMatchDecisionCache, getCachedMatchReason, setCachedMatchReason } from "./match-decision-cache";
 
 describe("match decision cache", () => {
 	it("#given full cache #when updating existing key #then unrelated oldest entry remains cached", () => {
@@ -32,13 +28,7 @@ describe("match decision cache", () => {
 
 		// then
 		expect(
-			getCachedMatchReason(
-				cache,
-				"/project",
-				"/project/src/0.ts",
-				"/project/.github/instructions/0.md",
-				"1000:10",
-			),
+			getCachedMatchReason(cache, "/project", "/project/src/0.ts", "/project/.github/instructions/0.md", "1000:10"),
 		).toBe("matched-0");
 		expect(
 			getCachedMatchReason(

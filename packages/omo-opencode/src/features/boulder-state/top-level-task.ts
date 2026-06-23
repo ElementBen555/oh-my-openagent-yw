@@ -1,1 +1,1 @@
-export { readCurrentTopLevelTask } from "@oh-my-opencode/boulder-state"
+export { readCurrentTopLevelTask } from "@oh-my-opencode/boulder-state";

@@ -1,1 +1,1 @@
-export type { RuntimeSkillConfig as OhMyOpenCodeConfig } from "../types"
+export type { RuntimeSkillConfig as OhMyOpenCodeConfig } from "../types";

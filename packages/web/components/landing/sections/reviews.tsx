@@ -1,8 +1,8 @@
-import type { JSX } from "react"
-import { getTranslations } from "next-intl/server"
-import { Card, CardContent } from "@/components/ui/card"
 import { Star } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
 import { REVIEW_KEYS } from "@/components/landing/constants"
+import { Card, CardContent } from "@/components/ui/card"
 
 export async function ReviewsSection(): Promise<JSX.Element> {
   const t = await getTranslations("landing")

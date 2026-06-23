@@ -1,3 +1,3 @@
-export * from "./constants"
+export * from "./constants";
 
-export { createSisyphusJuniorNotepadHook } from "./hook"
+export { createSisyphusJuniorNotepadHook } from "./hook";

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+
+  // DeepSeek V4 Pro — 默认模型，全 Agent 统一使用
+  // Hephaestus 已禁用 — 硬编码只支持 GPT-5.x，Sisyphus 接管其职责
+
+  "disabled_agents": ["hephaestus"],
+
+  "agents": {
+    // 主编排器：负责任务分发和驱动完成（同时接管 Hephaestus 的编码执行职责）
+    "sisyphus": {
+      "model": "deepseek/deepseek-v4-pro",
+      "ultrawork": { "model": "deepseek/deepseek-v4-pro" },
+    },
+
+    // 战略规划：先访谈再执行
+    "prometheus": {
+      "prompt_append": "Always interview first. Validate scope before planning.",
+    },
+
+    // 架构咨询：复杂设计和调试
+    "oracle": { "model": "deepseek/deepseek-v4-pro" },
+
+    // 文档和代码搜索
+    "librarian": { "model": "deepseek/deepseek-v4-pro" },
+
+    // 快速代码库探索
+    "explore": { "model": "deepseek/deepseek-v4-pro" },
+
+    // 视觉任务：UI/UX, 图片, 图表
+    "multimodal-looker": { "model": "deepseek/deepseek-v4-pro" },
+
+    // 计划审查和改进
+    "metis": {},
+
+    // 批判和代码审查
+    "momus": {},
+
+    // 长任务续写处理
+    "atlas": {},
+
+    // 轻量任务执行器
+    "sisyphus-junior": { "model": "deepseek/deepseek-v4-pro" },
+  },
+
+  "categories": {
+    "quick": { "model": "deepseek/deepseek-v4-pro" },
+    "unspecified-low": { "model": "deepseek/deepseek-v4-pro" },
+    "unspecified-high": { "model": "deepseek/deepseek-v4-pro" },
+    "writing": { "model": "deepseek/deepseek-v4-pro" },
+    "visual-engineering": { "model": "deepseek/deepseek-v4-pro" },
+    "deep": { "model": "deepseek/deepseek-v4-pro" },
+    "ultrabrain": { "model": "deepseek/deepseek-v4-pro" },
+  },
+
+  "background_task": {
+    "providerConcurrency": {
+      "deepseek": 5,
+    },
+  },
+
+  "experimental": { "aggressive_truncation": true },
+}

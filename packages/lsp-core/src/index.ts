@@ -1,6 +1,6 @@
 export * from "./lsp/cleanup-errors.js";
-export * from "./lsp/client-wrapper.js";
 export * from "./lsp/client.js";
+export * from "./lsp/client-wrapper.js";
 export * from "./lsp/config-loader.js";
 export * from "./lsp/connection.js";
 export * from "./lsp/constants.js";
@@ -12,8 +12,8 @@ export * from "./lsp/infer-extension.js";
 export * from "./lsp/json-rpc-connection.js";
 export * from "./lsp/language-mappings.js";
 export * from "./lsp/manager.js";
-export * from "./lsp/process-signal-cleanup.js";
 export * from "./lsp/process.js";
+export * from "./lsp/process-signal-cleanup.js";
 export * from "./lsp/server-definitions.js";
 export * from "./lsp/server-install-state.js";
 export * from "./lsp/server-installation.js";

@@ -1,47 +1,47 @@
-import { describe, expect, test } from "bun:test"
-import { buildBackgroundTaskNotificationText } from "./background-task-notification-template"
-import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value"
+import { describe, expect, test } from "bun:test";
+import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value";
+import { buildBackgroundTaskNotificationText } from "./background-task-notification-template";
 
 describe("buildBackgroundTaskNotificationText", () => {
-  describe("#given one task still running after a completed task notification", () => {
-    test("#when building the partial notification #then it does not use the final completed heading", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "task-1",
-          description: "Index repo",
-          status: "completed",
-        },
-        duration: "42s",
-        statusText: "COMPLETED",
-        allComplete: false,
-        remainingCount: 1,
-        completedTasks: [],
-      })
+	describe("#given one task still running after a completed task notification", () => {
+		test("#when building the partial notification #then it does not use the final completed heading", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "task-1",
+					description: "Index repo",
+					status: "completed",
+				},
+				duration: "42s",
+				statusText: "COMPLETED",
+				allComplete: false,
+				remainingCount: 1,
+				completedTasks: [],
+			});
 
-      // then
-      expect(notification).not.toContain("[BACKGROUND TASK COMPLETED]")
-      expect(notification).toContain("[BACKGROUND TASK RESULT READY]")
-      expect(notification).toContain("You WILL be notified when ALL complete.")
-    })
+			// then
+			expect(notification).not.toContain("[BACKGROUND TASK COMPLETED]");
+			expect(notification).toContain("[BACKGROUND TASK RESULT READY]");
+			expect(notification).toContain("You WILL be notified when ALL complete.");
+		});
 
-    test("#when building the partial notification #then it preserves the existing completed-task format", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "task-1",
-          description: "Index repo",
-          status: "completed",
-        },
-        duration: "42s",
-        statusText: "COMPLETED",
-        allComplete: false,
-        remainingCount: 1,
-        completedTasks: [],
-      })
+		test("#when building the partial notification #then it preserves the existing completed-task format", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "task-1",
+					description: "Index repo",
+					status: "completed",
+				},
+				duration: "42s",
+				statusText: "COMPLETED",
+				allComplete: false,
+				remainingCount: 1,
+				completedTasks: [],
+			});
 
-      // when
-      const expectedNotification = `<system-reminder>
+			// when
+			const expectedNotification = `<system-reminder>
 [BACKGROUND TASK RESULT READY]
 **ID:** \`task-1\`
 **Description:** Index repo
@@ -51,32 +51,32 @@ describe("buildBackgroundTaskNotificationText", () => {
 Do NOT poll - continue productive work.
 
 Use \`background_output(task_id="task-1")\` to retrieve this result when ready.
-</system-reminder>`
+</system-reminder>`;
 
-      // then
-      expect(notification).toBe(expectedNotification)
-    })
-  })
+			// then
+			expect(notification).toBe(expectedNotification);
+		});
+	});
 
-  describe("#given one task still running after a failed task notification", () => {
-    test("#when building the partial notification #then it preserves the existing failure format", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "task-2",
-          description: "Summarize logs",
-          status: "error",
-          error: "Timed out",
-        },
-        duration: "3m 4s",
-        statusText: "ERROR",
-        allComplete: false,
-        remainingCount: 2,
-        completedTasks: [],
-      })
+	describe("#given one task still running after a failed task notification", () => {
+		test("#when building the partial notification #then it preserves the existing failure format", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "task-2",
+					description: "Summarize logs",
+					status: "error",
+					error: "Timed out",
+				},
+				duration: "3m 4s",
+				statusText: "ERROR",
+				allComplete: false,
+				remainingCount: 2,
+				completedTasks: [],
+			});
 
-      // when
-      const expectedNotification = `<system-reminder>
+			// when
+			const expectedNotification = `<system-reminder>
 [BACKGROUND TASK ERROR]
 **ID:** \`task-2\`
 **Description:** Summarize logs
@@ -87,50 +87,50 @@ Use \`background_output(task_id="task-1")\` to retrieve this result when ready.
 **ACTION REQUIRED:** This task failed. Check the error and decide whether to retry, cancel remaining tasks, or continue.
 
 Use \`background_output(task_id="task-2")\` to retrieve this result when ready.
-</system-reminder>`
+</system-reminder>`;
 
-      // then
-      expect(notification).toBe(expectedNotification)
-    })
-  })
+			// then
+			expect(notification).toBe(expectedNotification);
+		});
+	});
 
-  describe("#given all sibling tasks completed with mixed outcomes", () => {
-    test("#when building the final notification #then it preserves the existing summary format", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "task-3",
-          description: "Fallback task",
-          status: "error",
-          error: "Denied",
-        },
-        duration: "10s",
-        statusText: "ERROR",
-        allComplete: true,
-        remainingCount: 0,
-        completedTasks: [
-          {
-            id: "task-1",
-            description: "Index repo",
-            status: "completed",
-          },
-          {
-            id: "task-2",
-            description: "Summarize logs",
-            status: "cancelled",
-            error: "User aborted",
-          },
-          {
-            id: "task-3",
-            description: "Fallback task",
-            status: "error",
-            error: "Denied",
-          },
-        ],
-      })
+	describe("#given all sibling tasks completed with mixed outcomes", () => {
+		test("#when building the final notification #then it preserves the existing summary format", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "task-3",
+					description: "Fallback task",
+					status: "error",
+					error: "Denied",
+				},
+				duration: "10s",
+				statusText: "ERROR",
+				allComplete: true,
+				remainingCount: 0,
+				completedTasks: [
+					{
+						id: "task-1",
+						description: "Index repo",
+						status: "completed",
+					},
+					{
+						id: "task-2",
+						description: "Summarize logs",
+						status: "cancelled",
+						error: "User aborted",
+					},
+					{
+						id: "task-3",
+						description: "Fallback task",
+						status: "error",
+						error: "Denied",
+					},
+				],
+			});
 
-      // when
-      const expectedNotification = `<system-reminder>
+			// when
+			const expectedNotification = `<system-reminder>
 [ALL BACKGROUND TASKS FINISHED - 2 FAILED]
 
 **Completed:**
@@ -143,154 +143,154 @@ Use \`background_output(task_id="task-2")\` to retrieve this result when ready.
 Use \`background_output(task_id="<id>")\` to retrieve each result.
 
 **ACTION REQUIRED:** 2 task(s) failed. Check errors above and decide whether to retry or proceed.
-</system-reminder>`
+</system-reminder>`;
 
-      // then
-      expect(notification).toBe(expectedNotification)
-    })
-  })
+			// then
+			expect(notification).toBe(expectedNotification);
+		});
+	});
 
-  describe("#given all tasks completed with undefined descriptions", () => {
-    test("#when building the final notification #then it uses task ID as fallback instead of 'undefined'", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "bg_abc123",
-          description: unsafeTestValue<string>(undefined),
-          status: "completed",
-        },
-        duration: "5s",
-        statusText: "COMPLETED",
-        allComplete: true,
-        remainingCount: 0,
-        completedTasks: [
-          { id: "bg_abc123", description: unsafeTestValue<string>(undefined), status: "completed" },
-          { id: "bg_def456", description: unsafeTestValue<string>(undefined), status: "completed" },
-        ],
-      })
+	describe("#given all tasks completed with undefined descriptions", () => {
+		test("#when building the final notification #then it uses task ID as fallback instead of 'undefined'", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "bg_abc123",
+					description: unsafeTestValue<string>(undefined),
+					status: "completed",
+				},
+				duration: "5s",
+				statusText: "COMPLETED",
+				allComplete: true,
+				remainingCount: 0,
+				completedTasks: [
+					{ id: "bg_abc123", description: unsafeTestValue<string>(undefined), status: "completed" },
+					{ id: "bg_def456", description: unsafeTestValue<string>(undefined), status: "completed" },
+				],
+			});
 
-      // then
-      expect(notification).not.toContain(": undefined")
-      expect(notification).toContain("bg_abc123")
-      expect(notification).toContain("bg_def456")
-    })
-  })
+			// then
+			expect(notification).not.toContain(": undefined");
+			expect(notification).toContain("bg_abc123");
+			expect(notification).toContain("bg_def456");
+		});
+	});
 
-  describe("#given a completed task with retry attempt history", () => {
-    test("#when building the final notification #then it includes the final completed heading", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "task-3",
-          description: "Fallback task",
-          status: "completed",
-        },
-        duration: "10s",
-        statusText: "COMPLETED",
-        allComplete: true,
-        remainingCount: 0,
-        completedTasks: [
-          {
-            id: "task-3",
-            description: "Fallback task",
-            status: "completed",
-          },
-        ],
-      })
+	describe("#given a completed task with retry attempt history", () => {
+		test("#when building the final notification #then it includes the final completed heading", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "task-3",
+					description: "Fallback task",
+					status: "completed",
+				},
+				duration: "10s",
+				statusText: "COMPLETED",
+				allComplete: true,
+				remainingCount: 0,
+				completedTasks: [
+					{
+						id: "task-3",
+						description: "Fallback task",
+						status: "completed",
+					},
+				],
+			});
 
-      // then
-      expect(notification).toContain("[BACKGROUND TASK COMPLETED]")
-      expect(notification).toContain("[ALL BACKGROUND TASKS COMPLETE]")
-    })
+			// then
+			expect(notification).toContain("[BACKGROUND TASK COMPLETED]");
+			expect(notification).toContain("[ALL BACKGROUND TASKS COMPLETE]");
+		});
 
-    test("#when building the final notification #then it renders the spec-aligned balanced attempt timeline", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "task-3",
-          description: "Fallback task",
-          status: "completed",
-          attempts: [
-            {
-              attemptId: "att-1",
-              attemptNumber: 1,
-              sessionId: "ses-primary",
-              providerId: "genai-proxy-openai",
-              modelId: "gpt-5.4-mini",
-              status: "error",
-              error: "Forbidden: Selected provider is forbidden",
-            },
-            {
-              attemptId: "att-2",
-              attemptNumber: 2,
-              sessionId: "ses-fallback",
-              providerId: "anthropic",
-              modelId: "claude-haiku-4.5",
-              status: "completed",
-            },
-          ],
-        },
-        duration: "10s",
-        statusText: "COMPLETED",
-        allComplete: true,
-        remainingCount: 0,
-        completedTasks: [
-          {
-            id: "task-3",
-            description: "Fallback task",
-            status: "completed",
-            attempts: [
-              {
-                attemptId: "att-1",
-                attemptNumber: 1,
-                sessionId: "ses-primary",
-                providerId: "genai-proxy-openai",
-                modelId: "gpt-5.4-mini",
-                status: "error",
-                error: "Forbidden: Selected provider is forbidden",
-              },
-              {
-                attemptId: "att-2",
-                attemptNumber: 2,
-                sessionId: "ses-fallback",
-                providerId: "anthropic",
-                modelId: "claude-haiku-4.5",
-                status: "completed",
-              },
-            ],
-          },
-        ],
-      })
+		test("#when building the final notification #then it renders the spec-aligned balanced attempt timeline", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "task-3",
+					description: "Fallback task",
+					status: "completed",
+					attempts: [
+						{
+							attemptId: "att-1",
+							attemptNumber: 1,
+							sessionId: "ses-primary",
+							providerId: "genai-proxy-openai",
+							modelId: "gpt-5.4-mini",
+							status: "error",
+							error: "Forbidden: Selected provider is forbidden",
+						},
+						{
+							attemptId: "att-2",
+							attemptNumber: 2,
+							sessionId: "ses-fallback",
+							providerId: "anthropic",
+							modelId: "claude-haiku-4.5",
+							status: "completed",
+						},
+					],
+				},
+				duration: "10s",
+				statusText: "COMPLETED",
+				allComplete: true,
+				remainingCount: 0,
+				completedTasks: [
+					{
+						id: "task-3",
+						description: "Fallback task",
+						status: "completed",
+						attempts: [
+							{
+								attemptId: "att-1",
+								attemptNumber: 1,
+								sessionId: "ses-primary",
+								providerId: "genai-proxy-openai",
+								modelId: "gpt-5.4-mini",
+								status: "error",
+								error: "Forbidden: Selected provider is forbidden",
+							},
+							{
+								attemptId: "att-2",
+								attemptNumber: 2,
+								sessionId: "ses-fallback",
+								providerId: "anthropic",
+								modelId: "claude-haiku-4.5",
+								status: "completed",
+							},
+						],
+					},
+				],
+			});
 
-      // then
-      expect(notification).toContain("[ALL BACKGROUND TASKS COMPLETE]")
-      expect(notification).toContain("- `task-3`: Fallback task")
-      expect(notification).toContain("Background task attempts:")
-      expect(notification).toContain("  - Attempt 1 — ERROR — genai-proxy-openai/gpt-5.4-mini — ses-primary")
-      expect(notification).toContain("    Error: Forbidden: Selected provider is forbidden")
-      expect(notification).toContain("  - Attempt 2 — COMPLETED — anthropic/claude-haiku-4.5 — ses-fallback")
-    })
-  })
+			// then
+			expect(notification).toContain("[ALL BACKGROUND TASKS COMPLETE]");
+			expect(notification).toContain("- `task-3`: Fallback task");
+			expect(notification).toContain("Background task attempts:");
+			expect(notification).toContain("  - Attempt 1 — ERROR — genai-proxy-openai/gpt-5.4-mini — ses-primary");
+			expect(notification).toContain("    Error: Forbidden: Selected provider is forbidden");
+			expect(notification).toContain("  - Attempt 2 — COMPLETED — anthropic/claude-haiku-4.5 — ses-fallback");
+		});
+	});
 
-  describe("#given a single task notification with undefined description", () => {
-    test("#when building the partial notification #then it uses task ID as fallback", () => {
-      // given
-      const notification = buildBackgroundTaskNotificationText({
-        task: {
-          id: "bg_xyz789",
-          description: unsafeTestValue<string>(undefined),
-          status: "completed",
-        },
-        duration: "3s",
-        statusText: "COMPLETED",
-        allComplete: false,
-        remainingCount: 2,
-        completedTasks: [],
-      })
+	describe("#given a single task notification with undefined description", () => {
+		test("#when building the partial notification #then it uses task ID as fallback", () => {
+			// given
+			const notification = buildBackgroundTaskNotificationText({
+				task: {
+					id: "bg_xyz789",
+					description: unsafeTestValue<string>(undefined),
+					status: "completed",
+				},
+				duration: "3s",
+				statusText: "COMPLETED",
+				allComplete: false,
+				remainingCount: 2,
+				completedTasks: [],
+			});
 
-      // then
-      expect(notification).not.toContain("undefined")
-      expect(notification).toContain("bg_xyz789")
-    })
-  })
-})
+			// then
+			expect(notification).not.toContain("undefined");
+			expect(notification).toContain("bg_xyz789");
+		});
+	});
+});

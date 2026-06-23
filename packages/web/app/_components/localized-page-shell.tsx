@@ -1,5 +1,5 @@
-import type { JSX } from "react"
 import { NextIntlClientProvider } from "next-intl"
+import type { JSX } from "react"
 import { Footer } from "@/components/footer"
 import { NavHeader } from "@/components/nav-header"
 import type { Locale } from "@/i18n/config"

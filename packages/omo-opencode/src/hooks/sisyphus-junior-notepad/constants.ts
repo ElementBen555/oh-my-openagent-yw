@@ -1,4 +1,4 @@
-export const HOOK_NAME = "sisyphus-junior-notepad"
+export const HOOK_NAME = "sisyphus-junior-notepad";
 
 export const NOTEPAD_DIRECTIVE = `
 <Work_Context>
@@ -21,4 +21,4 @@ SUBAGENT PLAN RESTRICTION (applies to YOU, the delegated worker — NOT to the O
 - You MUST NOT edit the plan file or mark checkboxes — that is the Orchestrator's job
 - The Orchestrator (Atlas) updates checkboxes after verifying your completed work
 </Work_Context>
-`
+`;

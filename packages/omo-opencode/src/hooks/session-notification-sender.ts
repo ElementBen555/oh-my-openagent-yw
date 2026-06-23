@@ -1,10 +1,5 @@
-import {
-  type Platform,
-  detectPlatform,
-  getDefaultSoundPath,
-} from "./session-notification-platform"
-import { playSessionNotificationSound } from "./session-notification-sound"
-import { sendSessionNotification } from "./session-notification-send"
+import { detectPlatform, getDefaultSoundPath, type Platform } from "./session-notification-platform";
+import { sendSessionNotification } from "./session-notification-send";
+import { playSessionNotificationSound } from "./session-notification-sound";
 
-export { type Platform, detectPlatform, getDefaultSoundPath }
-export { sendSessionNotification, playSessionNotificationSound }
+export { detectPlatform, getDefaultSoundPath, type Platform, playSessionNotificationSound, sendSessionNotification };

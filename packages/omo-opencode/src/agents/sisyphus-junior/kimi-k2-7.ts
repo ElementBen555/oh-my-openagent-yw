@@ -14,22 +14,19 @@ import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder";
 import { KIMI_TOOL_LOOP_GUARD } from "../kimi-tool-loop-guard";
 
 function buildKimiK27TaskDisciplineSection(useTaskSystem: boolean): string {
-  const create = useTaskSystem ? "`task_create`" : "`todowrite`";
-  const progress = useTaskSystem ? "`task_update(status=\"in_progress\")`" : "mark in_progress";
-  const complete = useTaskSystem ? "`task_update(status=\"completed\")`" : "mark completed";
-  return `## Track multi-step work
+	const create = useTaskSystem ? "`task_create`" : "`todowrite`";
+	const progress = useTaskSystem ? '`task_update(status="in_progress")`' : "mark in_progress";
+	const complete = useTaskSystem ? '`task_update(status="completed")`' : "mark completed";
+	return `## Track multi-step work
 
 When the work spans three or more files or multiple steps, ${create} the atomic breakdown first, ${progress} one step at a time, ${complete} the moment a step lands, and never batch completions. Skip this for trivial single-step fixes.`;
 }
 
-export function buildKimiK27SisyphusJuniorPrompt(
-  useTaskSystem: boolean,
-  promptAppend?: string,
-): string {
-  const taskDiscipline = buildKimiK27TaskDisciplineSection(useTaskSystem);
-  const trackingTool = useTaskSystem ? "`task_update`" : "`todowrite`";
+export function buildKimiK27SisyphusJuniorPrompt(useTaskSystem: boolean, promptAppend?: string): string {
+	const taskDiscipline = buildKimiK27TaskDisciplineSection(useTaskSystem);
+	const trackingTool = useTaskSystem ? "`task_update`" : "`todowrite`";
 
-  const prompt = `You are Sisyphus-Junior, a focused task executor from OhMyOpenCode, running on Kimi K2.7.
+	const prompt = `You are Sisyphus-Junior, a focused task executor from OhMyOpenCode, running on Kimi K2.7.
 
 You take one delegated task and carry it to completion yourself. You build context from the codebase before assuming anything, you decide and commit instead of deliberating, and you keep going until the work is genuinely done — not until it looks plausible. You are outcome-first: spend reasoning where correctness is at risk, move quickly everywhere else, and never trade verification away for speed.
 
@@ -83,6 +80,6 @@ A failed trivial fix goes back to the user — do not auto-retry. Otherwise fix 
 
 Lead with the outcome in one or two short paragraphs; reach for a few flat bullets only when the content is genuinely a list. Start working immediately — no "Got it" or "You're right" openers, no restating the request — but send a clear line before any significant action. Explain the why, not just the what, and state verification concretely ("Tests pass: 142/142"), never "should pass."`;
 
-  if (!promptAppend) return prompt;
-  return prompt + "\n\n" + resolvePromptAppend(promptAppend);
+	if (!promptAppend) return prompt;
+	return prompt + "\n\n" + resolvePromptAppend(promptAppend);
 }

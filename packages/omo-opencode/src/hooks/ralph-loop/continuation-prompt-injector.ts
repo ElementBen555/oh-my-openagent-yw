@@ -1,92 +1,92 @@
-import type { PluginInput } from "@opencode-ai/plugin"
-import { log } from "../../shared/logger"
-import { findNearestMessageWithFields } from "../../features/hook-message-injector"
-import { getMessageDir } from "./message-storage-directory"
-import { withTimeout } from "./with-timeout"
+import type { PluginInput } from "@opencode-ai/plugin";
+import { resolveRegisteredAgentName } from "../../features/claude-code-session-state";
+import { findNearestMessageWithFields } from "../../features/hook-message-injector";
 import {
 	createInternalAgentContinuationTextPart,
 	isAmbiguousPostDispatchPromptFailure,
 	isRecord,
 	normalizeSDKResponse,
 	resolveInheritedPromptTools,
-} from "../../shared"
-import { resolveRegisteredAgentName } from "../../features/claude-code-session-state"
-import { normalizeAgentForPromptKey, stripAgentListSortPrefix } from "../../shared/agent-display-names"
-import { dispatchInternalPrompt } from "../shared/prompt-async-gate"
+} from "../../shared";
+import { normalizeAgentForPromptKey, stripAgentListSortPrefix } from "../../shared/agent-display-names";
+import { log } from "../../shared/logger";
+import { dispatchInternalPrompt } from "../shared/prompt-async-gate";
+import { getMessageDir } from "./message-storage-directory";
+import { withTimeout } from "./with-timeout";
 
 type MessageInfo = {
-	agent?: string
-	model?: { providerID: string; modelID: string; variant?: string }
-	modelID?: string
-	providerID?: string
-	tools?: Record<string, boolean | "allow" | "deny" | "ask">
-}
+	agent?: string;
+	model?: { providerID: string; modelID: string; variant?: string };
+	modelID?: string;
+	providerID?: string;
+	tools?: Record<string, boolean | "allow" | "deny" | "ask">;
+};
 
 export type ContinuationPromptResult =
 	| { status: "dispatched" }
 	| { status: "deferred"; reason: "active" | "reserved" }
-	| { status: "rejected"; error: Error }
+	| { status: "rejected"; error: Error };
 
 function extractPromptAsyncError(response: unknown): unknown | undefined {
 	if (!isRecord(response) || !Object.hasOwn(response, "error")) {
-		return undefined
+		return undefined;
 	}
 
-	return response.error ?? "Unknown promptAsync error"
+	return response.error ?? "Unknown promptAsync error";
 }
 
 function describePromptAsyncError(error: unknown): string {
 	if (error instanceof Error) {
-		return error.message
+		return error.message;
 	}
 
 	if (typeof error === "string") {
-		return error
+		return error;
 	}
 
 	if (isRecord(error)) {
-		const message = error.message
+		const message = error.message;
 		if (typeof message === "string") {
-			return message
+			return message;
 		}
 	}
 
 	try {
-		return JSON.stringify(error)
+		return JSON.stringify(error);
 	} catch (jsonError) {
 		if (!(jsonError instanceof Error)) {
-			throw jsonError
+			throw jsonError;
 		}
-		return String(error)
+		return String(error);
 	}
 }
 
 function createPromptAsyncError(prefix: string, error: unknown): Error {
-	return new Error(`${prefix}: ${describePromptAsyncError(error)}`)
+	return new Error(`${prefix}: ${describePromptAsyncError(error)}`);
 }
 
 function normalizeInheritedAgentForPrompt(agent: string | undefined): string | undefined {
-	const resolvedAgent = resolveRegisteredAgentName(agent) ?? normalizeAgentForPromptKey(agent)
-	if (typeof resolvedAgent !== "string") return undefined
-	const cleanAgent = stripAgentListSortPrefix(resolvedAgent).trim()
-	return cleanAgent || undefined
+	const resolvedAgent = resolveRegisteredAgentName(agent) ?? normalizeAgentForPromptKey(agent);
+	if (typeof resolvedAgent !== "string") return undefined;
+	const cleanAgent = stripAgentListSortPrefix(resolvedAgent).trim();
+	return cleanAgent || undefined;
 }
 
 export async function injectContinuationPrompt(
 	ctx: PluginInput,
 	options: {
-		sessionID: string
-		prompt: string
-		directory: string
-		apiTimeoutMs: number
-		inheritFromSessionID?: string
-		idleSettleMs?: number
+		sessionID: string;
+		prompt: string;
+		directory: string;
+		apiTimeoutMs: number;
+		inheritFromSessionID?: string;
+		idleSettleMs?: number;
 	},
 ): Promise<ContinuationPromptResult> {
-	let agent: string | undefined
-	let model: { providerID: string; modelID: string; variant?: string } | undefined
-	let tools: Record<string, boolean | "allow" | "deny" | "ask"> | undefined
-	const sourceSessionID = options.inheritFromSessionID ?? options.sessionID
+	let agent: string | undefined;
+	let model: { providerID: string; modelID: string; variant?: string } | undefined;
+	let tools: Record<string, boolean | "allow" | "deny" | "ask"> | undefined;
+	const sourceSessionID = options.inheritFromSessionID ?? options.sessionID;
 
 	try {
 		const messagesResp = await withTimeout(
@@ -94,48 +94,44 @@ export async function injectContinuationPrompt(
 				path: { id: sourceSessionID },
 			}),
 			options.apiTimeoutMs,
-		)
-		const messages = normalizeSDKResponse(messagesResp, [] as Array<{ info?: MessageInfo }>)
+		);
+		const messages = normalizeSDKResponse(messagesResp, [] as Array<{ info?: MessageInfo }>);
 		for (let i = messages.length - 1; i >= 0; i--) {
-			const info = messages[i]?.info
+			const info = messages[i]?.info;
 			if (info?.agent || info?.model || (info?.modelID && info?.providerID)) {
-				agent = info.agent
+				agent = info.agent;
 				model =
 					info.model ??
-					(info.providerID && info.modelID
-						? { providerID: info.providerID, modelID: info.modelID }
-						: undefined)
-				tools = info.tools
-				break
+					(info.providerID && info.modelID ? { providerID: info.providerID, modelID: info.modelID } : undefined);
+				tools = info.tools;
+				break;
 			}
 		}
 	} catch (error) {
 		if (!(error instanceof Error)) {
-			throw error
+			throw error;
 		}
-		const messageDir = getMessageDir(sourceSessionID)
-		const currentMessage = messageDir ? findNearestMessageWithFields(messageDir) : null
-		agent = currentMessage?.agent
+		const messageDir = getMessageDir(sourceSessionID);
+		const currentMessage = messageDir ? findNearestMessageWithFields(messageDir) : null;
+		agent = currentMessage?.agent;
 		model =
 			currentMessage?.model?.providerID && currentMessage?.model?.modelID
 				? {
-					providerID: currentMessage.model.providerID,
-					modelID: currentMessage.model.modelID,
-					...(currentMessage.model.variant ? { variant: currentMessage.model.variant } : {}),
-				}
-				: undefined
-		tools = currentMessage?.tools
+						providerID: currentMessage.model.providerID,
+						modelID: currentMessage.model.modelID,
+						...(currentMessage.model.variant ? { variant: currentMessage.model.variant } : {}),
+					}
+				: undefined;
+		tools = currentMessage?.tools;
 	}
 
-	const inheritedTools = resolveInheritedPromptTools(sourceSessionID, tools)
-	const cleanAgent = normalizeInheritedAgentForPrompt(agent)
+	const inheritedTools = resolveInheritedPromptTools(sourceSessionID, tools);
+	const cleanAgent = normalizeInheritedAgentForPrompt(agent);
 
-	const launchModel = model
-		? { providerID: model.providerID, modelID: model.modelID }
-		: undefined
-	const launchVariant = model?.variant
+	const launchModel = model ? { providerID: model.providerID, modelID: model.modelID } : undefined;
+	const launchVariant = model?.variant;
 
-	let response: unknown
+	let response: unknown;
 	try {
 		const promptResult = await dispatchInternalPrompt({
 			mode: "async",
@@ -155,46 +151,44 @@ export async function injectContinuationPrompt(
 				},
 				query: { directory: options.directory },
 			},
-		})
+		});
 		if (promptResult.status === "failed") {
 			if (isAmbiguousPostDispatchPromptFailure(promptResult)) {
-				return { status: "dispatched" }
+				return { status: "dispatched" };
 			}
-			throw promptResult.error
+			throw promptResult.error;
 		}
 		if (promptResult.status === "queued") {
-			return { status: "deferred", reason: "reserved" }
+			return { status: "deferred", reason: "reserved" };
 		}
 		if (promptResult.status === "active" || promptResult.status === "reserved") {
-			return { status: "deferred", reason: promptResult.status }
+			return { status: "deferred", reason: promptResult.status };
 		}
 		if (promptResult.status !== "dispatched") {
 			return {
 				status: "rejected",
 				error: createPromptAsyncError(`promptAsync skipped: ${promptResult.status}`, promptResult),
-			}
+			};
 		}
-		response = promptResult.response
+		response = promptResult.response;
 	} catch (error) {
-		const promptError = error instanceof Error
-			? error
-			: createPromptAsyncError("promptAsync rejected", error)
+		const promptError = error instanceof Error ? error : createPromptAsyncError("promptAsync rejected", error);
 		log("[ralph-loop] continuation prompt rejected", {
 			sessionID: options.sessionID,
 			error: String(promptError),
-		})
-		return { status: "rejected", error: promptError }
+		});
+		return { status: "rejected", error: promptError };
 	}
-	const promptError = extractPromptAsyncError(response)
+	const promptError = extractPromptAsyncError(response);
 	if (promptError !== undefined) {
-		const error = createPromptAsyncError("promptAsync returned error", promptError)
+		const error = createPromptAsyncError("promptAsync returned error", promptError);
 		log("[ralph-loop] continuation prompt rejected", {
 			sessionID: options.sessionID,
 			error: String(error),
-		})
-		return { status: "rejected", error }
+		});
+		return { status: "rejected", error };
 	}
 
-	log("[ralph-loop] continuation injected", { sessionID: options.sessionID })
-	return { status: "dispatched" }
+	log("[ralph-loop] continuation injected", { sessionID: options.sessionID });
+	return { status: "dispatched" };
 }

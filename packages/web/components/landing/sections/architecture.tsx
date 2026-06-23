@@ -1,7 +1,7 @@
-import type { JSX } from "react"
 import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
+import { PRINCIPLE_ICONS, PRINCIPLE_KEYS } from "@/components/landing/constants"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PRINCIPLE_KEYS, PRINCIPLE_ICONS } from "@/components/landing/constants"
 
 export async function ArchitectureSection(): Promise<JSX.Element> {
   const t = await getTranslations("landing")

@@ -1,38 +1,38 @@
-import type { PluginInput } from "@opencode-ai/plugin"
-import type { AggressiveTruncateResult } from "./tool-part-types"
-import { findToolResultsBySize, truncateToolResult } from "./tool-result-storage"
-import { truncateToolResultAsync } from "./tool-result-storage-sdk"
-import { isSqliteBackend } from "../../shared/opencode-storage-detection"
-import { normalizeSDKResponse } from "../../shared"
+import type { PluginInput } from "@opencode-ai/plugin";
+import { normalizeSDKResponse } from "../../shared";
+import { isSqliteBackend } from "../../shared/opencode-storage-detection";
+import type { AggressiveTruncateResult } from "./tool-part-types";
+import { findToolResultsBySize, truncateToolResult } from "./tool-result-storage";
+import { truncateToolResultAsync } from "./tool-result-storage-sdk";
 
-type OpencodeClient = PluginInput["client"]
+type OpencodeClient = PluginInput["client"];
 
 interface SDKToolPart {
-	id: string
-	type: string
-	tool?: string
+	id: string;
+	type: string;
+	tool?: string;
 	state?: {
-		output?: string
-		time?: { start?: number; end?: number; compacted?: number }
-	}
-	originalSize?: number
+		output?: string;
+		time?: { start?: number; end?: number; compacted?: number };
+	};
+	originalSize?: number;
 }
 
 interface SDKMessage {
-	info?: { id?: string }
-	parts?: SDKToolPart[]
+	info?: { id?: string };
+	parts?: SDKToolPart[];
 }
 
 function calculateTargetBytesToRemove(
 	currentTokens: number,
 	maxTokens: number,
 	targetRatio: number,
-	charsPerToken: number
+	charsPerToken: number,
 ): { tokensToReduce: number; targetBytesToRemove: number } {
-	const targetTokens = Math.floor(maxTokens * targetRatio)
-	const tokensToReduce = currentTokens - targetTokens
-	const targetBytesToRemove = tokensToReduce * charsPerToken
-	return { tokensToReduce, targetBytesToRemove }
+	const targetTokens = Math.floor(maxTokens * targetRatio);
+	const tokensToReduce = currentTokens - targetTokens;
+	const targetBytesToRemove = tokensToReduce * charsPerToken;
+	return { tokensToReduce, targetBytesToRemove };
 }
 
 export async function truncateUntilTargetTokens(
@@ -41,14 +41,14 @@ export async function truncateUntilTargetTokens(
 	maxTokens: number,
 	targetRatio: number = 0.8,
 	charsPerToken: number = 4,
-	client?: OpencodeClient
+	client?: OpencodeClient,
 ): Promise<AggressiveTruncateResult> {
 	const { tokensToReduce, targetBytesToRemove } = calculateTargetBytesToRemove(
 		currentTokens,
 		maxTokens,
 		targetRatio,
-		charsPerToken
-	)
+		charsPerToken,
+	);
 
 	if (tokensToReduce <= 0) {
 		return {
@@ -58,34 +58,34 @@ export async function truncateUntilTargetTokens(
 			totalBytesRemoved: 0,
 			targetBytesToRemove: 0,
 			truncatedTools: [],
-		}
+		};
 	}
 
 	if (client && isSqliteBackend()) {
-		let toolPartsByKey = new Map<string, SDKToolPart>()
+		let toolPartsByKey = new Map<string, SDKToolPart>();
 		try {
 			const response = (await client.session.messages({
 				path: { id: sessionID },
-			})) as { data?: SDKMessage[] }
-			const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
-			toolPartsByKey = new Map<string, SDKToolPart>()
+			})) as { data?: SDKMessage[] };
+			const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true });
+			toolPartsByKey = new Map<string, SDKToolPart>();
 
 			for (const message of messages) {
-				const messageID = message.info?.id
-				if (!messageID || !message.parts) continue
+				const messageID = message.info?.id;
+				if (!messageID || !message.parts) continue;
 				for (const part of message.parts) {
-					if (part.type !== "tool") continue
-					toolPartsByKey.set(`${messageID}:${part.id}`, part)
+					if (part.type !== "tool") continue;
+					toolPartsByKey.set(`${messageID}:${part.id}`, part);
 				}
 			}
 		} catch (error) {
 			if (!(error instanceof Error)) {
-				throw error
+				throw error;
 			}
-			toolPartsByKey = new Map<string, SDKToolPart>()
+			toolPartsByKey = new Map<string, SDKToolPart>();
 		}
 
-		const results: import("./tool-part-types").ToolResultInfo[] = []
+		const results: import("./tool-part-types").ToolResultInfo[] = [];
 		for (const [key, part] of toolPartsByKey) {
 			if (part.type === "tool" && part.state?.output && !part.state?.time?.compacted && part.tool) {
 				results.push({
@@ -94,10 +94,10 @@ export async function truncateUntilTargetTokens(
 					messageID: key.split(":")[0],
 					toolName: part.tool,
 					outputSize: part.state.output.length,
-				})
+				});
 			}
 		}
-		results.sort((a, b) => b.outputSize - a.outputSize)
+		results.sort((a, b) => b.outputSize - a.outputSize);
 
 		if (results.length === 0) {
 			return {
@@ -107,40 +107,34 @@ export async function truncateUntilTargetTokens(
 				totalBytesRemoved: 0,
 				targetBytesToRemove,
 				truncatedTools: [],
-			}
+			};
 		}
 
-		let totalRemoved = 0
-		let truncatedCount = 0
-		const truncatedTools: Array<{ toolName: string; originalSize: number }> = []
+		let totalRemoved = 0;
+		let truncatedCount = 0;
+		const truncatedTools: Array<{ toolName: string; originalSize: number }> = [];
 
 		for (const result of results) {
-			const part = toolPartsByKey.get(`${result.messageID}:${result.partId}`)
-			if (!part) continue
+			const part = toolPartsByKey.get(`${result.messageID}:${result.partId}`);
+			if (!part) continue;
 
-			const truncateResult = await truncateToolResultAsync(
-				client,
-				sessionID,
-				result.messageID,
-				result.partId,
-				part
-			)
+			const truncateResult = await truncateToolResultAsync(client, sessionID, result.messageID, result.partId, part);
 			if (truncateResult.success) {
-				truncatedCount++
-				const removedSize = truncateResult.originalSize ?? result.outputSize
-				totalRemoved += removedSize
+				truncatedCount++;
+				const removedSize = truncateResult.originalSize ?? result.outputSize;
+				totalRemoved += removedSize;
 				truncatedTools.push({
 					toolName: truncateResult.toolName ?? result.toolName,
 					originalSize: removedSize,
-				})
+				});
 
 				if (totalRemoved >= targetBytesToRemove) {
-					break
+					break;
 				}
 			}
 		}
 
-		const sufficient = totalRemoved >= targetBytesToRemove
+		const sufficient = totalRemoved >= targetBytesToRemove;
 
 		return {
 			success: truncatedCount > 0,
@@ -149,10 +143,10 @@ export async function truncateUntilTargetTokens(
 			totalBytesRemoved: totalRemoved,
 			targetBytesToRemove,
 			truncatedTools,
-		}
+		};
 	}
 
-	const results = findToolResultsBySize(sessionID)
+	const results = findToolResultsBySize(sessionID);
 
 	if (results.length === 0) {
 		return {
@@ -162,31 +156,31 @@ export async function truncateUntilTargetTokens(
 			totalBytesRemoved: 0,
 			targetBytesToRemove,
 			truncatedTools: [],
-		}
+		};
 	}
 
-	let totalRemoved = 0
-	let truncatedCount = 0
-	const truncatedTools: Array<{ toolName: string; originalSize: number }> = []
+	let totalRemoved = 0;
+	let truncatedCount = 0;
+	const truncatedTools: Array<{ toolName: string; originalSize: number }> = [];
 
 	for (const result of results) {
-		const truncateResult = truncateToolResult(result.partPath)
+		const truncateResult = truncateToolResult(result.partPath);
 		if (truncateResult.success) {
-			truncatedCount++
-			const removedSize = truncateResult.originalSize ?? result.outputSize
-			totalRemoved += removedSize
+			truncatedCount++;
+			const removedSize = truncateResult.originalSize ?? result.outputSize;
+			totalRemoved += removedSize;
 			truncatedTools.push({
 				toolName: truncateResult.toolName ?? result.toolName,
 				originalSize: removedSize,
-			})
+			});
 
 			if (totalRemoved >= targetBytesToRemove) {
-				break
+				break;
 			}
 		}
 	}
 
-	const sufficient = totalRemoved >= targetBytesToRemove
+	const sufficient = totalRemoved >= targetBytesToRemove;
 
 	return {
 		success: truncatedCount > 0,
@@ -195,5 +189,5 @@ export async function truncateUntilTargetTokens(
 		totalBytesRemoved: totalRemoved,
 		targetBytesToRemove,
 		truncatedTools,
-	}
+	};
 }

@@ -1,1 +1,1 @@
-export * from "../../shared/prompt-async-gate"
+export * from "../../shared/prompt-async-gate";

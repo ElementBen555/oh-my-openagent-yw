@@ -1,27 +1,27 @@
-const sessionCategoryMap = new Map<string, string>()
+const sessionCategoryMap = new Map<string, string>();
 
 export const SessionCategoryRegistry = {
-  register: (sessionID: string, category: string): void => {
-    sessionCategoryMap.set(sessionID, category)
-  },
+	register: (sessionID: string, category: string): void => {
+		sessionCategoryMap.set(sessionID, category);
+	},
 
-  get: (sessionID: string): string | undefined => {
-    return sessionCategoryMap.get(sessionID)
-  },
+	get: (sessionID: string): string | undefined => {
+		return sessionCategoryMap.get(sessionID);
+	},
 
-  remove: (sessionID: string): void => {
-    sessionCategoryMap.delete(sessionID)
-  },
+	remove: (sessionID: string): void => {
+		sessionCategoryMap.delete(sessionID);
+	},
 
-  has: (sessionID: string): boolean => {
-    return sessionCategoryMap.has(sessionID)
-  },
+	has: (sessionID: string): boolean => {
+		return sessionCategoryMap.has(sessionID);
+	},
 
-  size: (): number => {
-    return sessionCategoryMap.size
-  },
+	size: (): number => {
+		return sessionCategoryMap.size;
+	},
 
-  clear: (): void => {
-    sessionCategoryMap.clear()
-  },
-}
+	clear: (): void => {
+		sessionCategoryMap.clear();
+	},
+};

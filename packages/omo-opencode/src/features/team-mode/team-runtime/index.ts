@@ -1,2 +1,2 @@
-export * from "./resolve-member"
-export * from "./shutdown"
+export * from "./resolve-member";
+export * from "./shutdown";

@@ -1,74 +1,69 @@
-import { spawn, spawnSync } from "../runtime"
-
-import type { ArchiveEntry } from "../archive-entry-validator"
-import { readProcessStream } from "../process-stream-reader"
-import { readZipSymlinkTarget } from "./read-zip-symlink-target"
+import type { ArchiveEntry } from "../archive-entry-validator";
+import { readProcessStream } from "../process-stream-reader";
+import { spawn, spawnSync } from "../runtime";
+import { readZipSymlinkTarget } from "./read-zip-symlink-target";
 
 export function parseZipInfoListedEntry(line: string): ArchiveEntry | null {
-	const match = line.match(
-		/^([-dl?])\S*\s+\S+\s+\S+\s+\d+\s+\S+\s+\d+\s+\S+\s+\S+\s+\S+\s+(.*)$/
-	)
+	const match = line.match(/^([-dl?])\S*\s+\S+\s+\S+\s+\d+\s+\S+\s+\d+\s+\S+\s+\S+\s+\S+\s+(.*)$/);
 	if (!match) {
-		return null
+		return null;
 	}
 
-	const [, rawType, rawEntryPath] = match
+	const [, rawType, rawEntryPath] = match;
 	return {
 		path: rawEntryPath,
 		type: rawType === "d" ? "directory" : rawType === "l" ? "symlink" : "file",
-	}
+	};
 }
 
 export function isZipInfoZipListingAvailable(): boolean {
 	const proc = spawnSync(["which", "zipinfo"], {
 		stdout: "ignore",
 		stderr: "ignore",
-	})
+	});
 
-	return proc.exitCode === 0
+	return proc.exitCode === 0;
 }
 
 function splitZipInfoOutputLines(stdout: string): string[] {
-	return stdout.split(/\r?\n/).filter(line => line.length > 0)
+	return stdout.split(/\r?\n/).filter((line) => line.length > 0);
 }
 
-export async function listZipEntriesWithZipInfo(
-	archivePath: string
-): Promise<ArchiveEntry[]> {
+export async function listZipEntriesWithZipInfo(archivePath: string): Promise<ArchiveEntry[]> {
 	if (!isZipInfoZipListingAvailable()) {
-		throw new Error("zip entry listing requires zipinfo, but zipinfo is not installed")
+		throw new Error("zip entry listing requires zipinfo, but zipinfo is not installed");
 	}
 
 	const proc = spawn(["zipinfo", "-l", archivePath], {
 		stdout: "pipe",
 		stderr: "pipe",
-	})
+	});
 
 	const [exitCode, stdout, stderr] = await Promise.all([
 		proc.exited,
 		// #3919: Use Buffer-concat stream reads for Node utility-process compatibility.
 		readProcessStream(proc.stdout),
 		readProcessStream(proc.stderr),
-	])
+	]);
 
 	if (exitCode !== 0) {
-		throw new Error(`zip entry listing failed (exit ${exitCode}): ${stderr}`)
+		throw new Error(`zip entry listing failed (exit ${exitCode}): ${stderr}`);
 	}
 
 	const parsedEntries = splitZipInfoOutputLines(stdout)
-		.map(line => parseZipInfoListedEntry(line))
-		.filter((entry): entry is ArchiveEntry => entry !== null)
+		.map((line) => parseZipInfoListedEntry(line))
+		.filter((entry): entry is ArchiveEntry => entry !== null);
 
 	return Promise.all(
-		parsedEntries.map(async entry => {
+		parsedEntries.map(async (entry) => {
 			if (entry.type !== "symlink") {
-				return entry
+				return entry;
 			}
 
 			return {
 				...entry,
 				linkPath: await readZipSymlinkTarget(archivePath, entry.path),
-			}
-		})
-	)
+			};
+		}),
+	);
 }

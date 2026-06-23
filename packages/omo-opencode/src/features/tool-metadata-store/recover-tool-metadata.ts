@@ -1,18 +1,18 @@
-import { consumeToolMetadata, type PendingToolMetadata } from "./store"
-import { resolveToolCallID, type ToolCallIDCarrier } from "./resolve-tool-call-id"
+import { resolveToolCallID, type ToolCallIDCarrier } from "./resolve-tool-call-id";
+import { consumeToolMetadata, type PendingToolMetadata } from "./store";
 
 export function recoverToolMetadata(
-  sessionID: string,
-  source: ToolCallIDCarrier | string | undefined
+	sessionID: string,
+	source: ToolCallIDCarrier | string | undefined,
 ): PendingToolMetadata | undefined {
-  if (typeof source === "string") {
-    return consumeToolMetadata(sessionID, source)
-  }
+	if (typeof source === "string") {
+		return consumeToolMetadata(sessionID, source);
+	}
 
-  const callID = source ? resolveToolCallID(source) : undefined
-  if (!callID) {
-    return undefined
-  }
+	const callID = source ? resolveToolCallID(source) : undefined;
+	if (!callID) {
+		return undefined;
+	}
 
-  return consumeToolMetadata(sessionID, callID)
+	return consumeToolMetadata(sessionID, callID);
 }

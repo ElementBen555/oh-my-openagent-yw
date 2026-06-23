@@ -1,4 +1,4 @@
-import type { BuiltinCategoryDefinition } from "./builtin-category-definition"
+import type { BuiltinCategoryDefinition } from "./builtin-category-definition";
 
 const VISUAL_CATEGORY_PROMPT_APPEND = `<Category_Context>
 You are working on VISUAL/UI tasks.
@@ -87,7 +87,7 @@ Design-first mindset (AFTER design system is established):
 
 AVOID: Generic fonts, purple gradients on white, predictable layouts, cookie-cutter patterns.
 </DESIGN_QUALITY>
-</Category_Context>`
+</Category_Context>`;
 
 const ARTISTRY_CATEGORY_PROMPT_APPEND = `<Category_Context>
 You are working on HIGHLY CREATIVE / ARTISTIC tasks.
@@ -104,19 +104,19 @@ Approach:
 - Embrace ambiguity and wild experimentation
 - Balance novelty with coherence
 - This is for tasks requiring exceptional creativity
-</Category_Context>`
+</Category_Context>`;
 
 export const GOOGLE_CATEGORIES: BuiltinCategoryDefinition[] = [
-  {
-    name: "visual-engineering",
-    config: { model: "google/gemini-3.1-pro", variant: "high" },
-    description: "Frontend, UI/UX, design, styling, animation",
-    promptAppend: VISUAL_CATEGORY_PROMPT_APPEND,
-  },
-  {
-    name: "artistry",
-    config: { model: "google/gemini-3.1-pro", variant: "high" },
-    description: "Complex problem-solving with unconventional, creative approaches - beyond standard patterns",
-    promptAppend: ARTISTRY_CATEGORY_PROMPT_APPEND,
-  },
-]
+	{
+		name: "visual-engineering",
+		config: { model: "google/gemini-3.1-pro", variant: "high" },
+		description: "Frontend, UI/UX, design, styling, animation",
+		promptAppend: VISUAL_CATEGORY_PROMPT_APPEND,
+	},
+	{
+		name: "artistry",
+		config: { model: "google/gemini-3.1-pro", variant: "high" },
+		description: "Complex problem-solving with unconventional, creative approaches - beyond standard patterns",
+		promptAppend: ARTISTRY_CATEGORY_PROMPT_APPEND,
+	},
+];

@@ -25,113 +25,99 @@
  * (sst/opencode#19127).
  */
 
-import { DEFAULT_AGENT_ORDER, resolveAgentOrderDisplayNames } from "./agent-ordering"
-import { getAgentListDisplayName } from "./agent-display-names"
+import { getAgentListDisplayName } from "./agent-display-names";
+import { DEFAULT_AGENT_ORDER, resolveAgentOrderDisplayNames } from "./agent-ordering";
 
-let agentRank: ReadonlyMap<string, number> = createAgentRank(undefined)
-const AGENT_ARRAY_SENTINELS = new Set(
-  DEFAULT_AGENT_ORDER.map((configKey) => getAgentListDisplayName(configKey)),
-)
+let agentRank: ReadonlyMap<string, number> = createAgentRank(undefined);
+const AGENT_ARRAY_SENTINELS = new Set(DEFAULT_AGENT_ORDER.map((configKey) => getAgentListDisplayName(configKey)));
 
-const UNRANKED = Number.MAX_SAFE_INTEGER
+const UNRANKED = Number.MAX_SAFE_INTEGER;
 
 function extractAgentName(value: unknown): string {
-  if (value === null || typeof value !== "object") return ""
-  const candidate = value as { name?: unknown }
-  return typeof candidate.name === "string" ? candidate.name : ""
+	if (value === null || typeof value !== "object") return "";
+	const candidate = value as { name?: unknown };
+	return typeof candidate.name === "string" ? candidate.name : "";
 }
 
 function isAgentArray(arr: ReadonlyArray<unknown>): boolean {
-  if (arr.length < 2) return false
+	if (arr.length < 2) return false;
 
-  let rankedCount = 0
-  for (const element of arr) {
-    if (element === null || typeof element !== "object") return false
-    const name = (element as { name?: unknown }).name
-    if (typeof name !== "string") return false
-    if (AGENT_ARRAY_SENTINELS.has(name)) rankedCount++
-  }
+	let rankedCount = 0;
+	for (const element of arr) {
+		if (element === null || typeof element !== "object") return false;
+		const name = (element as { name?: unknown }).name;
+		if (typeof name !== "string") return false;
+		if (AGENT_ARRAY_SENTINELS.has(name)) rankedCount++;
+	}
 
-  return rankedCount >= 2
+	return rankedCount >= 2;
 }
 
-function agentComparator(
-  a: unknown,
-  b: unknown,
-  fallback: ((a: unknown, b: unknown) => number) | undefined,
-): number {
-  const aRank = agentRank.get(extractAgentName(a)) ?? UNRANKED
-  const bRank = agentRank.get(extractAgentName(b)) ?? UNRANKED
+function agentComparator(a: unknown, b: unknown, fallback: ((a: unknown, b: unknown) => number) | undefined): number {
+	const aRank = agentRank.get(extractAgentName(a)) ?? UNRANKED;
+	const bRank = agentRank.get(extractAgentName(b)) ?? UNRANKED;
 
-  if (aRank !== bRank) return aRank - bRank
-  if (fallback) return fallback(a, b)
-  return 0
+	if (aRank !== bRank) return aRank - bRank;
+	if (fallback) return fallback(a, b);
+	return 0;
 }
 
-let installed = false
+let installed = false;
 
 function createAgentRank(agentOrder: readonly string[] | undefined): ReadonlyMap<string, number> {
-  return new Map(
-    resolveAgentOrderDisplayNames(agentOrder).map(
-      (displayName, index): [string, number] => [displayName, index + 1],
-    ),
-  )
+	return new Map(
+		resolveAgentOrderDisplayNames(agentOrder).map((displayName, index): [string, number] => [displayName, index + 1]),
+	);
 }
 
 export function setAgentSortOrder(agentOrder: readonly string[] | undefined): void {
-  agentRank = createAgentRank(agentOrder)
+	agentRank = createAgentRank(agentOrder);
 }
 
 export function setDefaultAgentForSort(agentName: string | undefined): void {
-  if (!agentName) return
-  if (agentRank.get(agentName) === 0) return
-  const updated = new Map<string, number>()
-  updated.set(agentName, 0)
-  for (const [key, rank] of agentRank) {
-    if (key !== agentName) updated.set(key, rank + 1)
-  }
-  agentRank = updated
+	if (!agentName) return;
+	if (agentRank.get(agentName) === 0) return;
+	const updated = new Map<string, number>();
+	updated.set(agentName, 0);
+	for (const [key, rank] of agentRank) {
+		if (key !== agentName) updated.set(key, rank + 1);
+	}
+	agentRank = updated;
 }
 
 export function installAgentSortShim(): void {
-  if (installed) return
+	if (installed) return;
 
-  const originalToSorted = Array.prototype.toSorted
-  const originalSort = Array.prototype.sort
+	const originalToSorted = Array.prototype.toSorted;
+	const originalSort = Array.prototype.sort;
 
-  function patchedToSorted(
-    this: unknown[],
-    compareFn?: (a: unknown, b: unknown) => number,
-  ): unknown[] {
-    if (isAgentArray(this)) {
-      return originalToSorted.call(this, (a, b) => agentComparator(a, b, compareFn))
-    }
-    return originalToSorted.call(this, compareFn)
-  }
+	function patchedToSorted(this: unknown[], compareFn?: (a: unknown, b: unknown) => number): unknown[] {
+		if (isAgentArray(this)) {
+			return originalToSorted.call(this, (a, b) => agentComparator(a, b, compareFn));
+		}
+		return originalToSorted.call(this, compareFn);
+	}
 
-  function patchedSort(
-    this: unknown[],
-    compareFn?: (a: unknown, b: unknown) => number,
-  ): unknown[] {
-    if (isAgentArray(this)) {
-      return originalSort.call(this, (a, b) => agentComparator(a, b, compareFn))
-    }
-    return originalSort.call(this, compareFn)
-  }
+	function patchedSort(this: unknown[], compareFn?: (a: unknown, b: unknown) => number): unknown[] {
+		if (isAgentArray(this)) {
+			return originalSort.call(this, (a, b) => agentComparator(a, b, compareFn));
+		}
+		return originalSort.call(this, compareFn);
+	}
 
-  Object.defineProperty(Array.prototype, "toSorted", {
-    value: patchedToSorted,
-    configurable: true,
-    writable: true,
-    enumerable: false,
-  })
+	Object.defineProperty(Array.prototype, "toSorted", {
+		value: patchedToSorted,
+		configurable: true,
+		writable: true,
+		enumerable: false,
+	});
 
-  Object.defineProperty(Array.prototype, "sort", {
-    value: patchedSort,
-    configurable: true,
-    writable: true,
-    enumerable: false,
-  })
+	Object.defineProperty(Array.prototype, "sort", {
+		value: patchedSort,
+		configurable: true,
+		writable: true,
+		enumerable: false,
+	});
 
-  installed = true
+	installed = true;
 }

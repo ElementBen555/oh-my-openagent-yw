@@ -1,26 +1,23 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, test } from "bun:test";
 
-import {
-	transformModelForProvider,
-	transformModelForProviderDisplay,
-} from "./provider-model-id-transform"
+import { transformModelForProvider, transformModelForProviderDisplay } from "./provider-model-id-transform";
 
 describe("provider model ID transforms", () => {
 	test("preserves hyphenated Anthropic IDs for direct API calls", () => {
 		// #given Anthropic model IDs in config-display form
-		const provider = "anthropic"
-		const models = ["claude-haiku-4-5", "claude-opus-4-7"] as const
+		const provider = "anthropic";
+		const models = ["claude-haiku-4-5", "claude-opus-4-7"] as const;
 
 		for (const model of models) {
 			// #when both model-core transform variants are called
-			const apiResult = transformModelForProvider(provider, model)
-			const displayResult = transformModelForProviderDisplay(provider, model)
+			const apiResult = transformModelForProvider(provider, model);
+			const displayResult = transformModelForProviderDisplay(provider, model);
 
 			// #then direct Anthropic calls keep the strict provider model ID
-			expect(apiResult).toBe(model)
-			expect(displayResult).toBe(model)
+			expect(apiResult).toBe(model);
+			expect(displayResult).toBe(model);
 		}
-	})
+	});
 
 	test("keeps dotted Claude versions for gateway providers", () => {
 		// #given gateway providers that expect Claude version aliases
@@ -45,16 +42,16 @@ describe("provider model ID transforms", () => {
 				model: "anthropic/claude-opus-4-7",
 				expected: "anthropic/claude-opus-4.7",
 			},
-		] as const
+		] as const;
 
 		for (const scenario of scenarios) {
 			// #when a gateway transform is applied
-			const result = transformModelForProvider(scenario.provider, scenario.model)
+			const result = transformModelForProvider(scenario.provider, scenario.model);
 
 			// #then the gateway receives its dotted Claude version form
-			expect(result).toBe(scenario.expected)
+			expect(result).toBe(scenario.expected);
 		}
-	})
+	});
 
 	test("produces identical results for non-Anthropic providers", () => {
 		// #given non-Anthropic provider/model pairs
@@ -63,21 +60,15 @@ describe("provider model ID transforms", () => {
 			{ provider: "google", model: "gemini-2.5-pro" },
 			{ provider: "github-copilot", model: "gemini-3-flash" },
 			{ provider: "vercel", model: "claude-opus-4-7" },
-		] as const
+		] as const;
 
 		for (const scenario of scenarios) {
 			// #when both transform variants are called
-			const apiResult = transformModelForProvider(
-				scenario.provider,
-				scenario.model,
-			)
-			const displayResult = transformModelForProviderDisplay(
-				scenario.provider,
-				scenario.model,
-			)
+			const apiResult = transformModelForProvider(scenario.provider, scenario.model);
+			const displayResult = transformModelForProviderDisplay(scenario.provider, scenario.model);
 
 			// #then the variants match outside the direct Anthropic provider branch
-			expect(displayResult).toBe(apiResult)
+			expect(displayResult).toBe(apiResult);
 		}
-	})
-})
+	});
+});

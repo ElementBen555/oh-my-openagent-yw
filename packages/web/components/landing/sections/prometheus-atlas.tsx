@@ -1,6 +1,6 @@
-import type { JSX } from "react"
+import { ArrowRight, Brain, Layers } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { Brain, Layers, ArrowRight } from "lucide-react"
+import type { JSX } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 

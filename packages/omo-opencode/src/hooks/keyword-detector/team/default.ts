@@ -1,4 +1,4 @@
-import { TEAM_MODE_PROMPT } from "@oh-my-opencode/prompts-core"
+import { TEAM_MODE_PROMPT } from "@oh-my-opencode/prompts-core";
 
 /**
  * Team mode keyword detector.
@@ -7,6 +7,6 @@ import { TEAM_MODE_PROMPT } from "@oh-my-opencode/prompts-core"
  *   team mode, team-mode, team_mode, teammode (case-insensitive)
  */
 
-export const TEAM_PATTERN = /\bteam[\s_-]?mode\b/i
+export const TEAM_PATTERN = /\bteam[\s_-]?mode\b/i;
 
-export const TEAM_MESSAGE = TEAM_MODE_PROMPT
+export const TEAM_MESSAGE = TEAM_MODE_PROMPT;

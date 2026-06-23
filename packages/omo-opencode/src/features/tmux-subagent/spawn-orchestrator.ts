@@ -1,0 +1,30 @@
+export {
+	beginPendingSession,
+	canAutoActivatePane,
+	cleanupIsolatedContainerAfterSessionDeletion,
+	closeSessionById,
+	closeSessionFromPolling,
+	closeTrackedSession,
+	closeTrackedSessionPane,
+	enqueueSpawn,
+	ensureSessionReadyBeforeSpawn,
+	finalizeForceRemoveCandidate,
+	finalizeTrackedSessionClose,
+	getEventSessionId,
+	getSessionStatusType,
+	markSessionClosePending,
+	queryWindowStateSafely,
+	reassignIsolatedContainerAnchor,
+	removeTrackedSession,
+	retryPendingCloses,
+	SpawnContext,
+	spawnInIsolatedContainer,
+	spawnPendingSession,
+	windowStateContainsPane,
+} from "./spawn-close";
+
+export {
+	retryFailedReadinessSession,
+	shouldSkipRespawnAfterPollingClose,
+	tryAttachDeferredSession,
+} from "./spawn-deferred";

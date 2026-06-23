@@ -1,13 +1,13 @@
-export { playwrightSkill, agentBrowserSkill } from "./playwright"
-export { playwrightCliSkill } from "./playwright-cli"
-export { frontendSkill } from "./frontend"
-export { gitMasterSkill } from "./git-master"
-export { devBrowserSkill } from "./dev-browser"
-export { reviewWorkSkill } from "./review-work"
-export { removeAiSlopsSkill } from "./remove-ai-slops"
-export { initDeepSkill } from "./init-deep"
-export { debuggingSkill } from "./debugging"
-export { securityResearchSkill } from "./security-research"
-export { securityReviewSkill } from "./security-review"
-export { visualQaSkill } from "./visual-qa"
-export * from "./team-mode"
+export { debuggingSkill } from "./debugging";
+export { devBrowserSkill } from "./dev-browser";
+export { frontendSkill } from "./frontend";
+export { gitMasterSkill } from "./git-master";
+export { initDeepSkill } from "./init-deep";
+export { agentBrowserSkill, playwrightSkill } from "./playwright";
+export { playwrightCliSkill } from "./playwright-cli";
+export { removeAiSlopsSkill } from "./remove-ai-slops";
+export { reviewWorkSkill } from "./review-work";
+export { securityResearchSkill } from "./security-research";
+export { securityReviewSkill } from "./security-review";
+export * from "./team-mode";
+export { visualQaSkill } from "./visual-qa";

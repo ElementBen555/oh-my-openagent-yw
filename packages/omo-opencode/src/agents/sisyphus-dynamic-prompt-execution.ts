@@ -1,7 +1,7 @@
 import type { SisyphusDynamicPromptSections } from "./sisyphus-dynamic-prompt-sections";
 
 export function renderExecutionSections(sections: SisyphusDynamicPromptSections): string {
-  return `## Phase 2B - Implementation
+	return `## Phase 2B - Implementation
 
 ### Pre-Implementation:
 0. Find relevant skills that you can load, and load them IMMEDIATELY.

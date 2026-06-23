@@ -7,53 +7,54 @@
  * falls back to a pure-JS implementation otherwise. No package-level dependency
  * on any specific runtime; the binding is detected via globalThis at call time.
  */
-export { NIBBLE_STR, HASHLINE_DICT, HASHLINE_REF_PATTERN, HASHLINE_OUTPUT_PATTERN } from "./constants"
-export type { ReplaceEdit, AppendEdit, PrependEdit, HashlineEdit } from "./types"
+
 export {
-  computeLineHash,
-  computeLegacyLineHash,
-  formatHashLine,
-  formatHashLines,
-  streamHashLinesFromUtf8,
-  streamHashLinesFromLines,
-} from "./hash-computation"
-export { parseLineRef, validateLineRef, validateLineRefs, HashlineMismatchError, normalizeLineRef } from "./validation"
-export type { LineRef } from "./validation"
-export { applyHashlineEdits, applyHashlineEditsWithReport } from "./edit-operations"
-export type { HashlineApplyReport } from "./edit-operations"
+	autocorrectReplacementLines,
+	maybeExpandSingleLineMerge,
+	restoreIndentForPairedReplacement,
+	restoreOldWrappedLines,
+	stripMergeOperatorChars,
+	stripTrailingContinuationTokens,
+} from "./autocorrect-replacement-lines";
+export { HASHLINE_DICT, HASHLINE_OUTPUT_PATTERN, HASHLINE_REF_PATTERN, NIBBLE_STR } from "./constants";
+export { countLineDiffs, generateUnifiedDiff, toHashlineContent } from "./diff-utils";
+export { dedupeEdits } from "./edit-deduplication";
 export {
-  applySetLine,
-  applyReplaceLines,
-  applyInsertAfter,
-  applyInsertBefore,
-  applyAppend,
-  applyPrepend,
-} from "./edit-operation-primitives"
-export { getEditLineNumber, collectLineRefs, detectOverlappingRanges } from "./edit-ordering"
-export { dedupeEdits } from "./edit-deduplication"
+	applyAppend,
+	applyInsertAfter,
+	applyInsertBefore,
+	applyPrepend,
+	applyReplaceLines,
+	applySetLine,
+} from "./edit-operation-primitives";
+export type { HashlineApplyReport } from "./edit-operations";
+export { applyHashlineEdits, applyHashlineEditsWithReport } from "./edit-operations";
+export { collectLineRefs, detectOverlappingRanges, getEditLineNumber } from "./edit-ordering";
 export {
-  stripLinePrefixes,
-  toNewLines,
-  restoreLeadingIndent,
-  stripInsertAnchorEcho,
-  stripInsertBeforeEcho,
-  stripInsertBoundaryEcho,
-  stripRangeBoundaryEcho,
-} from "./edit-text-normalization"
-export { canonicalizeFileText, restoreFileText } from "./file-text-canonicalization"
-export type { FileTextEnvelope } from "./file-text-canonicalization"
+	restoreLeadingIndent,
+	stripInsertAnchorEcho,
+	stripInsertBeforeEcho,
+	stripInsertBoundaryEcho,
+	stripLinePrefixes,
+	stripRangeBoundaryEcho,
+	toNewLines,
+} from "./edit-text-normalization";
+export type { FileTextEnvelope } from "./file-text-canonicalization";
+export { canonicalizeFileText, restoreFileText } from "./file-text-canonicalization";
+export type { HashlineStreamOptions } from "./hash-computation";
 export {
-  stripTrailingContinuationTokens,
-  stripMergeOperatorChars,
-  restoreOldWrappedLines,
-  maybeExpandSingleLineMerge,
-  restoreIndentForPairedReplacement,
-  autocorrectReplacementLines,
-} from "./autocorrect-replacement-lines"
-export { normalizeHashlineEdits } from "./normalize-edits"
-export type { RawHashlineEdit } from "./normalize-edits"
-export { createHashlineChunkFormatter } from "./hashline-chunk-formatter"
-export type { HashlineChunkFormatter } from "./hashline-chunk-formatter"
-export type { HashlineStreamOptions } from "./hash-computation"
-export { toHashlineContent, generateUnifiedDiff, countLineDiffs } from "./diff-utils"
-export { generateHashlineDiff } from "./hashline-edit-diff"
+	computeLegacyLineHash,
+	computeLineHash,
+	formatHashLine,
+	formatHashLines,
+	streamHashLinesFromLines,
+	streamHashLinesFromUtf8,
+} from "./hash-computation";
+export type { HashlineChunkFormatter } from "./hashline-chunk-formatter";
+export { createHashlineChunkFormatter } from "./hashline-chunk-formatter";
+export { generateHashlineDiff } from "./hashline-edit-diff";
+export type { RawHashlineEdit } from "./normalize-edits";
+export { normalizeHashlineEdits } from "./normalize-edits";
+export type { AppendEdit, HashlineEdit, PrependEdit, ReplaceEdit } from "./types";
+export type { LineRef } from "./validation";
+export { HashlineMismatchError, normalizeLineRef, parseLineRef, validateLineRef, validateLineRefs } from "./validation";

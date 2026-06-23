@@ -1,6 +1,6 @@
-import type { JSX } from "react"
-import { getTranslations } from "next-intl/server"
 import { Zap } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
 import { Section } from "@/components/ui/section"
 
 export async function TokenCostSection(): Promise<JSX.Element> {

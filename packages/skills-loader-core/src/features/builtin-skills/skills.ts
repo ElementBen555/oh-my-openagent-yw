@@ -1,41 +1,40 @@
-import type { BuiltinSkill } from "./types"
-import type { BrowserAutomationProvider } from "../../types"
-
+import type { BrowserAutomationProvider } from "../../types";
 import {
-  playwrightSkill,
-  agentBrowserSkill,
-  playwrightCliSkill,
-  frontendSkill,
-  gitMasterSkill,
-  devBrowserSkill,
-  initDeepSkill,
-  debuggingSkill,
-  removeAiSlopsSkill,
-  reviewWorkSkill,
-  securityResearchSkill,
-  securityReviewSkill,
-  visualQaSkill,
-  teamModeSkill,
-} from "./skills/index"
+	agentBrowserSkill,
+	debuggingSkill,
+	devBrowserSkill,
+	frontendSkill,
+	gitMasterSkill,
+	initDeepSkill,
+	playwrightCliSkill,
+	playwrightSkill,
+	removeAiSlopsSkill,
+	reviewWorkSkill,
+	securityResearchSkill,
+	securityReviewSkill,
+	teamModeSkill,
+	visualQaSkill,
+} from "./skills/index";
+import type { BuiltinSkill } from "./types";
 
 export interface CreateBuiltinSkillsOptions {
-  browserProvider?: BrowserAutomationProvider
-  disabledSkills?: Set<string>
-  teamModeEnabled?: boolean
+	browserProvider?: BrowserAutomationProvider;
+	disabledSkills?: Set<string>;
+	teamModeEnabled?: boolean;
 }
 
 export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): BuiltinSkill[] {
-  const { browserProvider = "playwright", disabledSkills, teamModeEnabled = false } = options
+	const { browserProvider = "playwright", disabledSkills, teamModeEnabled = false } = options;
 
-  let browserSkill: BuiltinSkill
+	let browserSkill: BuiltinSkill;
 	if (browserProvider === "agent-browser") {
-		browserSkill = agentBrowserSkill
+		browserSkill = agentBrowserSkill;
 	} else if (browserProvider === "dev-browser") {
-		browserSkill = devBrowserSkill
+		browserSkill = devBrowserSkill;
 	} else if (browserProvider === "playwright-cli") {
-		browserSkill = playwrightCliSkill
+		browserSkill = playwrightCliSkill;
 	} else {
-		browserSkill = playwrightSkill
+		browserSkill = playwrightSkill;
 	}
 
 	const skills = [
@@ -49,28 +48,28 @@ export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): B
 		securityResearchSkill,
 		securityReviewSkill,
 		visualQaSkill,
-	]
+	];
 
-  if (teamModeEnabled && !disabledSkills?.has("team-mode")) {
-    skills.push(teamModeSkill)
-  }
+	if (teamModeEnabled && !disabledSkills?.has("team-mode")) {
+		skills.push(teamModeSkill);
+	}
 
-  if (!disabledSkills) {
-    return skills
-  }
+	if (!disabledSkills) {
+		return skills;
+	}
 
-  return skills.filter((skill) => !disabledSkills.has(skill.name))
+	return skills.filter((skill) => !disabledSkills.has(skill.name));
 }
 
 export interface ResolveActiveBuiltinSkillsOptions extends CreateBuiltinSkillsOptions {
-  systemMcpNames: Set<string>
+	systemMcpNames: Set<string>;
 }
 
 export function resolveActiveBuiltinSkills(options: ResolveActiveBuiltinSkillsOptions): BuiltinSkill[] {
-  const { systemMcpNames, ...createOptions } = options
+	const { systemMcpNames, ...createOptions } = options;
 
-  return createBuiltinSkills(createOptions).filter((skill) => {
-    if (!skill.mcpConfig) return true
-    return !Object.keys(skill.mcpConfig).some((mcpName) => systemMcpNames.has(mcpName))
-  })
+	return createBuiltinSkills(createOptions).filter((skill) => {
+		if (!skill.mcpConfig) return true;
+		return !Object.keys(skill.mcpConfig).some((mcpName) => systemMcpNames.has(mcpName));
+	});
 }

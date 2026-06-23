@@ -145,4 +145,4 @@ git commit -m "refactor(scope): description
 
 ---
 
-`
+`;

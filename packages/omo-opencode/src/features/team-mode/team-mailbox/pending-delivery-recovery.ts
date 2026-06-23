@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-mailbox/pending-delivery-recovery"
+export * from "@oh-my-opencode/team-core/team-mailbox/pending-delivery-recovery";

@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/openclaw-core/dispatcher"
+export * from "@oh-my-opencode/openclaw-core/dispatcher";

@@ -5,11 +5,7 @@ import * as os from "node:os";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { RULES_INJECTOR_STORAGE } from "./constants";
-import {
-	clearParsedRuleCache,
-	createRuleInjectionProcessor,
-	getParsedRuleCacheStats,
-} from "./injector";
+import { clearParsedRuleCache, createRuleInjectionProcessor, getParsedRuleCacheStats } from "./injector";
 
 type StatSnapshot = { mtimeMs: number; size: number };
 
@@ -34,10 +30,7 @@ async function createProcessor(projectRoot: string): Promise<{
 		output: { title: string; output: string; metadata: unknown },
 	) => Promise<void>;
 }> {
-	const sessionCaches = new Map<
-		string,
-		{ contentHashes: Set<string>; realPaths: Set<string> }
-	>();
+	const sessionCaches = new Map<string, { contentHashes: Set<string>; realPaths: Set<string> }>();
 
 	return createRuleInjectionProcessor({
 		workspaceDirectory: projectRoot,
@@ -87,11 +80,9 @@ async function createProcessor(projectRoot: string): Promise<{
 			trackedShouldApplyRuleCount += 1;
 			return { applies: true, reason: "matched" };
 		},
-		isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) =>
-			cache.has(realPath),
+		isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) => cache.has(realPath),
 		createContentHash: (content: string) => `hash:${content}`,
-		isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) =>
-			cache.has(hash),
+		isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) => cache.has(hash),
 	});
 }
 
@@ -113,12 +104,7 @@ describe("createRuleInjectionProcessor", () => {
 		projectRoot = join(testRoot, "project");
 		homeRoot = join(testRoot, "home");
 		targetFile = join(projectRoot, "src", "index.ts");
-		ruleFile = join(
-			projectRoot,
-			".github",
-			"instructions",
-			"typescript.instructions.md",
-		);
+		ruleFile = join(projectRoot, ".github", "instructions", "typescript.instructions.md");
 
 		mkdirSync(join(projectRoot, ".git"), { recursive: true });
 		mkdirSync(join(projectRoot, "src"), { recursive: true });
@@ -154,16 +140,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedReadFileCount).toBe(1);
@@ -178,16 +156,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedReadFileCount).toBe(2);
@@ -202,16 +172,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedReadFileCount).toBe(2);
@@ -226,16 +188,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedShouldApplyRuleCount).toBe(1);
@@ -250,16 +204,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedShouldApplyRuleCount).toBe(2);
@@ -276,16 +222,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			secondTargetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(secondTargetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedShouldApplyRuleCount).toBe(2);
@@ -302,16 +240,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedReadFileCount).toBe(2);
@@ -343,11 +273,7 @@ describe("createRuleInjectionProcessor", () => {
 		});
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			sessionID,
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, sessionID, createOutput());
 
 		// then
 		expect(fs.existsSync(injectedPath)).toBe(false);
@@ -363,11 +289,7 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			sessionID,
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, sessionID, createOutput());
 
 		// then
 		expect(fs.existsSync(injectedPath)).toBe(true);
@@ -399,28 +321,22 @@ describe("createRuleInjectionProcessor", () => {
 			}),
 			homedir: () => homeRoot,
 			shouldApplyRule: () => ({ applies: true, reason: "matched" }),
-			isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) =>
-				cache.has(realPath),
+			isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) => cache.has(realPath),
 			createContentHash: (content: string) => `hash:${content}`,
-			isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) =>
-				cache.has(hash),
+			isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) => cache.has(hash),
 			saveInjectedRules: () => undefined,
 		});
 
 		// when
 		const output = createOutput();
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			output,
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", output);
 
 		// then
 		expect(output.output).toContain("[Rule: src/.omo/rules/nested.md]");
 		expect(output.output).toContain("[Rule: .omo/rules/root.md]");
-		expect(
-			output.output.indexOf("[Rule: src/.omo/rules/nested.md]"),
-		).toBeLessThan(output.output.indexOf("[Rule: .omo/rules/root.md]"));
+		expect(output.output.indexOf("[Rule: src/.omo/rules/nested.md]")).toBeLessThan(
+			output.output.indexOf("[Rule: .omo/rules/root.md]"),
+		);
 		expect(output.output).toContain("[Match: matched]\ntruncated:nested-rule");
 		expect(output.output).toContain(
 			"[Note: Content was truncated to save context window space. For full context, please read the file directly: src/.omo/rules/nested.md]",
@@ -433,16 +349,8 @@ describe("createRuleInjectionProcessor", () => {
 		const processor = await createProcessor(projectRoot);
 
 		// when
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-2",
-			createOutput(),
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", createOutput());
+		await processor.processFilePathForInjection(targetFile, "session-2", createOutput());
 
 		// then
 		expect(trackedReadFileCount).toBe(2);
@@ -476,11 +384,7 @@ describe("createRuleInjectionProcessor", () => {
 		});
 
 		// when
-		const process = processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			createOutput(),
-		);
+		const process = processor.processFilePathForInjection(targetFile, "session-1", createOutput());
 
 		// then
 		await expect(process).rejects.toBe(thrown);
@@ -488,12 +392,8 @@ describe("createRuleInjectionProcessor", () => {
 
 	it("#given transcript hydration reports prior rule banner #when same rule matches #then rule is skipped and cache absorbs the realPath", async () => {
 		// given
-		const hydratedRelativePath =
-			".github/instructions/typescript.instructions.md";
-		const sessionCaches = new Map<
-			string,
-			{ contentHashes: Set<string>; realPaths: Set<string> }
-		>();
+		const hydratedRelativePath = ".github/instructions/typescript.instructions.md";
+		const sessionCaches = new Map<string, { contentHashes: Set<string>; realPaths: Set<string> }>();
 		let savedSessionID: string | null = null;
 		const processor = createRuleInjectionProcessor({
 			workspaceDirectory: projectRoot,
@@ -516,11 +416,9 @@ describe("createRuleInjectionProcessor", () => {
 			},
 			homedir: () => homeRoot,
 			shouldApplyRule: () => ({ applies: true, reason: "matched" }),
-			isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) =>
-				cache.has(realPath),
+			isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) => cache.has(realPath),
 			createContentHash: (content: string) => `hash:${content}`,
-			isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) =>
-				cache.has(hash),
+			isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) => cache.has(hash),
 			saveInjectedRules: (sessionID: string) => {
 				savedSessionID = sessionID;
 			},
@@ -531,11 +429,7 @@ describe("createRuleInjectionProcessor", () => {
 
 		// when
 		const output = createOutput();
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			output,
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", output);
 
 		// then
 		expect(output.output).toBe("");
@@ -546,10 +440,7 @@ describe("createRuleInjectionProcessor", () => {
 
 	it("#given transcript hydration reports unrelated rule #when injecting #then rule is still injected", async () => {
 		// given
-		const sessionCaches = new Map<
-			string,
-			{ contentHashes: Set<string>; realPaths: Set<string> }
-		>();
+		const sessionCaches = new Map<string, { contentHashes: Set<string>; realPaths: Set<string> }>();
 		const processor = createRuleInjectionProcessor({
 			workspaceDirectory: projectRoot,
 			truncator: {
@@ -571,11 +462,9 @@ describe("createRuleInjectionProcessor", () => {
 			},
 			homedir: () => homeRoot,
 			shouldApplyRule: () => ({ applies: true, reason: "matched" }),
-			isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) =>
-				cache.has(realPath),
+			isDuplicateByRealPath: (realPath: string, cache: ReadonlySet<string>) => cache.has(realPath),
 			createContentHash: (content: string) => `hash:${content}`,
-			isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) =>
-				cache.has(hash),
+			isDuplicateByContentHash: (hash: string, cache: ReadonlySet<string>) => cache.has(hash),
 			transcriptHydration: {
 				hydrateSession: async () => new Set(["some/other/rule.md"]),
 			},
@@ -583,15 +472,9 @@ describe("createRuleInjectionProcessor", () => {
 
 		// when
 		const output = createOutput();
-		await processor.processFilePathForInjection(
-			targetFile,
-			"session-1",
-			output,
-		);
+		await processor.processFilePathForInjection(targetFile, "session-1", output);
 
 		// then
-		expect(output.output).toContain(
-			"[Rule: .github/instructions/typescript.instructions.md]",
-		);
+		expect(output.output).toContain("[Rule: .github/instructions/typescript.instructions.md]");
 	});
 });

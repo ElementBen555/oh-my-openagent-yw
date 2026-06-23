@@ -1,4 +1,4 @@
-export type ShellType = "unix" | "powershell" | "cmd" | "csh"
+export type ShellType = "unix" | "powershell" | "cmd" | "csh";
 
 /**
  * Detect the current shell type based on environment variables.
@@ -15,31 +15,29 @@ export type ShellType = "unix" | "powershell" | "cmd" | "csh"
  * because some PowerShell users set it manually.
  */
 export function detectShellType(): ShellType {
-  if (process.env.SHELL) {
-    const shell = process.env.SHELL
-    if (shell.includes("csh") || shell.includes("tcsh")) {
-      return "csh"
-    }
-    return "unix"
-  }
+	if (process.env.SHELL) {
+		const shell = process.env.SHELL;
+		if (shell.includes("csh") || shell.includes("tcsh")) {
+			return "csh";
+		}
+		return "unix";
+	}
 
-  // On Windows, detect Unix-compatible shells (Git Bash, WSL, MSYS2).
-  // PSModulePath is always set on Windows, so we must check these BEFORE it.
-  // Indicators are shell-specific — no broad signals like TERM.
-  if (
-    process.platform === "win32" &&
-    (process.env.BASH_VERSION ||
-      process.env.MSYSTEM ||
-      process.env.WSL_DISTRO_NAME)
-  ) {
-    return "unix"
-  }
+	// On Windows, detect Unix-compatible shells (Git Bash, WSL, MSYS2).
+	// PSModulePath is always set on Windows, so we must check these BEFORE it.
+	// Indicators are shell-specific — no broad signals like TERM.
+	if (
+		process.platform === "win32" &&
+		(process.env.BASH_VERSION || process.env.MSYSTEM || process.env.WSL_DISTRO_NAME)
+	) {
+		return "unix";
+	}
 
-  if (process.env.PSModulePath) {
-    return "powershell"
-  }
+	if (process.env.PSModulePath) {
+		return "powershell";
+	}
 
-  return process.platform === "win32" ? "cmd" : "unix"
+	return process.platform === "win32" ? "cmd" : "unix";
 }
 
 /**
@@ -50,28 +48,28 @@ export function detectShellType(): ShellType {
  * @returns Escaped value appropriate for the shell
  */
 export function shellEscape(value: string, shellType: ShellType): string {
-  if (value === "") {
-    return shellType === "cmd" ? '""' : "''"
-  }
+	if (value === "") {
+		return shellType === "cmd" ? '""' : "''";
+	}
 
-  switch (shellType) {
-    case "unix":
-    case "csh":
-      if (/[^a-zA-Z0-9_\-.:\/]/.test(value)) {
-        return `'${value.replace(/'/g, "'\\''")}'`
-      }
-      return value
+	switch (shellType) {
+		case "unix":
+		case "csh":
+			if (/[^a-zA-Z0-9_\-.:/]/.test(value)) {
+				return `'${value.replace(/'/g, "'\\''")}'`;
+			}
+			return value;
 
-    case "powershell":
-      return `'${value.replace(/'/g, "''")}'`
+		case "powershell":
+			return `'${value.replace(/'/g, "''")}'`;
 
-    case "cmd":
-      // Escape % first (for environment variable expansion), then " (for quoting)
-      return `"${value.replace(/%/g, '%%').replace(/"/g, '""')}"`
+		case "cmd":
+			// Escape % first (for environment variable expansion), then " (for quoting)
+			return `"${value.replace(/%/g, "%%").replace(/"/g, '""')}"`;
 
-    default:
-      return value
-  }
+		default:
+			return value;
+	}
 }
 
 /**
@@ -96,48 +94,37 @@ export function shellEscape(value: string, shellType: ShellType): string {
  * // => "set VAR1=\"val1\" && set VAR2=\"val2\" &&"
  * ```
  */
-export function buildEnvPrefix(
-  env: Record<string, string>,
-  shellType: ShellType
-): string {
-  const entries = Object.entries(env)
+export function buildEnvPrefix(env: Record<string, string>, shellType: ShellType): string {
+	const entries = Object.entries(env);
 
-  if (entries.length === 0) {
-    return ""
-  }
+	if (entries.length === 0) {
+		return "";
+	}
 
-  switch (shellType) {
-    case "unix": {
-      const assignments = entries
-        .map(([key, value]) => `${key}=${shellEscape(value, shellType)}`)
-        .join(" ")
-      return `export ${assignments};`
-    }
+	switch (shellType) {
+		case "unix": {
+			const assignments = entries.map(([key, value]) => `${key}=${shellEscape(value, shellType)}`).join(" ");
+			return `export ${assignments};`;
+		}
 
-    case "csh": {
-      const assignments = entries
-        .map(([key, value]) => `setenv ${key} ${shellEscape(value, shellType)}`)
-        .join("; ")
-      return `${assignments};`
-    }
+		case "csh": {
+			const assignments = entries.map(([key, value]) => `setenv ${key} ${shellEscape(value, shellType)}`).join("; ");
+			return `${assignments};`;
+		}
 
-    case "powershell": {
-      const assignments = entries
-        .map(([key, value]) => `$env:${key}=${shellEscape(value, shellType)}`)
-        .join("; ")
-      return `${assignments};`
-    }
+		case "powershell": {
+			const assignments = entries.map(([key, value]) => `$env:${key}=${shellEscape(value, shellType)}`).join("; ");
+			return `${assignments};`;
+		}
 
-    case "cmd": {
-      const assignments = entries
-        .map(([key, value]) => `set ${key}=${shellEscape(value, shellType)}`)
-        .join(" && ")
-      return `${assignments} &&`
-    }
+		case "cmd": {
+			const assignments = entries.map(([key, value]) => `set ${key}=${shellEscape(value, shellType)}`).join(" && ");
+			return `${assignments} &&`;
+		}
 
-    default:
-      return ""
-  }
+		default:
+			return "";
+	}
 }
 
 /**
@@ -166,8 +153,8 @@ export function buildEnvPrefix(
  * const cmd = `/bin/sh -c "opencode attach ${escaped} --session ${sessionId}"`
  * ```
  */
-export { shellEscapeForDoubleQuotedCommand } from "@oh-my-opencode/utils"
+export { shellEscapeForDoubleQuotedCommand } from "@oh-my-opencode/utils";
 
 export function shellSingleQuote(value: string): string {
-  return `'${value.replace(/'/g, "'\\''")}'`
+	return `'${value.replace(/'/g, "'\\''")}'`;
 }

@@ -1,8 +1,4 @@
-import type {
-	DynamicTruncator,
-	RuleToInject,
-	ToolExecuteOutput,
-} from "./injection-types";
+import type { DynamicTruncator, RuleToInject, ToolExecuteOutput } from "./injection-types";
 
 export async function appendInjectedRulesToOutput(
 	output: ToolExecuteOutput,
@@ -13,10 +9,7 @@ export async function appendInjectedRulesToOutput(
 	rules.sort((a, b) => a.distance - b.distance);
 
 	for (const rule of rules) {
-		const { result, truncated } = await truncator.truncate(
-			sessionID,
-			rule.content,
-		);
+		const { result, truncated } = await truncator.truncate(sessionID, rule.content);
 		const truncationNotice = truncated
 			? `\n\n[Note: Content was truncated to save context window space. For full context, please read the file directly: ${rule.relativePath}]`
 			: "";

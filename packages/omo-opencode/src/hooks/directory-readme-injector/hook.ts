@@ -6,75 +6,75 @@ import { processFilePathForReadmeInjection } from "./injector";
 import { clearInjectedPaths } from "./storage";
 
 interface ToolExecuteInput {
-  tool: string;
-  sessionID: string;
-  callID: string;
+	tool: string;
+	sessionID: string;
+	callID: string;
 }
 
 interface ToolExecuteOutput {
-  title: string;
-  output: string;
-  metadata: unknown;
+	title: string;
+	output: string;
+	metadata: unknown;
 }
 
 interface DirectoryReadmeInjectorHook {
-  "tool.execute.before"?: (input: ToolExecuteInput, output: { args: unknown }) => Promise<void>;
-  "tool.execute.after": (input: ToolExecuteInput, output: ToolExecuteOutput) => Promise<void>;
-  event: (input: EventInput) => Promise<void>;
+	"tool.execute.before"?: (input: ToolExecuteInput, output: { args: unknown }) => Promise<void>;
+	"tool.execute.after": (input: ToolExecuteInput, output: ToolExecuteOutput) => Promise<void>;
+	event: (input: EventInput) => Promise<void>;
 }
 
 interface EventInput {
-  event: {
-    type: string;
-    properties?: unknown;
-  };
+	event: {
+		type: string;
+		properties?: unknown;
+	};
 }
 
 export function createDirectoryReadmeInjectorHook(
-  ctx: PluginInput,
-  modelCacheState?: { anthropicContext1MEnabled: boolean },
+	ctx: PluginInput,
+	modelCacheState?: { anthropicContext1MEnabled: boolean },
 ): DirectoryReadmeInjectorHook {
-  const sessionCaches = new Map<string, Set<string>>();
-  const truncator = createDynamicTruncator(ctx, modelCacheState);
+	const sessionCaches = new Map<string, Set<string>>();
+	const truncator = createDynamicTruncator(ctx, modelCacheState);
 
-  const toolExecuteAfter = async (input: ToolExecuteInput, output: ToolExecuteOutput) => {
-    const toolName = input.tool.toLowerCase();
+	const toolExecuteAfter = async (input: ToolExecuteInput, output: ToolExecuteOutput) => {
+		const toolName = input.tool.toLowerCase();
 
-    if (toolName === "read") {
-      await processFilePathForReadmeInjection({
-        ctx,
-        truncator,
-        sessionCaches,
-        filePath: output.title,
-        sessionID: input.sessionID,
-        output,
-      });
-      return;
-    }
-  };
+		if (toolName === "read") {
+			await processFilePathForReadmeInjection({
+				ctx,
+				truncator,
+				sessionCaches,
+				filePath: output.title,
+				sessionID: input.sessionID,
+				output,
+			});
+			return;
+		}
+	};
 
-  const eventHandler = async ({ event }: EventInput) => {
-    const props = event.properties as Record<string, unknown> | undefined;
+	const eventHandler = async ({ event }: EventInput) => {
+		const props = event.properties as Record<string, unknown> | undefined;
 
-    if (event.type === "session.deleted") {
-      const sessionID = resolveSessionEventID(props);
-      if (sessionID) {
-        sessionCaches.delete(sessionID);
-        clearInjectedPaths(sessionID);
-      }
-    }
+		if (event.type === "session.deleted") {
+			const sessionID = resolveSessionEventID(props);
+			if (sessionID) {
+				sessionCaches.delete(sessionID);
+				clearInjectedPaths(sessionID);
+			}
+		}
 
-    if (event.type === "session.compacted") {
-      const sessionID = resolveSessionEventID(props);
-      if (sessionID) {
-        sessionCaches.delete(sessionID);
-        clearInjectedPaths(sessionID);
-      }
-    }
-  };
+		if (event.type === "session.compacted") {
+			const sessionID = resolveSessionEventID(props);
+			if (sessionID) {
+				sessionCaches.delete(sessionID);
+				clearInjectedPaths(sessionID);
+			}
+		}
+	};
 
-  return {
-    "tool.execute.after": toolExecuteAfter,
-    event: eventHandler,
-  };
+	return {
+		"tool.execute.after": toolExecuteAfter,
+		event: eventHandler,
+	};
 }

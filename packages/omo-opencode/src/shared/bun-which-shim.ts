@@ -1,1 +1,1 @@
-export { bunWhich } from "@oh-my-opencode/utils/runtime"
+export { bunWhich } from "@oh-my-opencode/utils/runtime";

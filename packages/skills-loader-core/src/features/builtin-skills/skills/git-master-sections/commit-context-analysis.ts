@@ -141,4 +141,4 @@ ELSE IF pushed but not merged:
   -> STRATEGY = CAREFUL_REWRITE
   -> Fixup OK but warn about force push
 \`\`\`
-</branch_analysis>`
+</branch_analysis>`;

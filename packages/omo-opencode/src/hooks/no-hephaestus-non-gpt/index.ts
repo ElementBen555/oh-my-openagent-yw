@@ -1,1 +1,1 @@
-export { createNoHephaestusNonGptHook } from "./hook"
+export { createNoHephaestusNonGptHook } from "./hook";

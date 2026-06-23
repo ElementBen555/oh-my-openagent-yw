@@ -1,9 +1,17 @@
-import { z } from "zod"
+import { z } from "zod";
 
-export const McpNameSchema = z.enum(["websearch", "context7", "grep_app", "lsp", "codegraph", "sequential_thinking", "github"])
+export const McpNameSchema = z.enum([
+	"websearch",
+	"context7",
+	"grep_app",
+	"lsp",
+	"codegraph",
+	"sequential_thinking",
+	"github",
+]);
 
-export type McpName = z.infer<typeof McpNameSchema>
+export type McpName = z.infer<typeof McpNameSchema>;
 
-export const AnyMcpNameSchema = z.string().min(1)
+export const AnyMcpNameSchema = z.string().min(1);
 
-export type AnyMcpName = z.infer<typeof AnyMcpNameSchema>
+export type AnyMcpName = z.infer<typeof AnyMcpNameSchema>;

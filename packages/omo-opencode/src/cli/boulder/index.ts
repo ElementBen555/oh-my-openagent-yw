@@ -1,1 +1,1 @@
-export { boulder } from "./boulder"
+export { boulder } from "./boulder";

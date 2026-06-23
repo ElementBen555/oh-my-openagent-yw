@@ -1,9 +1,9 @@
-import type { DelegateTaskArgs } from "./types"
+import type { DelegateTaskArgs } from "./types";
 
 export function getPersistedBackgroundTaskDescription(args: DelegateTaskArgs, agent: string): string {
-  if (args.descriptionSource === "generated") {
-    return `${agent} background task`
-  }
+	if (args.descriptionSource === "generated") {
+		return `${agent} background task`;
+	}
 
-  return args.description
+	return args.description;
 }

@@ -1,42 +1,45 @@
-import type { AvailableCategory, AvailableSkill } from "../../agents/dynamic-agent-prompt-builder"
-import { mergeCategories } from "../../shared/merge-categories"
-import { CATEGORY_DESCRIPTIONS } from "./constants"
-import type { DelegateTaskToolOptions } from "./types"
+import type { AvailableCategory, AvailableSkill } from "../../agents/dynamic-agent-prompt-builder";
+import { mergeCategories } from "../../shared/merge-categories";
+import { CATEGORY_DESCRIPTIONS } from "./constants";
+import type { DelegateTaskToolOptions } from "./types";
 
 export interface DelegateTaskPresentation {
-  availableCategories: AvailableCategory[]
-  availableSkills: AvailableSkill[]
-  categoryExamples: string
-  description: string
+	availableCategories: AvailableCategory[];
+	availableSkills: AvailableSkill[];
+	categoryExamples: string;
+	description: string;
 }
 
 export function createDelegateTaskPresentation(options: DelegateTaskToolOptions): DelegateTaskPresentation {
-  const { userCategories } = options
-  const allCategories = mergeCategories(userCategories)
-  const categoryEntries = Object.entries(allCategories).map(([name, categoryConfig]) => ({
-    name,
-    categoryConfig,
-    description: userCategories?.[name]?.description || CATEGORY_DESCRIPTIONS[name],
-  }))
-  const categoryNames = categoryEntries.map(({ name }) => name)
-  const categoryExamples = categoryNames.join(", ")
+	const { userCategories } = options;
+	const allCategories = mergeCategories(userCategories);
+	const categoryEntries = Object.entries(allCategories).map(([name, categoryConfig]) => ({
+		name,
+		categoryConfig,
+		description: userCategories?.[name]?.description || CATEGORY_DESCRIPTIONS[name],
+	}));
+	const categoryNames = categoryEntries.map(({ name }) => name);
+	const categoryExamples = categoryNames.join(", ");
 
-  const availableCategories: AvailableCategory[] = options.availableCategories
-    ?? categoryEntries.map(({ name, categoryConfig, description }) => {
-      return {
-        name,
-        description: description || "General tasks",
-        model: categoryConfig.model,
-      }
-    })
+	const availableCategories: AvailableCategory[] =
+		options.availableCategories ??
+		categoryEntries.map(({ name, categoryConfig, description }) => {
+			return {
+				name,
+				description: description || "General tasks",
+				model: categoryConfig.model,
+			};
+		});
 
-  const availableSkills: AvailableSkill[] = options.availableSkills ?? []
+	const availableSkills: AvailableSkill[] = options.availableSkills ?? [];
 
-  const categoryList = categoryEntries.map(({ name, description }) => {
-    return description ? `  - ${name}: ${description}` : `  - ${name}`
-  }).join("\n")
+	const categoryList = categoryEntries
+		.map(({ name, description }) => {
+			return description ? `  - ${name}: ${description}` : `  - ${name}`;
+		})
+		.join("\n");
 
-  const description = `Spawn agent task with category-based or direct agent selection.
+	const description = `Spawn agent task with category-based or direct agent selection.
 
   ⚠️  CRITICAL: You MUST provide EITHER category OR subagent_type. Omitting BOTH will FAIL.
 
@@ -76,12 +79,12 @@ export function createDelegateTaskPresentation(options: DelegateTaskToolOptions)
   - Need follow-up on previous result → \`task(task_id="ses_...", prompt="Also: [question]")\`
   - Multi-turn conversation with same agent → always \`task(task_id="ses_...")\` instead of new task
 
-  Prompts MUST be in English.`
+  Prompts MUST be in English.`;
 
-  return {
-    availableCategories,
-    availableSkills,
-    categoryExamples,
-    description,
-  }
+	return {
+		availableCategories,
+		availableSkills,
+		categoryExamples,
+		description,
+	};
 }

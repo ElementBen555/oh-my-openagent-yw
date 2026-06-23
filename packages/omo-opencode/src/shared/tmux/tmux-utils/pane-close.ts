@@ -1,10 +1,7 @@
-import {
-  closeTmuxPaneWithDependencies,
-  type CloseTmuxPaneDependencies,
-} from "@oh-my-opencode/tmux-core"
+import { type CloseTmuxPaneDependencies, closeTmuxPaneWithDependencies } from "@oh-my-opencode/tmux-core";
 
 function delay(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+	return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 export async function closeTmuxPane(paneId: string): Promise<boolean> {
@@ -13,7 +10,7 @@ export async function closeTmuxPane(paneId: string): Promise<boolean> {
 		import("./environment"),
 		import("../../../tools/interactive-bash/tmux-path-resolver"),
 		import("../runner"),
-	])
+	]);
 
 	return closeTmuxPaneWithDependencies(paneId, {
 		isInsideTmux,
@@ -21,8 +18,8 @@ export async function closeTmuxPane(paneId: string): Promise<boolean> {
 		runTmuxCommand,
 		log,
 		delay,
-	})
+	});
 }
 
-export { closeTmuxPaneWithDependencies }
-export type { CloseTmuxPaneDependencies }
+export type { CloseTmuxPaneDependencies };
+export { closeTmuxPaneWithDependencies };

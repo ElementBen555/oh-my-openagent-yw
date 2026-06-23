@@ -1,94 +1,94 @@
-import { isRecord } from "@oh-my-opencode/utils"
-import type { TransformPart } from "./types"
+import { isRecord } from "@oh-my-opencode/utils";
+import type { TransformPart } from "./types";
 
-export { isRecord }
+export { isRecord };
 
-const TERMINAL_OPENCODE_TOOL_STATUSES = new Set(["completed", "error"])
+const TERMINAL_OPENCODE_TOOL_STATUSES = new Set(["completed", "error"]);
 
 function isTerminalOpenCodeToolPart(part: TransformPart): boolean {
-  if (!isRecord(part)) {
-    return false
-  }
+	if (!isRecord(part)) {
+		return false;
+	}
 
-  const candidate = part
-  if (candidate.type !== "tool" || typeof candidate.callID !== "string" || candidate.callID.length === 0) {
-    return false
-  }
+	const candidate = part;
+	if (candidate.type !== "tool" || typeof candidate.callID !== "string" || candidate.callID.length === 0) {
+		return false;
+	}
 
-  if (!isRecord(candidate.state)) {
-    return false
-  }
+	if (!isRecord(candidate.state)) {
+		return false;
+	}
 
-  const status = candidate.state["status"]
-  return typeof status === "string" && TERMINAL_OPENCODE_TOOL_STATUSES.has(status)
+	const status = candidate.state["status"];
+	return typeof status === "string" && TERMINAL_OPENCODE_TOOL_STATUSES.has(status);
 }
 
 export function getToolUseID(part: TransformPart): string | null {
-  if (!isRecord(part)) {
-    return null
-  }
+	if (!isRecord(part)) {
+		return null;
+	}
 
-  const candidate = part
+	const candidate = part;
 
-  if (candidate.type === "tool_use" && typeof candidate.id === "string" && candidate.id.length > 0) {
-    return candidate.id
-  }
+	if (candidate.type === "tool_use" && typeof candidate.id === "string" && candidate.id.length > 0) {
+		return candidate.id;
+	}
 
-  if (candidate.type === "tool" && typeof candidate.callID === "string" && candidate.callID.length > 0) {
-    return isTerminalOpenCodeToolPart(part) ? null : candidate.callID
-  }
+	if (candidate.type === "tool" && typeof candidate.callID === "string" && candidate.callID.length > 0) {
+		return isTerminalOpenCodeToolPart(part) ? null : candidate.callID;
+	}
 
-  return null
+	return null;
 }
 
 export function getToolResultID(part: TransformPart): string | null {
-  if (!isRecord(part)) {
-    return null
-  }
+	if (!isRecord(part)) {
+		return null;
+	}
 
-  const candidate = part
+	const candidate = part;
 
-  if (candidate.type !== "tool_result") {
-    return null
-  }
+	if (candidate.type !== "tool_result") {
+		return null;
+	}
 
-  if (typeof candidate.toolUseId === "string" && candidate.toolUseId.length > 0) {
-    return candidate.toolUseId
-  }
+	if (typeof candidate.toolUseId === "string" && candidate.toolUseId.length > 0) {
+		return candidate.toolUseId;
+	}
 
-  if (typeof candidate.tool_use_id === "string" && candidate.tool_use_id.length > 0) {
-    return candidate.tool_use_id
-  }
+	if (typeof candidate.tool_use_id === "string" && candidate.tool_use_id.length > 0) {
+		return candidate.tool_use_id;
+	}
 
-  return null
+	return null;
 }
 
 export function extractUniqueToolUseIDs(parts: TransformPart[]): string[] {
-  const seen = new Set<string>()
-  const toolUseIDs: string[] = []
+	const seen = new Set<string>();
+	const toolUseIDs: string[] = [];
 
-  for (const part of parts) {
-    const toolUseID = getToolUseID(part)
-    if (!toolUseID || seen.has(toolUseID)) {
-      continue
-    }
+	for (const part of parts) {
+		const toolUseID = getToolUseID(part);
+		if (!toolUseID || seen.has(toolUseID)) {
+			continue;
+		}
 
-    seen.add(toolUseID)
-    toolUseIDs.push(toolUseID)
-  }
+		seen.add(toolUseID);
+		toolUseIDs.push(toolUseID);
+	}
 
-  return toolUseIDs
+	return toolUseIDs;
 }
 
 export function extractToolResultIDs(parts: TransformPart[]): Set<string> {
-  const toolResultIDs = new Set<string>()
+	const toolResultIDs = new Set<string>();
 
-  for (const part of parts) {
-    const toolResultID = getToolResultID(part)
-    if (toolResultID) {
-      toolResultIDs.add(toolResultID)
-    }
-  }
+	for (const part of parts) {
+		const toolResultID = getToolResultID(part);
+		if (toolResultID) {
+			toolResultIDs.add(toolResultID);
+		}
+	}
 
-  return toolResultIDs
+	return toolResultIDs;
 }

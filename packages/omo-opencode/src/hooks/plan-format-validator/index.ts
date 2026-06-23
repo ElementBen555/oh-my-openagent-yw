@@ -1,1 +1,1 @@
-export { createPlanFormatValidatorHook } from "./hook"
+export { createPlanFormatValidatorHook } from "./hook";

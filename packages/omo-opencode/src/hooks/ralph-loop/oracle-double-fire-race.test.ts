@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
-import { createRalphLoopHook } from "./index"
-import { clearState, writeState } from "./storage"
-import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value"
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value";
+import { createRalphLoopHook } from "./index";
+import { clearState, writeState } from "./storage";
 
 // Regression lock for Race A: Oracle verification fires twice during ULW loop.
 //
@@ -34,79 +34,82 @@ import { unsafeTestValue } from "../../../../../test-support/unsafe-test-value"
 // stamped a dispatch and the Oracle is mid-execution. The handler must wait
 // instead of declaring failure.
 describe("ulw-loop oracle double-fire race (Race A)", () => {
-	const testDir = join(tmpdir(), `oracle-double-fire-race-${Date.now()}`)
-	let promptCalls: Array<{ sessionID: string; text: string }>
-	let toastCalls: Array<{ title: string; message: string; variant: string }>
-	let abortCalls: Array<{ id: string }>
-	let parentTranscriptPath: string
-	let oracleTranscriptPath: string
+	const testDir = join(tmpdir(), `oracle-double-fire-race-${Date.now()}`);
+	let promptCalls: Array<{ sessionID: string; text: string }>;
+	let toastCalls: Array<{ title: string; message: string; variant: string }>;
+	let abortCalls: Array<{ id: string }>;
+	let parentTranscriptPath: string;
+	let oracleTranscriptPath: string;
 
 	function createMockPluginInput() {
 		return unsafeTestValue<Parameters<typeof createRalphLoopHook>[0]>({
 			client: {
 				session: {
-					promptAsync: async (opts: { path: { id: string }; body: { parts: Array<{ type: string; text: string }> } }) => {
+					promptAsync: async (opts: {
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
+					}) => {
 						promptCalls.push({
 							sessionID: opts.path.id,
 							text: opts.body.parts[0].text,
-						})
-						return {}
+						});
+						return {};
 					},
 					messages: async () => ({ data: [] }),
 					abort: async (opts: { path: { id: string } }) => {
-						abortCalls.push({ id: opts.path.id })
-						return {}
+						abortCalls.push({ id: opts.path.id });
+						return {};
 					},
 				},
 				tui: {
 					showToast: async (opts: { body: { title: string; message: string; variant: string } }) => {
-						toastCalls.push(opts.body)
-						return {}
+						toastCalls.push(opts.body);
+						return {};
 					},
 				},
 			},
 			directory: testDir,
-		})
+		});
 	}
 
 	beforeEach(() => {
-		promptCalls = []
-		toastCalls = []
-		abortCalls = []
-		parentTranscriptPath = join(testDir, "transcript-parent.jsonl")
-		oracleTranscriptPath = join(testDir, "transcript-oracle.jsonl")
+		promptCalls = [];
+		toastCalls = [];
+		abortCalls = [];
+		parentTranscriptPath = join(testDir, "transcript-parent.jsonl");
+		oracleTranscriptPath = join(testDir, "transcript-oracle.jsonl");
 
 		if (!existsSync(testDir)) {
-			mkdirSync(testDir, { recursive: true })
+			mkdirSync(testDir, { recursive: true });
 		}
 
-		clearState(testDir)
-	})
+		clearState(testDir);
+	});
 
 	afterEach(() => {
-		clearState(testDir)
+		clearState(testDir);
 		if (existsSync(testDir)) {
-			rmSync(testDir, { recursive: true, force: true })
+			rmSync(testDir, { recursive: true, force: true });
 		}
-	})
+	});
 
 	test("#given oracle dispatch is in-flight with verification_attempt_id set but verification_session_id undefined #when parent session.idle fires before tool-execute-after stores the oracle session id #then handleFailedVerification must NOT fire prematurely", async () => {
 		// given: ULW loop reaches DONE, enters verification_pending state
 		const hook = createRalphLoopHook(createMockPluginInput(), {
-			getTranscriptPath: (sessionID) => sessionID === "ses-oracle" ? oracleTranscriptPath : parentTranscriptPath,
-		})
-		hook.startLoop("session-123", "Build API", { ultrawork: true })
+			getTranscriptPath: (sessionID) => (sessionID === "ses-oracle" ? oracleTranscriptPath : parentTranscriptPath),
+		});
+		hook.startLoop("session-123", "Build API", { ultrawork: true });
 		writeFileSync(
 			parentTranscriptPath,
 			`${JSON.stringify({ type: "assistant", timestamp: new Date().toISOString(), content: "done <promise>DONE</promise>" })}\n`,
-		)
-		await hook.event({ event: { type: "session.idle", properties: { sessionID: "session-123" } } })
+		);
+		await hook.event({ event: { type: "session.idle", properties: { sessionID: "session-123" } } });
 
 		// sanity: verification phase started, exactly one verification prompt injected
-		const stateAfterDone = hook.getState()
-		expect(stateAfterDone?.verification_pending).toBe(true)
-		expect(stateAfterDone?.verification_session_id).toBeUndefined()
-		expect(promptCalls).toHaveLength(1)
+		const stateAfterDone = hook.getState();
+		expect(stateAfterDone?.verification_pending).toBe(true);
+		expect(stateAfterDone?.verification_session_id).toBeUndefined();
+		expect(promptCalls).toHaveLength(1);
 
 		// simulate Oracle dispatch in-flight:
 		// tool-execute-before.ts:147-159 has stamped verification_attempt_id
@@ -116,24 +119,24 @@ describe("ulw-loop oracle double-fire race (Race A)", () => {
 			...stateAfterDone!,
 			verification_attempt_id: "attempt-uuid-12345",
 			verification_session_id: undefined,
-		})
+		});
 
 		// when: a second session.idle fires on the parent while Oracle is mid-execution
 		// (real-world triggers: stale idle survives inFlightSessions guard, message.part.updated
 		// loop, background activity in parent, or runtime fallback retry cleanup).
-		await hook.event({ event: { type: "message.part.updated", properties: { sessionID: "session-123" } } })
-		await hook.event({ event: { type: "session.idle", properties: { sessionID: "session-123" } } })
+		await hook.event({ event: { type: "message.part.updated", properties: { sessionID: "session-123" } } });
+		await hook.event({ event: { type: "session.idle", properties: { sessionID: "session-123" } } });
 
 		// then: handleFailedVerification must NOT have fired.
 		// No duplicate "Verification failed" prompt should have been injected.
 		// verification_pending stays true, verification_attempt_id is preserved,
 		// iteration is NOT incremented.
-		expect(promptCalls).toHaveLength(1)
-		expect(promptCalls.every((call) => !call.text.includes("Verification failed"))).toBe(true)
+		expect(promptCalls).toHaveLength(1);
+		expect(promptCalls.every((call) => !call.text.includes("Verification failed"))).toBe(true);
 
-		const stateAfterRace = hook.getState()
-		expect(stateAfterRace?.verification_pending).toBe(true)
-		expect(stateAfterRace?.verification_attempt_id).toBe("attempt-uuid-12345")
-		expect(stateAfterRace?.iteration).toBe(1)
-	})
-})
+		const stateAfterRace = hook.getState();
+		expect(stateAfterRace?.verification_pending).toBe(true);
+		expect(stateAfterRace?.verification_attempt_id).toBe("attempt-uuid-12345");
+		expect(stateAfterRace?.iteration).toBe(1);
+	});
+});

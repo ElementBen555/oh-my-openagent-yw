@@ -1,7 +1,7 @@
 import type { SisyphusDynamicPromptSections } from "./sisyphus-dynamic-prompt-sections";
 
 export function renderToneAndConstraintsSection(sections: SisyphusDynamicPromptSections): string {
-  return `<Tone_and_Style>
+	return `<Tone_and_Style>
 ## Communication Style
 
 ### Be Concise

@@ -1,34 +1,33 @@
-import type { PluginInput } from "@opencode-ai/plugin"
-import { log } from "../../shared/logger"
-import { HOOK_NAME, ULTRAWORK_VERIFICATION_PROMISE } from "./constants"
-import { extractOracleSessionID, isOracleVerified } from "./oracle-verification-detector"
-import type { RalphLoopState } from "./types"
-import { handleFailedVerification } from "./verification-failure-handler"
-import { withTimeout } from "./with-timeout"
-import type { IterationCommitExpectation } from "./types"
+import type { PluginInput } from "@opencode-ai/plugin";
+import { log } from "../../shared/logger";
+import { HOOK_NAME, ULTRAWORK_VERIFICATION_PROMISE } from "./constants";
+import { extractOracleSessionID, isOracleVerified } from "./oracle-verification-detector";
+import type { IterationCommitExpectation, RalphLoopState } from "./types";
+import { handleFailedVerification } from "./verification-failure-handler";
+import { withTimeout } from "./with-timeout";
 
-export const STUCK_VERIFICATION_TIMEOUT_MS = 30 * 60 * 1000
+export const STUCK_VERIFICATION_TIMEOUT_MS = 30 * 60 * 1000;
 
 type OpenCodeSessionMessage = {
-	info?: { role?: string }
-	parts?: Array<{ type?: string; text?: string }>
-}
+	info?: { role?: string };
+	parts?: Array<{ type?: string; text?: string }>;
+};
 
 function collectAssistantText(message: OpenCodeSessionMessage): string {
 	if (!Array.isArray(message.parts)) {
-		return ""
+		return "";
 	}
 
-	const allowTextParts = message.info?.role === "assistant"
-	let text = ""
+	const allowTextParts = message.info?.role === "assistant";
+	let text = "";
 	for (const part of message.parts) {
 		if (part.type !== "tool_result" && !(allowTextParts && part.type === "text")) {
-			continue
+			continue;
 		}
-		text += `${text ? "\n" : ""}${part.text ?? ""}`
+		text += `${text ? "\n" : ""}${part.text ?? ""}`;
 	}
 
-	return text
+	return text;
 }
 
 async function detectOracleVerificationFromParentSession(
@@ -44,56 +43,56 @@ async function detectOracleVerificationFromParentSession(
 				query: { directory },
 			}),
 			apiTimeoutMs,
-		)
+		);
 
-		const messagesResponse: unknown = response
+		const messagesResponse: unknown = response;
 		const responseData =
 			typeof messagesResponse === "object" && messagesResponse !== null && "data" in messagesResponse
 				? (messagesResponse as { data?: unknown }).data
-				: undefined
+				: undefined;
 		const messageArray: unknown[] = Array.isArray(messagesResponse)
 			? messagesResponse
 			: Array.isArray(responseData)
 				? responseData
-				: []
+				: [];
 
 		for (let index = messageArray.length - 1; index >= 0; index -= 1) {
-			const message = messageArray[index] as OpenCodeSessionMessage
+			const message = messageArray[index] as OpenCodeSessionMessage;
 
-			const assistantText = collectAssistantText(message)
+			const assistantText = collectAssistantText(message);
 			if (!isOracleVerified(assistantText)) {
-				continue
+				continue;
 			}
 
-			const detectedOracleSessionID = extractOracleSessionID(assistantText)
+			const detectedOracleSessionID = extractOracleSessionID(assistantText);
 			if (detectedOracleSessionID) {
-				return detectedOracleSessionID
+				return detectedOracleSessionID;
 			}
 		}
 
-		return undefined
+		return undefined;
 	} catch (error) {
-		const errorText = error instanceof Error ? String(error) : String(error)
+		const errorText = error instanceof Error ? String(error) : String(error);
 		log(`[${HOOK_NAME}] Failed to scan parent session for oracle verification evidence`, {
 			parentSessionID,
 			error: errorText,
-		})
-		return undefined
+		});
+		return undefined;
 	}
 }
 
 type LoopStateController = {
-	restartAfterFailedVerification: (sessionID: string, messageCountAtStart?: number) => RalphLoopState | null
-	clearVerificationState: (sessionID: string, messageCountAtStart?: number) => RalphLoopState | null
-	incrementIteration: (expected?: IterationCommitExpectation) => RalphLoopState | null
-	clear: () => boolean
-	setVerificationSessionID: (sessionID: string, verificationSessionID: string) => RalphLoopState | null
-}
+	restartAfterFailedVerification: (sessionID: string, messageCountAtStart?: number) => RalphLoopState | null;
+	clearVerificationState: (sessionID: string, messageCountAtStart?: number) => RalphLoopState | null;
+	incrementIteration: (expected?: IterationCommitExpectation) => RalphLoopState | null;
+	clear: () => boolean;
+	setVerificationSessionID: (sessionID: string, verificationSessionID: string) => RalphLoopState | null;
+};
 
 function showCompletionToastBestEffort(ctx: PluginInput, state: RalphLoopState): void {
-	const showToast = ctx.client.tui?.showToast
+	const showToast = ctx.client.tui?.showToast;
 	if (!showToast) {
-		return
+		return;
 	}
 
 	const toastBody = {
@@ -103,35 +102,35 @@ function showCompletionToastBestEffort(ctx: PluginInput, state: RalphLoopState):
 			variant: "success" as const,
 			duration: 5000,
 		},
-	}
+	};
 	const logToastError = (error: unknown) => {
 		log(`[${HOOK_NAME}] Failed to show ulw completion toast`, {
 			error: String(error),
-		})
-	}
+		});
+	};
 
 	try {
-		void Promise.resolve(showToast(toastBody)).catch(logToastError)
+		void Promise.resolve(showToast(toastBody)).catch(logToastError);
 	} catch (error) {
 		if (error instanceof Error) {
-			logToastError(error)
-			return
+			logToastError(error);
+			return;
 		}
-		logToastError(error)
+		logToastError(error);
 	}
 }
 
 export async function handlePendingVerification(
 	ctx: PluginInput,
 	input: {
-		sessionID: string
-		state: RalphLoopState
-		verificationSessionID?: string
-		matchesParentSession: boolean
-		matchesVerificationSession: boolean
-		loopState: LoopStateController
-		directory: string
-		apiTimeoutMs: number
+		sessionID: string;
+		state: RalphLoopState;
+		verificationSessionID?: string;
+		matchesParentSession: boolean;
+		matchesVerificationSession: boolean;
+		loopState: LoopStateController;
+		directory: string;
+		apiTimeoutMs: number;
 	},
 ): Promise<void> {
 	const {
@@ -143,7 +142,7 @@ export async function handlePendingVerification(
 		loopState,
 		directory,
 		apiTimeoutMs,
-	} = input
+	} = input;
 
 	if (matchesParentSession || (verificationSessionID && matchesVerificationSession)) {
 		if (!verificationSessionID && state.session_id) {
@@ -152,37 +151,34 @@ export async function handlePendingVerification(
 				state.session_id,
 				directory,
 				apiTimeoutMs,
-			)
+			);
 
 			if (recoveredVerificationSessionID) {
 				if (state.completion_promise === ULTRAWORK_VERIFICATION_PROMISE) {
 					log(`[${HOOK_NAME}] Oracle verification evidence found in parent session, completing ultrawork loop`, {
 						parentSessionID: state.session_id,
 						recoveredVerificationSessionID,
-					})
-					loopState.clear()
-					showCompletionToastBestEffort(ctx, state)
-					return
+					});
+					loopState.clear();
+					showCompletionToastBestEffort(ctx, state);
+					return;
 				}
 
-				const updatedState = loopState.setVerificationSessionID(
-					state.session_id,
-					recoveredVerificationSessionID,
-				)
+				const updatedState = loopState.setVerificationSessionID(state.session_id, recoveredVerificationSessionID);
 				if (updatedState) {
 					log(`[${HOOK_NAME}] Recovered missing verification session from parent evidence`, {
 						parentSessionID: state.session_id,
 						recoveredVerificationSessionID,
-					})
-					return
+					});
+					return;
 				}
 			}
 		}
 
 		if (state.verification_attempt_id && !state.verification_session_id) {
-			const startedAt = state.verification_attempt_started_at
-			const attemptAgeMs = startedAt !== undefined ? Date.now() - startedAt : undefined
-			const isStuck = attemptAgeMs !== undefined && attemptAgeMs > STUCK_VERIFICATION_TIMEOUT_MS
+			const startedAt = state.verification_attempt_started_at;
+			const attemptAgeMs = startedAt !== undefined ? Date.now() - startedAt : undefined;
+			const isStuck = attemptAgeMs !== undefined && attemptAgeMs > STUCK_VERIFICATION_TIMEOUT_MS;
 
 			if (isStuck) {
 				log(`[${HOOK_NAME}] Stuck oracle dispatch detected, proceeding to failure handler`, {
@@ -190,14 +186,14 @@ export async function handlePendingVerification(
 					verificationAttemptId: state.verification_attempt_id,
 					attemptAgeMs,
 					iteration: state.iteration,
-				})
+				});
 			} else {
 				log(`[${HOOK_NAME}] Skipped verification failure: oracle dispatch in flight`, {
 					sessionID,
 					verificationAttemptId: state.verification_attempt_id,
 					iteration: state.iteration,
-				})
-				return
+				});
+				return;
 			}
 		}
 
@@ -206,9 +202,9 @@ export async function handlePendingVerification(
 			loopState,
 			directory,
 			apiTimeoutMs,
-		})
+		});
 		if (restarted) {
-			return
+			return;
 		}
 	}
 
@@ -216,5 +212,5 @@ export async function handlePendingVerification(
 		sessionID,
 		verificationSessionID,
 		iteration: state.iteration,
-	})
+	});
 }

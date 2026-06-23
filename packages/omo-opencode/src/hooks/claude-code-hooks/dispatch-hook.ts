@@ -1,39 +1,30 @@
-import type { HookAction, HookCommand } from "./types"
-import type { CommandResult, ExecuteHookOptions } from "../../shared/command-executor/execute-hook-command"
-import { executeHookCommand } from "../../shared"
-import { executeHttpHook } from "./execute-http-hook"
-import { DEFAULT_CONFIG } from "./plugin-config"
+import { executeHookCommand } from "../../shared";
+import type { CommandResult, ExecuteHookOptions } from "../../shared/command-executor/execute-hook-command";
+import { executeHttpHook } from "./execute-http-hook";
+import { DEFAULT_CONFIG } from "./plugin-config";
+import type { HookAction, HookCommand } from "./types";
 
 export function getHookIdentifier(hook: HookAction): string {
-  if (hook.type === "http") return hook.url
-  return hook.command.split("/").pop() || hook.command
+	if (hook.type === "http") return hook.url;
+	return hook.command.split("/").pop() || hook.command;
 }
 
-export async function dispatchHook(
-  hook: HookAction,
-  stdinJson: string,
-  cwd: string
-): Promise<CommandResult> {
-  if (hook.type === "http") {
-    return executeHttpHook(hook, stdinJson)
-  }
+export async function dispatchHook(hook: HookAction, stdinJson: string, cwd: string): Promise<CommandResult> {
+	if (hook.type === "http") {
+		return executeHttpHook(hook, stdinJson);
+	}
 
-  const cmdHook = hook as HookCommand
-  const options: ExecuteHookOptions = {
-    forceZsh: DEFAULT_CONFIG.forceZsh,
-    zshPath: DEFAULT_CONFIG.zshPath,
-  }
-  if (cmdHook.allowedEnvVars) {
-    options.allowedEnvVars = cmdHook.allowedEnvVars
-  }
-  if (cmdHook.pluginRoot) {
-    options.pluginRoot = cmdHook.pluginRoot
-  }
+	const cmdHook = hook as HookCommand;
+	const options: ExecuteHookOptions = {
+		forceZsh: DEFAULT_CONFIG.forceZsh,
+		zshPath: DEFAULT_CONFIG.zshPath,
+	};
+	if (cmdHook.allowedEnvVars) {
+		options.allowedEnvVars = cmdHook.allowedEnvVars;
+	}
+	if (cmdHook.pluginRoot) {
+		options.pluginRoot = cmdHook.pluginRoot;
+	}
 
-  return executeHookCommand(
-    hook.command,
-    stdinJson,
-    cwd,
-    options
-  )
+	return executeHookCommand(hook.command, stdinJson, cwd, options);
 }

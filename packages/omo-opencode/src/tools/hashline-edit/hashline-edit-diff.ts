@@ -1,1 +1,1 @@
-export { generateHashlineDiff } from "@oh-my-opencode/hashline-core"
+export { generateHashlineDiff } from "@oh-my-opencode/hashline-core";

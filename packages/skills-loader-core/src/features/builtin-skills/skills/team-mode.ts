@@ -1,10 +1,10 @@
-import type { BuiltinSkill } from "../types"
+import type { BuiltinSkill } from "../types";
 
 export const teamModeSkill: BuiltinSkill = {
-  name: "team-mode",
-  description:
-    "Team orchestration — create and manage parallel agent teams (OFF by default; enable via team_mode.enabled in config). Loading this skill provides usage documentation; the team_* tools are registered globally when team_mode.enabled=true and access-gated by team role.",
-  template: `# Team Mode
+	name: "team-mode",
+	description:
+		"Team orchestration — create and manage parallel agent teams (OFF by default; enable via team_mode.enabled in config). Loading this skill provides usage documentation; the team_* tools are registered globally when team_mode.enabled=true and access-gated by team role.",
+	template: `# Team Mode
 
 Team mode gives Claude Code Agent Teams parity. It is off by default. Enable it only when you want parallel multi-agent coordination, where each team member is an opencode child session.
 
@@ -201,4 +201,4 @@ Members should:
 Team mode is a docs-only skill. The team_* tools are registered globally when \`team_mode.enabled=true\`.
 Use \`~/.omo/teams/{name}/config.json\` plus worktree or tmux visibility to understand how the team is laid out.
 `,
-}
+};

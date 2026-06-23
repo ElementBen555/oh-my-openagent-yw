@@ -33,9 +33,7 @@ interface SessionHydrationState {
 
 interface TranscriptHydrationClient {
 	readonly session: {
-		readonly messages: (args: {
-			readonly path: { readonly id: string };
-		}) => Promise<{ readonly data?: unknown }>;
+		readonly messages: (args: { readonly path: { readonly id: string } }) => Promise<{ readonly data?: unknown }>;
 	};
 }
 
@@ -47,9 +45,7 @@ interface TranscriptHydrationClient {
  * file but whose model context still contains prior `[Rule: ...]` markers
  * does not re-inject duplicates.
  */
-export function createTranscriptHydrationStore(
-	deps: TranscriptHydrationDeps,
-): TranscriptHydrationStore {
+export function createTranscriptHydrationStore(deps: TranscriptHydrationDeps): TranscriptHydrationStore {
 	const states = new Map<string, SessionHydrationState>();
 
 	function ensureState(sessionID: string): SessionHydrationState {
@@ -65,9 +61,7 @@ export function createTranscriptHydrationStore(
 		return state;
 	}
 
-	async function hydrateSession(
-		sessionID: string,
-	): Promise<ReadonlySet<string>> {
+	async function hydrateSession(sessionID: string): Promise<ReadonlySet<string>> {
 		const state = ensureState(sessionID);
 		if (state.hydrated) {
 			return state.relativePaths;
@@ -75,10 +69,7 @@ export function createTranscriptHydrationStore(
 		if (state.inflight === undefined) {
 			state.inflight = (async () => {
 				try {
-					const fetched = await fetchTranscriptRelativePaths(
-						deps.client,
-						sessionID,
-					);
+					const fetched = await fetchTranscriptRelativePaths(deps.client, sessionID);
 					for (const relativePath of fetched) {
 						state.relativePaths.add(relativePath);
 					}
@@ -141,10 +132,7 @@ async function fetchTranscriptRelativePaths(
 	return relativePaths;
 }
 
-function collectMessageText(
-	value: unknown,
-	accumulator: string[] = [],
-): string {
+function collectMessageText(value: unknown, accumulator: string[] = []): string {
 	if (typeof value === "string") {
 		accumulator.push(value);
 	} else if (Array.isArray(value)) {

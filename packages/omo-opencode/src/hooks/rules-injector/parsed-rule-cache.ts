@@ -1,11 +1,6 @@
 import { readFileSync, statSync } from "node:fs";
+import type { ParsedRule, ParsedRuleEntry, RuleFileReader, RuleStatReader } from "./injection-types";
 import { parseRuleFrontmatter } from "./parser";
-import type {
-	ParsedRule,
-	ParsedRuleEntry,
-	RuleFileReader,
-	RuleStatReader,
-} from "./injection-types";
 
 export interface ParsedRuleCacheStats {
 	entries: number;
@@ -41,11 +36,7 @@ export function createParsedRuleReader(options?: {
 			const statFingerprint = `${stat.mtimeMs}:${stat.size}`;
 			const cached = parsedRuleCache.get(realPath);
 
-			if (
-				cached &&
-				cached.mtimeMs === stat.mtimeMs &&
-				cached.size === stat.size
-			) {
+			if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
 				return {
 					metadata: cached.metadata,
 					body: cached.body,
@@ -73,16 +64,9 @@ export function createParsedRuleReader(options?: {
 	};
 }
 
-function setParsedRuleCacheEntry(
-	realPath: string,
-	entry: ParsedRuleEntry,
-): void {
-	if (Buffer.byteLength(entry.body, "utf8") > MAX_PARSED_RULE_CACHE_BODY_BYTES)
-		return;
-	if (
-		!parsedRuleCache.has(realPath) &&
-		parsedRuleCache.size >= MAX_PARSED_RULE_CACHE_ENTRIES
-	) {
+function setParsedRuleCacheEntry(realPath: string, entry: ParsedRuleEntry): void {
+	if (Buffer.byteLength(entry.body, "utf8") > MAX_PARSED_RULE_CACHE_BODY_BYTES) return;
+	if (!parsedRuleCache.has(realPath) && parsedRuleCache.size >= MAX_PARSED_RULE_CACHE_ENTRIES) {
 		const oldestRealPath = parsedRuleCache.keys().next().value;
 		if (oldestRealPath !== undefined) {
 			parsedRuleCache.delete(oldestRealPath);

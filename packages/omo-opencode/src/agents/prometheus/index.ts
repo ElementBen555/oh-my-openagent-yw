@@ -1,5 +1,5 @@
 export {
-  PROMETHEUS_SYSTEM_PROMPT,
-  PROMETHEUS_PERMISSION,
-  getPrometheusPrompt,
-} from "./system-prompt"
+	getPrometheusPrompt,
+	PROMETHEUS_PERMISSION,
+	PROMETHEUS_SYSTEM_PROMPT,
+} from "./system-prompt";

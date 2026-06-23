@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
-import type { JSX, ReactNode } from "react"
 import { notFound } from "next/navigation"
 import { hasLocale } from "next-intl"
 import { setRequestLocale } from "next-intl/server"
+import type { JSX, ReactNode } from "react"
 import { LocalizedPageShell } from "@/app/_components/localized-page-shell"
 import { routing } from "@/i18n/routing"
 

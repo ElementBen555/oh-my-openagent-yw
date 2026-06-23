@@ -129,4 +129,4 @@ When working in a worktree (\`worktree_path\` is set in boulder.json) and ALL pl
 5. If merge succeeds, clean up: \`git worktree remove <worktree-path>\`
 6. Remove the boulder.json state
 
-This is the DEFAULT behavior when \`--worktree\` was used. Skip merge only if the user explicitly instructs otherwise (e.g., asks to create a PR instead).`
+This is the DEFAULT behavior when \`--worktree\` was used. Skip merge only if the user explicitly instructs otherwise (e.g., asks to create a PR instead).`;

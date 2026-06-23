@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skills/git-master-sections/overview"
+export * from "@oh-my-opencode/skills-loader-core/builtin-skills/skills/git-master-sections/overview";

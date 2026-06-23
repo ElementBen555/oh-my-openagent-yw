@@ -1,76 +1,75 @@
-import { TOOL_DESCRIPTION_NO_SKILLS, TOOL_DESCRIPTION_PREFIX } from "./constants"
-import { sortByScopePriority } from "./scope-priority"
-import type { SkillInfo } from "./types"
-import type { CommandInfo } from "../slashcommand/types"
+import type { CommandInfo } from "../slashcommand/types";
+import { TOOL_DESCRIPTION_NO_SKILLS, TOOL_DESCRIPTION_PREFIX } from "./constants";
+import { sortByScopePriority } from "./scope-priority";
+import type { SkillInfo } from "./types";
 
 interface CombinedDescriptionOptions {
-  includeSkills?: boolean
+	includeSkills?: boolean;
 }
 
 function formatSkillCommand(skill: SkillInfo): string {
-  const lines = [
-    "  <command>",
-    `    <name>/${skill.name}</name>`,
-    `    <description>${skill.description}</description>`,
-    `    <scope>${skill.scope}</scope>`,
-  ]
+	const lines = [
+		"  <command>",
+		`    <name>/${skill.name}</name>`,
+		`    <description>${skill.description}</description>`,
+		`    <scope>${skill.scope}</scope>`,
+	];
 
-  if (skill.compatibility) {
-    lines.push(`    <compatibility>${skill.compatibility}</compatibility>`)
-  }
+	if (skill.compatibility) {
+		lines.push(`    <compatibility>${skill.compatibility}</compatibility>`);
+	}
 
-  lines.push("  </command>")
-  return lines.join("\n")
+	lines.push("  </command>");
+	return lines.join("\n");
 }
 
 function formatSlashCommand(command: CommandInfo): string {
-  const argumentHint = typeof command.metadata.argumentHint === "string"
-    ? command.metadata.argumentHint.trim()
-    : undefined
-  const lines = [
-    "  <command>",
-    `    <name>/${command.name}</name>`,
-    `    <description>${command.metadata.description || "(no description)"}</description>`,
-    `    <scope>${command.scope}</scope>`,
-  ]
+	const argumentHint =
+		typeof command.metadata.argumentHint === "string" ? command.metadata.argumentHint.trim() : undefined;
+	const lines = [
+		"  <command>",
+		`    <name>/${command.name}</name>`,
+		`    <description>${command.metadata.description || "(no description)"}</description>`,
+		`    <scope>${command.scope}</scope>`,
+	];
 
-  if (argumentHint) {
-    lines.push(`    <argument>${argumentHint}</argument>`)
-  }
+	if (argumentHint) {
+		lines.push(`    <argument>${argumentHint}</argument>`);
+	}
 
-  lines.push("  </command>")
-  return lines.join("\n")
+	lines.push("  </command>");
+	return lines.join("\n");
 }
 
 export function formatCombinedDescription(
-  skills?: SkillInfo[],
-  commands?: CommandInfo[],
-  options: CombinedDescriptionOptions = {}
+	skills?: SkillInfo[],
+	commands?: CommandInfo[],
+	options: CombinedDescriptionOptions = {},
 ): string {
-  const availableSkills = options.includeSkills ? skills ?? [] : []
-  const availableCommands = commands ?? []
+	const availableSkills = options.includeSkills ? (skills ?? []) : [];
+	const availableCommands = commands ?? [];
 
-  if (availableSkills.length === 0 && availableCommands.length === 0) {
-    if ((skills?.length ?? 0) > 0) {
-      return TOOL_DESCRIPTION_PREFIX
-    }
+	if (availableSkills.length === 0 && availableCommands.length === 0) {
+		if ((skills?.length ?? 0) > 0) {
+			return TOOL_DESCRIPTION_PREFIX;
+		}
 
-    return TOOL_DESCRIPTION_NO_SKILLS
-  }
+		return TOOL_DESCRIPTION_NO_SKILLS;
+	}
 
-  const availableItems = [
-    ...sortByScopePriority(availableSkills).map(formatSkillCommand),
-    ...sortByScopePriority(availableCommands).map(formatSlashCommand),
-  ]
+	const availableItems = [
+		...sortByScopePriority(availableSkills).map(formatSkillCommand),
+		...sortByScopePriority(availableCommands).map(formatSlashCommand),
+	];
 
-  if (availableItems.length === 0) {
-    return TOOL_DESCRIPTION_PREFIX
-  }
+	if (availableItems.length === 0) {
+		return TOOL_DESCRIPTION_PREFIX;
+	}
 
-  return `${TOOL_DESCRIPTION_PREFIX}
+	return `${TOOL_DESCRIPTION_PREFIX}
 <available_items>
 Priority: project > user > opencode > builtin/plugin${options.includeSkills ? " | Skills listed before commands" : ""}
 Invoke via: skill(name="item-name") - omit leading slash for commands.
 ${availableItems.join("\n")}
-</available_items>`
+</available_items>`;
 }

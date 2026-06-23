@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/mcp-client-core/mcp-oauth/dcr"
+export * from "@oh-my-opencode/mcp-client-core/mcp-oauth/dcr";

@@ -1,1 +1,1 @@
-export { spawn } from "@oh-my-opencode/utils/runtime"
+export { spawn } from "@oh-my-opencode/utils/runtime";

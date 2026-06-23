@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-state-store/active-resume"
+export * from "@oh-my-opencode/team-core/team-state-store/active-resume";

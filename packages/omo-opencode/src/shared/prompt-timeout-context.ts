@@ -1,52 +1,55 @@
 export interface PromptTimeoutArgs {
-  signal?: AbortSignal
+	signal?: AbortSignal;
 }
 
 export interface PromptRetryOptions {
-  timeoutMs?: number
-  queueBehavior?: "enqueue" | "defer"
-  checkStatus?: boolean
-  checkToolState?: boolean
+	timeoutMs?: number;
+	queueBehavior?: "enqueue" | "defer";
+	checkStatus?: boolean;
+	checkToolState?: boolean;
 }
 
-export const PROMPT_TIMEOUT_MS = 120000
+export const PROMPT_TIMEOUT_MS = 120000;
 
-export function createPromptTimeoutContext(args: PromptTimeoutArgs, timeoutMs: number): {
-  signal: AbortSignal
-  wasTimedOut: () => boolean
-  cleanup: () => void
+export function createPromptTimeoutContext(
+	args: PromptTimeoutArgs,
+	timeoutMs: number,
+): {
+	signal: AbortSignal;
+	wasTimedOut: () => boolean;
+	cleanup: () => void;
 } {
-  const timeoutController = new AbortController()
-  let timeoutID: ReturnType<typeof setTimeout> | null = null
-  let timedOut = false
+	const timeoutController = new AbortController();
+	let timeoutID: ReturnType<typeof setTimeout> | null = null;
+	let timedOut = false;
 
-  const abortOnUpstreamSignal = (): void => {
-    timeoutController.abort(args.signal?.reason)
-  }
+	const abortOnUpstreamSignal = (): void => {
+		timeoutController.abort(args.signal?.reason);
+	};
 
-  if (args.signal) {
-    if (args.signal.aborted) {
-      timeoutController.abort(args.signal.reason)
-    } else {
-      args.signal.addEventListener("abort", abortOnUpstreamSignal, { once: true })
-    }
-  }
+	if (args.signal) {
+		if (args.signal.aborted) {
+			timeoutController.abort(args.signal.reason);
+		} else {
+			args.signal.addEventListener("abort", abortOnUpstreamSignal, { once: true });
+		}
+	}
 
-  timeoutID = setTimeout(() => {
-    timedOut = true
-    timeoutController.abort(new Error(`prompt timed out after ${timeoutMs}ms`))
-  }, timeoutMs)
+	timeoutID = setTimeout(() => {
+		timedOut = true;
+		timeoutController.abort(new Error(`prompt timed out after ${timeoutMs}ms`));
+	}, timeoutMs);
 
-  return {
-    signal: timeoutController.signal,
-    wasTimedOut: () => timedOut,
-    cleanup: () => {
-      if (timeoutID !== null) {
-        clearTimeout(timeoutID)
-      }
-      if (args.signal) {
-        args.signal.removeEventListener("abort", abortOnUpstreamSignal)
-      }
-    },
-  }
+	return {
+		signal: timeoutController.signal,
+		wasTimedOut: () => timedOut,
+		cleanup: () => {
+			if (timeoutID !== null) {
+				clearTimeout(timeoutID);
+			}
+			if (args.signal) {
+				args.signal.removeEventListener("abort", abortOnUpstreamSignal);
+			}
+		},
+	};
 }

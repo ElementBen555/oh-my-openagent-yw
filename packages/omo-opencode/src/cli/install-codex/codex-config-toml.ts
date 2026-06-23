@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-config-toml"
+export * from "@oh-my-opencode/omo-codex/install/codex-config-toml";

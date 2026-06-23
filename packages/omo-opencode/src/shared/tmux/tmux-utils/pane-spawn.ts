@@ -1,8 +1,8 @@
-import { spawnTmuxPane as spawnTmuxPaneCore } from "@oh-my-opencode/tmux-core"
-import type { SpawnTmuxPaneDeps, TmuxConfig } from "@oh-my-opencode/tmux-core"
-import type { SpawnPaneResult } from "../types"
-import type { SplitDirection } from "./environment"
-import { withPaneSpawnDeps } from "./adapter-deps"
+import type { SpawnTmuxPaneDeps, TmuxConfig } from "@oh-my-opencode/tmux-core";
+import { spawnTmuxPane as spawnTmuxPaneCore } from "@oh-my-opencode/tmux-core";
+import type { SpawnPaneResult } from "../types";
+import { withPaneSpawnDeps } from "./adapter-deps";
+import type { SplitDirection } from "./environment";
 
 export async function spawnTmuxPane(
 	sessionId: string,
@@ -23,5 +23,5 @@ export async function spawnTmuxPane(
 		targetPaneId,
 		splitDirection,
 		withPaneSpawnDeps(depsInput),
-	)
+	);
 }

@@ -1,1 +1,1 @@
-export { buildRetryGuidance } from "@oh-my-opencode/delegate-core"
+export { buildRetryGuidance } from "@oh-my-opencode/delegate-core";

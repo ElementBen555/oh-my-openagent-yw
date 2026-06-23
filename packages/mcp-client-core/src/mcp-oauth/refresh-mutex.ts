@@ -1,4 +1,4 @@
-import type { OAuthTokenData } from "./storage"
+import type { OAuthTokenData } from "./storage";
 
 /**
  * Per-server OAuth refresh mutex to prevent concurrent refresh race conditions.
@@ -8,7 +8,7 @@ import type { OAuthTokenData } from "./storage"
  * the same result.
  */
 
-const ongoingRefreshes = new Map<string, Promise<OAuthTokenData>>()
+const ongoingRefreshes = new Map<string, Promise<OAuthTokenData>>();
 
 /**
  * Execute a token refresh with per-server mutual exclusion.
@@ -22,20 +22,20 @@ const ongoingRefreshes = new Map<string, Promise<OAuthTokenData>>()
  * @returns Promise that resolves to the new token data
  */
 export async function withRefreshMutex(
-  serverUrl: string,
-  refreshFn: () => Promise<OAuthTokenData>,
+	serverUrl: string,
+	refreshFn: () => Promise<OAuthTokenData>,
 ): Promise<OAuthTokenData> {
-  const existing = ongoingRefreshes.get(serverUrl)
-  if (existing) {
-    return existing
-  }
+	const existing = ongoingRefreshes.get(serverUrl);
+	if (existing) {
+		return existing;
+	}
 
-  const refreshPromise = refreshFn().finally(() => {
-    ongoingRefreshes.delete(serverUrl)
-  })
+	const refreshPromise = refreshFn().finally(() => {
+		ongoingRefreshes.delete(serverUrl);
+	});
 
-  ongoingRefreshes.set(serverUrl, refreshPromise)
-  return refreshPromise
+	ongoingRefreshes.set(serverUrl, refreshPromise);
+	return refreshPromise;
 }
 
 /**
@@ -45,7 +45,7 @@ export async function withRefreshMutex(
  * @returns true if a refresh operation is active
  */
 export function isRefreshInProgress(serverUrl: string): boolean {
-  return ongoingRefreshes.has(serverUrl)
+	return ongoingRefreshes.has(serverUrl);
 }
 
 /**
@@ -54,5 +54,5 @@ export function isRefreshInProgress(serverUrl: string): boolean {
  * @returns Number of active refresh operations
  */
 export function getActiveRefreshCount(): number {
-  return ongoingRefreshes.size
+	return ongoingRefreshes.size;
 }

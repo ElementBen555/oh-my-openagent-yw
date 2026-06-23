@@ -1,4 +1,4 @@
-import type { ModelCapabilitiesSnapshotEntry } from "./types"
+import type { ModelCapabilitiesSnapshotEntry } from "./types";
 
 export const SUPPLEMENTAL_MODEL_CAPABILITIES: Record<string, ModelCapabilitiesSnapshotEntry> = {
 	"kimi-k2.6": {
@@ -48,4 +48,4 @@ export const SUPPLEMENTAL_MODEL_CAPABILITIES: Record<string, ModelCapabilitiesSn
 			output: 128000,
 		},
 	},
-}
+};

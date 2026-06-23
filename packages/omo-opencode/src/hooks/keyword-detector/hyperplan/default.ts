@@ -1,4 +1,4 @@
-import { HYPERPLAN_MODE_PROMPT } from "@oh-my-opencode/prompts-core"
+import { HYPERPLAN_MODE_PROMPT } from "@oh-my-opencode/prompts-core";
 
 /**
  * Hyperplan keyword detector.
@@ -17,6 +17,6 @@ import { HYPERPLAN_MODE_PROMPT } from "@oh-my-opencode/prompts-core"
  * satisfy `\b` because the dot is a non-word character. See issue #4215.
  */
 
-export const HYPERPLAN_PATTERN = /\bhyperplan\b|(?<![\w.])hpp\b/i
+export const HYPERPLAN_PATTERN = /\bhyperplan\b|(?<![\w.])hpp\b/i;
 
-export const HYPERPLAN_MESSAGE = HYPERPLAN_MODE_PROMPT
+export const HYPERPLAN_MESSAGE = HYPERPLAN_MODE_PROMPT;

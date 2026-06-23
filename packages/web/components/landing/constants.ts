@@ -1,16 +1,16 @@
 import type { Brain } from "lucide-react"
 import {
   Check,
-  Eye,
-  Search,
   Code2,
-  MessageSquare,
-  Target,
-  Shield,
-  Lightbulb,
-  Zap,
-  Route,
+  Eye,
   HardDrive,
+  Lightbulb,
+  MessageSquare,
+  Route,
+  Search,
+  Shield,
+  Target,
+  Zap,
 } from "lucide-react"
 
 export const SUB_AGENT_KEYS = ["oracle", "librarian", "explore", "metis", "momus"] as const

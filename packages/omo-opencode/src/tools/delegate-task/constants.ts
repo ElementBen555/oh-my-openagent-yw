@@ -1,15 +1,13 @@
-import type {
-   AvailableCategory,
-   AvailableSkill,
- } from "../../agents/dynamic-agent-prompt-builder"
-import { getAgentConfigKey } from "../../shared/agent-display-names"
-import { truncateDescription } from "../../shared/truncate-description"
+import type { AvailableCategory, AvailableSkill } from "../../agents/dynamic-agent-prompt-builder";
+import { getAgentConfigKey } from "../../shared/agent-display-names";
+import { truncateDescription } from "../../shared/truncate-description";
+
 export {
-  CATEGORY_DESCRIPTIONS,
-  CATEGORY_PROMPT_APPENDS,
-  CATEGORY_PROMPT_APPEND_RESOLVERS,
-  DEFAULT_CATEGORIES,
-} from "./builtin-categories"
+	CATEGORY_DESCRIPTIONS,
+	CATEGORY_PROMPT_APPEND_RESOLVERS,
+	CATEGORY_PROMPT_APPENDS,
+	DEFAULT_CATEGORIES,
+} from "./builtin-categories";
 
 /**
  * System prompt prepended to plan agent invocations.
@@ -123,7 +121,7 @@ WHY THIS MATTERS:
 FOR EVERY TASK, YOU MUST RECOMMEND:
 1. Which CATEGORY to use for delegation
 2. Which SKILLS to load for the delegated agent
-`
+`;
 
 export const PLAN_AGENT_SYSTEM_PREPEND_STATIC_AFTER_SKILLS = `### REQUIRED OUTPUT FORMAT
 
@@ -286,33 +284,33 @@ RULES:
   outside the envelope may be discarded.
 </DELIVERABLE_ENVELOPE>
 
-`
+`;
 
 function renderPlanAgentCategoryRows(categories: AvailableCategory[]): string[] {
-  const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name))
-  return sorted.map((category) => {
-    const bestFor = category.description || category.name
-    const model = category.model || ""
-    return `| \`${category.name}\` | ${bestFor} | ${model} |`
-  })
+	const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+	return sorted.map((category) => {
+		const bestFor = category.description || category.name;
+		const model = category.model || "";
+		return `| \`${category.name}\` | ${bestFor} | ${model} |`;
+	});
 }
 
 function renderPlanAgentSkillRows(skills: AvailableSkill[]): string[] {
-   const sorted = [...skills].sort((a, b) => a.name.localeCompare(b.name))
-   return sorted.map((skill) => {
-     const domain = truncateDescription(skill.description).trim() || skill.name
-     return `| \`${skill.name}\` | ${domain} |`
-   })
- }
+	const sorted = [...skills].sort((a, b) => a.name.localeCompare(b.name));
+	return sorted.map((skill) => {
+		const domain = truncateDescription(skill.description).trim() || skill.name;
+		return `| \`${skill.name}\` | ${domain} |`;
+	});
+}
 
 export function buildPlanAgentSkillsSection(
-  categories: AvailableCategory[] = [],
-  skills: AvailableSkill[] = []
+	categories: AvailableCategory[] = [],
+	skills: AvailableSkill[] = [],
 ): string {
-  const categoryRows = renderPlanAgentCategoryRows(categories)
-  const skillRows = renderPlanAgentSkillRows(skills)
+	const categoryRows = renderPlanAgentCategoryRows(categories);
+	const skillRows = renderPlanAgentSkillRows(skills);
 
-  return `### AVAILABLE CATEGORIES
+	return `### AVAILABLE CATEGORIES
 
 | Category | Best For | Model |
 |----------|----------|-------|
@@ -325,33 +323,33 @@ YOU MUST evaluate EVERY skill and justify inclusions/omissions.
 
 | Skill | Domain |
 |-------|--------|
-${skillRows.join("\n")}`
+${skillRows.join("\n")}`;
 }
 
 export function buildPlanAgentSystemPrepend(
-  categories: AvailableCategory[] = [],
-  skills: AvailableSkill[] = []
+	categories: AvailableCategory[] = [],
+	skills: AvailableSkill[] = [],
 ): string {
-  return [
-    PLAN_AGENT_SYSTEM_PREPEND_STATIC_BEFORE_SKILLS,
-    buildPlanAgentSkillsSection(categories, skills),
-    PLAN_AGENT_SYSTEM_PREPEND_STATIC_AFTER_SKILLS,
-  ].join("\n\n")
+	return [
+		PLAN_AGENT_SYSTEM_PREPEND_STATIC_BEFORE_SKILLS,
+		buildPlanAgentSkillsSection(categories, skills),
+		PLAN_AGENT_SYSTEM_PREPEND_STATIC_AFTER_SKILLS,
+	].join("\n\n");
 }
 
 /**
  * List of agent names that should be treated as plan agents (receive plan system prompt).
  * Case-insensitive matching is used.
  */
-export const PLAN_AGENT_NAMES = ["plan"]
+export const PLAN_AGENT_NAMES = ["plan"];
 
 /**
  * Check if the given agent name is a plan agent (receives plan system prompt).
  */
 export function isPlanAgent(agentName: string | undefined): boolean {
-  if (!agentName) return false
-  const lowerName = getAgentConfigKey(agentName).toLowerCase().trim()
-  return PLAN_AGENT_NAMES.some(name => lowerName === name)
+	if (!agentName) return false;
+	const lowerName = getAgentConfigKey(agentName).toLowerCase().trim();
+	return PLAN_AGENT_NAMES.some((name) => lowerName === name);
 }
 
 /**
@@ -359,7 +357,7 @@ export function isPlanAgent(agentName: string | undefined): boolean {
  * Injected into the plan system prompt and read back by fetchSyncResult so the
  * deliverable turn is selected explicitly rather than by recency.
  */
-export const PLAN_DELIVERABLE_TAG = "plan"
+export const PLAN_DELIVERABLE_TAG = "plan";
 
 /**
  * Resolve the deliverable envelope tag an agent is expected to emit, or undefined
@@ -367,24 +365,24 @@ export const PLAN_DELIVERABLE_TAG = "plan"
  * instruction, so extraction only expects a tag when the prompt asked for one.
  */
 export function getDeliverableTag(agentName: string | undefined): string | undefined {
-  return isPlanAgent(agentName) ? PLAN_DELIVERABLE_TAG : undefined
+	return isPlanAgent(agentName) ? PLAN_DELIVERABLE_TAG : undefined;
 }
 
 /**
  * Plan family: plan + prometheus. Shares mutual delegation blocking and task tool permission.
  * Does NOT share system prompt (only isPlanAgent controls that).
  */
-export const PLAN_FAMILY_NAMES = ["plan", "prometheus"]
+export const PLAN_FAMILY_NAMES = ["plan", "prometheus"];
 
 /**
  * Check if the given agent belongs to the plan family (blocking + task permission).
  */
-export function isPlanFamily(category: string): boolean
-export function isPlanFamily(category: string | undefined): boolean
+export function isPlanFamily(category: string): boolean;
+export function isPlanFamily(category: string | undefined): boolean;
 export function isPlanFamily(category: string | undefined): boolean {
-  if (!category) return false
-  const lowerCategory = getAgentConfigKey(category).toLowerCase().trim()
-  return PLAN_FAMILY_NAMES.some((name) => lowerCategory === name)
+	if (!category) return false;
+	const lowerCategory = getAgentConfigKey(category).toLowerCase().trim();
+	return PLAN_FAMILY_NAMES.some((name) => lowerCategory === name);
 }
 
 /**
@@ -400,14 +398,14 @@ export function isPlanFamily(category: string | undefined): boolean {
  *
  * Symmetric guard to the caller-eligibility check added by PR #4065 for team_create.
  */
-export const COORDINATOR_AGENT_NAMES = ["prometheus"]
+export const COORDINATOR_AGENT_NAMES = ["prometheus"];
 
 /**
  * Returns true when the given agent name refers to a coordinator/meta agent that
  * should not be reachable as a subagent_type target via task().
  */
 export function isCoordinatorAgent(agentName: string | undefined): boolean {
-  if (!agentName) return false
-  const normalized = getAgentConfigKey(agentName).toLowerCase().trim()
-  return COORDINATOR_AGENT_NAMES.some((name) => normalized === name)
+	if (!agentName) return false;
+	const normalized = getAgentConfigKey(agentName).toLowerCase().trim();
+	return COORDINATOR_AGENT_NAMES.some((name) => normalized === name);
 }

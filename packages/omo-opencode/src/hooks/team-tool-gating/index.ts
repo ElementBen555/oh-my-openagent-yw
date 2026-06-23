@@ -1,1 +1,1 @@
-export { createTeamToolGating } from "./hook"
+export { createTeamToolGating } from "./hook";

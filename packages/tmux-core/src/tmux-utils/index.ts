@@ -1,1 +1,1 @@
-export { killTmuxSessionIfExists } from "./session-kill"
+export { killTmuxSessionIfExists } from "./session-kill";

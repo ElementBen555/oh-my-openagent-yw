@@ -21,32 +21,27 @@
  *   8. <style>             - Tone (prose) + output contract + progress updates
  */
 
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildAgentIdentitySection,
-  buildKeyTriggersSection,
-  buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
-  buildDelegationTable,
-  buildCategorySkillsDelegationGuide,
-  buildOracleSection,
-  buildHardBlocksSection,
-  buildAntiPatternsSection,
-  buildAntiDuplicationSection,
-  buildNonClaudePlannerSection,
-  categorizeTools,
+	buildAgentIdentitySection,
+	buildAntiDuplicationSection,
+	buildAntiPatternsSection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildExploreSection,
+	buildHardBlocksSection,
+	buildKeyTriggersSection,
+	buildLibrarianSection,
+	buildNonClaudePlannerSection,
+	buildOracleSection,
+	buildToolSelectionTable,
+	categorizeTools,
 } from "../dynamic-agent-prompt-builder";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
 
 function buildGpt54TasksSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `<tasks>
+	if (useTaskSystem) {
+		return `<tasks>
 Create tasks before starting any non-trivial work. This is your primary coordination mechanism.
 
 When to create: multi-step task (2+), uncertain scope, multiple items, complex breakdown.
@@ -60,9 +55,9 @@ Workflow:
 When asking for clarification:
 - State what you understood, what's unclear, 2-3 options with effort/implications, and your recommendation.
 </tasks>`;
-  }
+	}
 
-  return `<tasks>
+	return `<tasks>
 Create todos before starting any non-trivial work. This is your primary coordination mechanism.
 
 When to create: multi-step task (2+), uncertain scope, multiple items, complex breakdown.
@@ -79,41 +74,34 @@ When asking for clarification:
 }
 
 export function buildGpt54SisyphusPrompt(
-  model: string,
-  availableAgents: AvailableAgent[],
-  availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	model: string,
+	availableAgents: AvailableAgent[],
+	availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
-  const toolSelection = buildToolSelectionTable(
-    availableAgents,
-    availableTools,
-    availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
-  const tasksSection = buildGpt54TasksSection(useTaskSystem);
-  const todoHookNote = useTaskSystem
-    ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
-    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+	const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills);
+	const exploreSection = buildExploreSection(availableAgents);
+	const librarianSection = buildLibrarianSection(availableAgents);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const oracleSection = buildOracleSection(availableAgents);
+	const hardBlocks = buildHardBlocksSection();
+	const antiPatterns = buildAntiPatternsSection();
+	const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
+	const tasksSection = buildGpt54TasksSection(useTaskSystem);
+	const todoHookNote = useTaskSystem
+		? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
+		: "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
 
-  const agentIdentity = buildAgentIdentitySection(
-    "Sisyphus",
-    "Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
-  );
+	const agentIdentity = buildAgentIdentitySection(
+		"Sisyphus",
+		"Powerful AI Agent with orchestration capabilities from OhMyOpenCode",
+	);
 
-  const identityBlock = `<identity>
+	const identityBlock = `<identity>
 You are Sisyphus - an AI orchestrator from OhMyOpenCode.
 
 You are a senior SF Bay Area engineer. You delegate, verify, and ship. Your code is indistinguishable from a senior engineer's work.
@@ -130,13 +118,13 @@ Default to orchestration. Direct execution is for clearly local, trivial work on
 ${todoHookNote}
 </identity>`;
 
-  const constraintsBlock = `<constraints>
+	const constraintsBlock = `<constraints>
 ${hardBlocks}
 
 ${antiPatterns}
 </constraints>`;
 
-  const intentBlock = `<intent>
+	const intentBlock = `<intent>
 Every message passes through this gate before any action.
 Your default reasoning effort is minimal. For anything beyond a trivial lookup, pause and work through Steps 0-3 deliberately.
 
@@ -210,7 +198,7 @@ If proceeding, briefly state what you did and what remains.
 </ask_gate>
 </intent>`;
 
-  const exploreBlock = `<explore>
+	const exploreBlock = `<explore>
 ## Exploration & Research
 
 ### Codebase maturity (assess on first encounter with a new repo or module)
@@ -278,7 +266,7 @@ ${buildAntiDuplicationSection()}
 Stop searching when: you have enough context, same info repeating, 2 iterations with no new data, or direct answer found.
 </explore>`;
 
-  const executionLoopBlock = `<execution_loop>
+	const executionLoopBlock = `<execution_loop>
 ## Execution Loop
 
 Every implementation task follows this cycle. No exceptions.
@@ -361,7 +349,7 @@ Progress: report at phase transitions - before exploration, after discovery, bef
 1-2 sentences each, outcome-based. Include one specific detail. Not upfront narration or scripted preambles.
 </execution_loop>`;
 
-  const delegationBlock = `<delegation>
+	const delegationBlock = `<delegation>
 ## Delegation System
 
 ### Pre-delegation:
@@ -397,12 +385,16 @@ Keep IDs separate: background task IDs (\`bg_...\`) are for \`background_output(
 
 This preserves full context, avoids repeated exploration, saves 70%+ tokens.
 
-${oracleSection ? `### Oracle
+${
+	oracleSection
+		? `### Oracle
 
-${oracleSection}` : ""}
+${oracleSection}`
+		: ""
+}
 </delegation>`;
 
-  const styleBlock = `<style>
+	const styleBlock = `<style>
 ## Tone
 
 Write in complete, natural sentences. Avoid sentence fragments, bullet-only responses, and terse shorthand.
@@ -431,7 +423,7 @@ If the user's approach has a problem, explain the concern directly and clearly, 
 </verbosity_controls>
 </style>`;
 
-  return `${agentIdentity}
+	return `${agentIdentity}
 ${identityBlock}
 
 ${constraintsBlock}

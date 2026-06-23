@@ -1,2 +1,2 @@
-export { createTeamMailboxInjector } from "./hook"
-export type { TeamMailboxInjectorHook } from "./hook"
+export type { TeamMailboxInjectorHook } from "./hook";
+export { createTeamMailboxInjector } from "./hook";

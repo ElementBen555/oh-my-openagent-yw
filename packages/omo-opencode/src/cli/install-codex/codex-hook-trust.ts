@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-hook-trust"
+export * from "@oh-my-opencode/omo-codex/install/codex-hook-trust";

@@ -1,37 +1,35 @@
-import { isRecord } from "@oh-my-opencode/utils"
+import { isRecord } from "@oh-my-opencode/utils";
 export type SessionMessagePart = {
-  type?: string
-  text?: string
-}
+	type?: string;
+	text?: string;
+};
 
 export type SessionMessage = {
-  info?: Record<string, unknown>
-  parts?: SessionMessagePart[]
-}
-
-
+	info?: Record<string, unknown>;
+	parts?: SessionMessagePart[];
+};
 
 function isSessionMessage(value: unknown): value is SessionMessage {
-  return isRecord(value)
+	return isRecord(value);
 }
 
 function isSessionMessageArray(value: unknown): value is SessionMessage[] {
-  return Array.isArray(value) && value.every(isSessionMessage)
+	return Array.isArray(value) && value.every(isSessionMessage);
 }
 
 export function extractSessionMessages(messagesResponse: unknown): SessionMessage[] | undefined {
-  if (isSessionMessageArray(messagesResponse)) {
-    return messagesResponse
-  }
+	if (isSessionMessageArray(messagesResponse)) {
+		return messagesResponse;
+	}
 
-  if (!isRecord(messagesResponse)) {
-    return undefined
-  }
+	if (!isRecord(messagesResponse)) {
+		return undefined;
+	}
 
-  const data = messagesResponse.data
-  if (isSessionMessageArray(data)) {
-    return data
-  }
+	const data = messagesResponse.data;
+	if (isSessionMessageArray(data)) {
+		return data;
+	}
 
-  return undefined
+	return undefined;
 }

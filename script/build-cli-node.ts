@@ -9,23 +9,23 @@ const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const jsoncParserEsmEntry = fileURLToPath(new URL("../node_modules/jsonc-parser/lib/esm/main.js", import.meta.url));
 
 const result = await Bun.build({
-  entrypoints: [`${repoRoot}packages/omo-opencode/src/cli/index.ts`],
-  outdir: `${repoRoot}dist/cli-node`,
-  target: "node",
-  format: "esm",
-  plugins: [
-    {
-      name: "jsonc-parser-esm",
-      setup(build) {
-        build.onResolve({ filter: /^jsonc-parser$/ }, () => ({ path: jsoncParserEsmEntry }));
-      },
-    },
-  ],
+	entrypoints: [`${repoRoot}packages/omo-opencode/src/cli/index.ts`],
+	outdir: `${repoRoot}dist/cli-node`,
+	target: "node",
+	format: "esm",
+	plugins: [
+		{
+			name: "jsonc-parser-esm",
+			setup(build) {
+				build.onResolve({ filter: /^jsonc-parser$/ }, () => ({ path: jsoncParserEsmEntry }));
+			},
+		},
+	],
 });
 
 if (!result.success) {
-  for (const log of result.logs) console.error(log);
-  process.exit(1);
+	for (const log of result.logs) console.error(log);
+	process.exit(1);
 }
 
 console.log(`built dist/cli-node (${result.outputs.length} output${result.outputs.length === 1 ? "" : "s"})`);

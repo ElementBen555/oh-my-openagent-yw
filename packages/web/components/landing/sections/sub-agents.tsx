@@ -1,14 +1,14 @@
-import type { JSX } from "react"
-import { getTranslations } from "next-intl/server"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, Zap } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
 import {
-  SUB_AGENT_KEYS,
   AGENT_STYLES,
   CATEGORY_ROUTING,
   SKILL_INJECTIONS,
+  SUB_AGENT_KEYS,
 } from "@/components/landing/constants"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export async function SubAgentsSection(): Promise<JSX.Element> {
   const t = await getTranslations("landing")

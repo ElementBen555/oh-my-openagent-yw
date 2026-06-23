@@ -1,16 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { createRuleInjectionProcessor as createRuleInjectionProcessorFromFacade } from "./injector";
-import type { RuleInjectionProcessorDeps as RuleInjectionProcessorDepsFromFacade } from "./injector";
 import { createRuleInjectionProcessor as createRuleInjectionProcessorFromProcessor } from "./injection-processor";
 import type { RuleInjectionProcessorDeps as RuleInjectionProcessorDepsFromTypes } from "./injection-types";
+import type { RuleInjectionProcessorDeps as RuleInjectionProcessorDepsFromFacade } from "./injector";
+import {
+	clearParsedRuleCache as clearParsedRuleCacheFromFacade,
+	createRuleInjectionProcessor as createRuleInjectionProcessorFromFacade,
+	getParsedRuleCacheStats as getParsedRuleCacheStatsFromFacade,
+} from "./injector";
 import {
 	clearParsedRuleCache as clearParsedRuleCacheFromCache,
 	getParsedRuleCacheStats as getParsedRuleCacheStatsFromCache,
 } from "./parsed-rule-cache";
-import {
-	clearParsedRuleCache as clearParsedRuleCacheFromFacade,
-	getParsedRuleCacheStats as getParsedRuleCacheStatsFromFacade,
-} from "./injector";
 
 describe("rules injector facade", () => {
 	test("#given the injector facade #when runtime exports are imported #then it preserves the existing module boundary", () => {
@@ -37,9 +37,8 @@ describe("rules injector facade", () => {
 				realPaths: new Set<string>(),
 			}),
 		};
-		const acceptProcessorDeps = (
-			deps: RuleInjectionProcessorDepsFromTypes,
-		): RuleInjectionProcessorDepsFromTypes => deps;
+		const acceptProcessorDeps = (deps: RuleInjectionProcessorDepsFromTypes): RuleInjectionProcessorDepsFromTypes =>
+			deps;
 
 		expect(acceptProcessorDeps(dependencyContract)).toBe(dependencyContract);
 	});

@@ -46,7 +46,7 @@ The refactor splits packages into strict layers by runtime boundary:
 - `pi-extensions` and `codex-plugins` are not yet migrated to consume these packages. That migration is the next phase.
 - The `lsp-tools-mcp` and `lsp-daemon` packages are vendored in-tree and now consume `lsp-core` plus `mcp-stdio-core` instead of deep-importing each other's source internals.
 
-Layering achieved: Core (19 pure-TS packages) → MCP packages → Adapters (`omo` OpenCode plugin and Codex Light) → Platform binaries. Future Pi and external Codex repositories can consume the same Core layer.
+Layering achieved: Core (18 pure-TS packages) → MCP packages → Adapters (`omo` OpenCode plugin and Codex Light) → Platform binaries. Future Pi and external Codex repositories can consume the same Core layer.
 
 The Pi Engine DI abstraction was deferred. It can be revisited once the adapter migration is complete.
 

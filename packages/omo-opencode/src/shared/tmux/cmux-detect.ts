@@ -1,1 +1,1 @@
-export { isCmuxCompatEnvironment } from "@oh-my-opencode/tmux-core"
+export { isCmuxCompatEnvironment } from "@oh-my-opencode/tmux-core";

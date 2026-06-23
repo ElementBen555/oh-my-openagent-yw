@@ -1,13 +1,13 @@
-import type { BackgroundManager } from "../../features/background-agent"
-import type { PluginInput } from "@opencode-ai/plugin"
-import { resolveMessageContext } from "../../features/hook-message-injector"
-import { getSessionAgent } from "../../features/claude-code-session-state"
-import { log } from "../../shared"
-import type { CallOmoAgentArgs } from "./types"
-import type { ToolContextWithMetadata } from "./tool-context-with-metadata"
-import { getMessageDir } from "./message-storage-directory"
-import { getSessionTools } from "../../shared/session-tools-store"
-import { getAgentDisplayName, stripAgentListSortPrefix } from "../../shared/agent-display-names"
+import type { PluginInput } from "@opencode-ai/plugin";
+import type { BackgroundManager } from "../../features/background-agent";
+import { getSessionAgent } from "../../features/claude-code-session-state";
+import { resolveMessageContext } from "../../features/hook-message-injector";
+import { log } from "../../shared";
+import { getAgentDisplayName, stripAgentListSortPrefix } from "../../shared/agent-display-names";
+import { getSessionTools } from "../../shared/session-tools-store";
+import { getMessageDir } from "./message-storage-directory";
+import type { ToolContextWithMetadata } from "./tool-context-with-metadata";
+import type { CallOmoAgentArgs } from "./types";
 
 export async function executeBackgroundAgent(
 	args: CallOmoAgentArgs,
@@ -16,16 +16,11 @@ export async function executeBackgroundAgent(
 	client: PluginInput["client"],
 ): Promise<string> {
 	try {
-		const messageDir = getMessageDir(toolContext.sessionID)
-		const { prevMessage, firstMessageAgent } = await resolveMessageContext(
-			toolContext.sessionID,
-			client,
-			messageDir
-		)
+		const messageDir = getMessageDir(toolContext.sessionID);
+		const { prevMessage, firstMessageAgent } = await resolveMessageContext(toolContext.sessionID, client, messageDir);
 
-		const sessionAgent = getSessionAgent(toolContext.sessionID)
-		const parentAgent =
-			toolContext.agent ?? sessionAgent ?? firstMessageAgent ?? prevMessage?.agent
+		const sessionAgent = getSessionAgent(toolContext.sessionID);
+		const parentAgent = toolContext.agent ?? sessionAgent ?? firstMessageAgent ?? prevMessage?.agent;
 
 		log("[call_omo_agent] parentAgent resolution", {
 			sessionID: toolContext.sessionID,
@@ -35,7 +30,7 @@ export async function executeBackgroundAgent(
 			firstMessageAgent,
 			prevMessageAgent: prevMessage?.agent,
 			resolvedParentAgent: parentAgent,
-		})
+		});
 
 		const task = await manager.launch({
 			description: args.description,
@@ -45,34 +40,34 @@ export async function executeBackgroundAgent(
 			parentMessageId: toolContext.messageID,
 			parentAgent,
 			parentTools: getSessionTools(toolContext.sessionID),
-		})
+		});
 
-		const waitStart = Date.now()
-		const waitTimeoutMs = 30_000
-		const waitIntervalMs = 50
+		const waitStart = Date.now();
+		const waitTimeoutMs = 30_000;
+		const waitIntervalMs = 50;
 
-		let sessionId = task.sessionId
+		let sessionId = task.sessionId;
 		while (!sessionId && Date.now() - waitStart < waitTimeoutMs) {
-			const updated = manager.getTask(task.id)
+			const updated = manager.getTask(task.id);
 			if (updated?.status === "error" || updated?.status === "cancelled" || updated?.status === "interrupt") {
-				return `Task failed to start (status: ${updated.status}).\n\nTask ID: ${task.id}`
+				return `Task failed to start (status: ${updated.status}).\n\nTask ID: ${task.id}`;
 			}
-			sessionId = updated?.sessionId
+			sessionId = updated?.sessionId;
 			if (sessionId) {
-				break
+				break;
 			}
 			if (toolContext.abort?.aborted) {
-				break
+				break;
 			}
 			await new Promise<void>((resolve) => {
-				setTimeout(resolve, waitIntervalMs)
-			})
+				setTimeout(resolve, waitIntervalMs);
+			});
 		}
 
 		await toolContext.metadata?.({
 			title: args.description,
 			metadata: { sessionId: sessionId ?? "pending" },
-		})
+		});
 
 		return `Background agent task launched successfully.
 
@@ -82,9 +77,9 @@ Description: ${task.description}
 Agent: ${task.agent} (subagent)
 Status: ${task.status}
 
-Do NOT call background_output now. Wait for <system-reminder> notification first. The system will deliver the result when the task completes; you do not need to poll for it.`
+Do NOT call background_output now. Wait for <system-reminder> notification first. The system will deliver the result when the task completes; you do not need to poll for it.`;
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error)
-		return `Failed to launch background agent task: ${message}`
+		const message = error instanceof Error ? error.message : String(error);
+		return `Failed to launch background agent task: ${message}`;
 	}
 }

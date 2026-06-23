@@ -1,7 +1,7 @@
-import type { JSX } from "react"
 import { getTranslations } from "next-intl/server"
-import { Badge } from "@/components/ui/badge"
+import type { JSX } from "react"
 import { TerminalTypewriter } from "@/components/landing/motion-wrappers"
+import { Badge } from "@/components/ui/badge"
 
 export async function UltraworkSection(): Promise<JSX.Element> {
   const t = await getTranslations("landing")

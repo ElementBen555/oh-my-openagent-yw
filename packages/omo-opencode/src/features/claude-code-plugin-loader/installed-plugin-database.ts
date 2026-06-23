@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/claude-code-compat-core/claude-code-plugin-loader/installed-plugin-database"
+export * from "@oh-my-opencode/claude-code-compat-core/claude-code-plugin-loader/installed-plugin-database";

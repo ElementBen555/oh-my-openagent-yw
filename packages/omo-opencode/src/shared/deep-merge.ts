@@ -1,1 +1,1 @@
-export { deepMerge, isPlainObject } from "@oh-my-opencode/utils"
+export { deepMerge, isPlainObject } from "@oh-my-opencode/utils";

@@ -3,31 +3,26 @@
  * Used for Claude and other non-specialized models.
  */
 
-import type {
-  AvailableAgent,
-  AvailableTool,
-  AvailableSkill,
-  AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+import type { AvailableAgent, AvailableCategory, AvailableSkill, AvailableTool } from "../dynamic-agent-prompt-builder";
 import {
-  buildKeyTriggersSection,
-  buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
-  buildDelegationTable,
-  buildCategorySkillsDelegationGuide,
-  buildOracleSection,
-  buildHardBlocksSection,
-  buildAntiPatternsSection,
-  buildParallelDelegationSection,
-  buildNonClaudePlannerSection,
-  buildAntiDuplicationSection,
-  categorizeTools,
+	buildAntiDuplicationSection,
+	buildAntiPatternsSection,
+	buildCategorySkillsDelegationGuide,
+	buildDelegationTable,
+	buildExploreSection,
+	buildHardBlocksSection,
+	buildKeyTriggersSection,
+	buildLibrarianSection,
+	buildNonClaudePlannerSection,
+	buildOracleSection,
+	buildParallelDelegationSection,
+	buildToolSelectionTable,
+	categorizeTools,
 } from "../dynamic-agent-prompt-builder";
 
 export function buildTaskManagementSection(useTaskSystem: boolean): string {
-  if (useTaskSystem) {
-    return `<Task_Management>
+	if (useTaskSystem) {
+		return `<Task_Management>
 ## Task Management (CRITICAL)
 
 **DEFAULT BEHAVIOR**: Create tasks BEFORE starting any non-trivial task. This is your PRIMARY coordination mechanism.
@@ -79,9 +74,9 @@ I want to make sure I understand correctly.
 Should I proceed with [recommendation], or would you prefer differently?
 \`\`\`
 </Task_Management>`;
-  }
+	}
 
-  return `<Task_Management>
+	return `<Task_Management>
 ## Todo Management (CRITICAL)
 
 **DEFAULT BEHAVIOR**: Create todos BEFORE starting any non-trivial task. This is your PRIMARY coordination mechanism.
@@ -136,37 +131,30 @@ Should I proceed with [recommendation], or would you prefer differently?
 }
 
 export function buildDefaultSisyphusPrompt(
-  model: string,
-  availableAgents: AvailableAgent[],
-  availableTools: AvailableTool[] = [],
-  availableSkills: AvailableSkill[] = [],
-  availableCategories: AvailableCategory[] = [],
-  useTaskSystem = false,
+	model: string,
+	availableAgents: AvailableAgent[],
+	availableTools: AvailableTool[] = [],
+	availableSkills: AvailableSkill[] = [],
+	availableCategories: AvailableCategory[] = [],
+	useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
-  const toolSelection = buildToolSelectionTable(
-    availableAgents,
-    availableTools,
-    availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
-    availableCategories,
-    availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const parallelDelegationSection = buildParallelDelegationSection(model, availableCategories);
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
-  const taskManagementSection = buildTaskManagementSection(useTaskSystem);
-  const todoHookNote = useTaskSystem
-    ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
-    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
+	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+	const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills);
+	const exploreSection = buildExploreSection(availableAgents);
+	const librarianSection = buildLibrarianSection(availableAgents);
+	const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills);
+	const delegationTable = buildDelegationTable(availableAgents);
+	const oracleSection = buildOracleSection(availableAgents);
+	const hardBlocks = buildHardBlocksSection();
+	const antiPatterns = buildAntiPatternsSection();
+	const parallelDelegationSection = buildParallelDelegationSection(model, availableCategories);
+	const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
+	const taskManagementSection = buildTaskManagementSection(useTaskSystem);
+	const todoHookNote = useTaskSystem
+		? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
+		: "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
 
-  return `<Role>
+	return `<Role>
 You are "Sisyphus" - Powerful AI Agent with orchestration capabilities from OhMyOpenCode.
 
 **Why Sisyphus?**: Humans roll their boulder every day. So do you. We're not so different-your code should be indistinguishable from a senior engineer's.

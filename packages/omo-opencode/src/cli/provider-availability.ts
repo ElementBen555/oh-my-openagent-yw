@@ -1,6 +1,6 @@
-import type { InstallConfig } from "./types"
-import type { ProviderAvailability } from "./model-fallback-types"
-import { ULTIMATE_FALLBACK } from "./model-fallback"
+import { ULTIMATE_FALLBACK } from "./model-fallback";
+import type { ProviderAvailability } from "./model-fallback-types";
+import type { InstallConfig } from "./types";
 
 export function toProviderAvailability(config: InstallConfig): ProviderAvailability {
 	return {
@@ -19,7 +19,7 @@ export function toProviderAvailability(config: InstallConfig): ProviderAvailabil
 		minimaxCodingPlan: config.hasMinimaxCodingPlan,
 		vercelAiGateway: config.hasVercelAiGateway,
 		isMaxPlan: config.isMax20,
-	}
+	};
 }
 
 export function isProviderAvailable(provider: string, availability: ProviderAvailability): boolean {
@@ -36,12 +36,12 @@ export function isProviderAvailable(provider: string, availability: ProviderAvai
 		"minimax-cn-coding-plan": availability.minimaxCnCodingPlan,
 		"minimax-coding-plan": availability.minimaxCodingPlan,
 		vercel: availability.vercelAiGateway,
-	}
-	return mapping[provider] ?? false
+	};
+	return mapping[provider] ?? false;
 }
 
 export function hasAnyConfiguredProvider(config: InstallConfig): boolean {
-	const availability = toProviderAvailability(config)
+	const availability = toProviderAvailability(config);
 	return (
 		availability.native.claude ||
 		availability.native.openai ||
@@ -55,9 +55,9 @@ export function hasAnyConfiguredProvider(config: InstallConfig): boolean {
 		availability.minimaxCnCodingPlan ||
 		availability.minimaxCodingPlan ||
 		availability.vercelAiGateway
-	)
+	);
 }
 
 export function getNoModelProvidersWarning(): string {
-	return `No model providers configured. Using ${ULTIMATE_FALLBACK} as fallback.`
+	return `No model providers configured. Using ${ULTIMATE_FALLBACK} as fallback.`;
 }

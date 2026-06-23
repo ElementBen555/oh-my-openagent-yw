@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/openclaw-core/reply-listener-startup"
+export * from "@oh-my-opencode/openclaw-core/reply-listener-startup";

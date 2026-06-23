@@ -178,4 +178,4 @@ Execution order: Commit 1 -> Commit 2 -> Commit 3
 - Total commits >= min_commits
 
 **IF ANY CHECK FAILS, DO NOT PROCEED. REPLAN.**
-</atomic_planning>`
+</atomic_planning>`;

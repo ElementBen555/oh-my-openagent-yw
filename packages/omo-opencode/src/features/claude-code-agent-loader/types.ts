@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/claude-code-compat-core/claude-code-agent-loader/types"
+export * from "@oh-my-opencode/claude-code-compat-core/claude-code-agent-loader/types";

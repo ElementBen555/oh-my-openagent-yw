@@ -1,7 +1,7 @@
-import type { TeamModeConfig } from "../../config/schema/team-mode"
+import type { TeamModeConfig } from "../../config/schema/team-mode";
 
 export function buildTeammateCommunicationAddendum(_config: TeamModeConfig): string {
-  return `
+	return `
 # Team Communication
 
 You are running as a team member. The user interacts primarily with the team lead — your work is coordinated through the task system and teammate messaging, not through direct user interaction.
@@ -42,5 +42,5 @@ When you finish your assigned work, ALWAYS, in this order:
 1. Mark your task \`status: "completed"\` (or \`"failed"\` with a reason) via \`team_task_update\` — the lead's closure check reads \`team_task_list\`, so the task update must land before any completion message.
 2. Re-check \`team_task_list\` for newly unblocked work. If there is any, claim it and continue — do not idle.
 3. If \`team_task_list\` shows nothing left for you, send the lead a single short \`team_send_message\` with your results and the phrase \`closure-ready\` so the lead knows you have no more work in flight. Then go idle.
-`
+`;
 }

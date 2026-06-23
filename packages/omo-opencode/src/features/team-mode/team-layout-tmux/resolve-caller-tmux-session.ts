@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-layout-tmux/resolve-caller-tmux-session"
+export * from "@oh-my-opencode/team-core/team-layout-tmux/resolve-caller-tmux-session";

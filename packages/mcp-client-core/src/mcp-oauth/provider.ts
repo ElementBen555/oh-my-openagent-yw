@@ -1,215 +1,221 @@
-import type { OAuthTokenData } from "./storage"
-import { loadToken, saveToken } from "./storage"
-import { PLUGIN_NAME } from "../plugin-identity"
-import { discoverOAuthServerMetadata } from "./discovery"
-import type { OAuthServerMetadata } from "./discovery"
-import { getOrRegisterClient } from "./dcr"
-import type { ClientCredentials, ClientRegistrationStorage } from "./dcr"
-import { findAvailablePort } from "./callback-server"
+import { PLUGIN_NAME } from "../plugin-identity";
+import { findAvailablePort } from "./callback-server";
+import type { ClientCredentials, ClientRegistrationStorage } from "./dcr";
+import { getOrRegisterClient } from "./dcr";
+import type { OAuthServerMetadata } from "./discovery";
+import { discoverOAuthServerMetadata } from "./discovery";
 import {
-  buildAuthorizationUrl,
-  generateCodeChallenge,
-  generateCodeVerifier,
-  runAuthorizationCodeRedirect,
-  startCallbackServer,
-} from "./oauth-authorization-flow"
+	buildAuthorizationUrl,
+	generateCodeChallenge,
+	generateCodeVerifier,
+	runAuthorizationCodeRedirect,
+	startCallbackServer,
+} from "./oauth-authorization-flow";
+import type { OAuthTokenData } from "./storage";
+import { loadToken, saveToken } from "./storage";
 
 export type McpOAuthProviderOptions = {
-  serverUrl: string
-  clientId?: string
-  scopes?: string[]
-}
+	serverUrl: string;
+	clientId?: string;
+	scopes?: string[];
+};
 
 async function parseTokenResponse(tokenResponse: Response): Promise<Record<string, unknown>> {
-  if (!tokenResponse.ok) {
-    let errorDetail = `${tokenResponse.status}`
-    try {
-      const body = (await tokenResponse.json()) as Record<string, unknown>
-      if (body["error"]) {
-        errorDetail = `${tokenResponse.status} ${body["error"]}`
-        if (body["error_description"]) {
-          errorDetail += `: ${body["error_description"]}`
-        }
-      }
-    } catch (error) {
-      if (!(error instanceof Error)) throw error
-    }
-    throw new Error(`Token exchange failed: ${errorDetail}`)
-  }
+	if (!tokenResponse.ok) {
+		let errorDetail = `${tokenResponse.status}`;
+		try {
+			const body = (await tokenResponse.json()) as Record<string, unknown>;
+			if (body["error"]) {
+				errorDetail = `${tokenResponse.status} ${body["error"]}`;
+				if (body["error_description"]) {
+					errorDetail += `: ${body["error_description"]}`;
+				}
+			}
+		} catch (error) {
+			if (!(error instanceof Error)) throw error;
+		}
+		throw new Error(`Token exchange failed: ${errorDetail}`);
+	}
 
-  return (await tokenResponse.json()) as Record<string, unknown>
+	return (await tokenResponse.json()) as Record<string, unknown>;
 }
 
 function buildOAuthTokenData(
-  tokenData: Record<string, unknown>,
-  clientInfo: ClientCredentials,
-  fallbackRefreshToken?: string,
+	tokenData: Record<string, unknown>,
+	clientInfo: ClientCredentials,
+	fallbackRefreshToken?: string,
 ): OAuthTokenData {
-  const accessToken = tokenData["access_token"]
-  if (typeof accessToken !== "string") {
-    throw new Error("Token response missing access_token")
-  }
+	const accessToken = tokenData["access_token"];
+	if (typeof accessToken !== "string") {
+		throw new Error("Token response missing access_token");
+	}
 
-  return {
-    accessToken,
-    refreshToken: typeof tokenData["refresh_token"] === "string" ? tokenData["refresh_token"] : fallbackRefreshToken,
-    expiresAt:
-      typeof tokenData["expires_in"] === "number" ? Math.floor(Date.now() / 1000) + tokenData["expires_in"] : undefined,
-    clientInfo: {
-      clientId: clientInfo.clientId,
-      ...(clientInfo.clientSecret ? { clientSecret: clientInfo.clientSecret } : {}),
-    },
-  }
+	return {
+		accessToken,
+		refreshToken: typeof tokenData["refresh_token"] === "string" ? tokenData["refresh_token"] : fallbackRefreshToken,
+		expiresAt:
+			typeof tokenData["expires_in"] === "number"
+				? Math.floor(Date.now() / 1000) + tokenData["expires_in"]
+				: undefined,
+		clientInfo: {
+			clientId: clientInfo.clientId,
+			...(clientInfo.clientSecret ? { clientSecret: clientInfo.clientSecret } : {}),
+		},
+	};
 }
 
 export class McpOAuthProvider {
-  private readonly serverUrl: string
-  private readonly configClientId: string | undefined
-  private readonly scopes: string[]
-  private storedCodeVerifier: string | null = null
-  private storedClientInfo: ClientCredentials | null = null
-  private callbackPort: number | null = null
+	private readonly serverUrl: string;
+	private readonly configClientId: string | undefined;
+	private readonly scopes: string[];
+	private storedCodeVerifier: string | null = null;
+	private storedClientInfo: ClientCredentials | null = null;
+	private callbackPort: number | null = null;
 
-  constructor(options: McpOAuthProviderOptions) {
-    this.serverUrl = options.serverUrl
-    this.configClientId = options.clientId
-    this.scopes = options.scopes ?? []
-  }
+	constructor(options: McpOAuthProviderOptions) {
+		this.serverUrl = options.serverUrl;
+		this.configClientId = options.clientId;
+		this.scopes = options.scopes ?? [];
+	}
 
-  tokens(): OAuthTokenData | null {
-    return loadToken(this.serverUrl, this.serverUrl)
-  }
+	tokens(): OAuthTokenData | null {
+		return loadToken(this.serverUrl, this.serverUrl);
+	}
 
-  saveTokens(tokenData: OAuthTokenData): boolean {
-    return saveToken(this.serverUrl, this.serverUrl, tokenData)
-  }
+	saveTokens(tokenData: OAuthTokenData): boolean {
+		return saveToken(this.serverUrl, this.serverUrl, tokenData);
+	}
 
-  clientInformation(): ClientCredentials | null {
-    if (this.storedClientInfo) return this.storedClientInfo
-    const tokenData = this.tokens()
-    if (tokenData?.clientInfo) {
-      this.storedClientInfo = tokenData.clientInfo
-      return this.storedClientInfo
-    }
-    return null
-  }
+	clientInformation(): ClientCredentials | null {
+		if (this.storedClientInfo) return this.storedClientInfo;
+		const tokenData = this.tokens();
+		if (tokenData?.clientInfo) {
+			this.storedClientInfo = tokenData.clientInfo;
+			return this.storedClientInfo;
+		}
+		return null;
+	}
 
-  redirectUrl(): string {
-    return `http://127.0.0.1:${this.callbackPort ?? 19877}/callback`
-  }
+	redirectUrl(): string {
+		return `http://127.0.0.1:${this.callbackPort ?? 19877}/callback`;
+	}
 
-  saveCodeVerifier(verifier: string): void {
-    this.storedCodeVerifier = verifier
-  }
+	saveCodeVerifier(verifier: string): void {
+		this.storedCodeVerifier = verifier;
+	}
 
-  codeVerifier(): string | null {
-    return this.storedCodeVerifier
-  }
+	codeVerifier(): string | null {
+		return this.storedCodeVerifier;
+	}
 
-  async redirectToAuthorization(metadata: OAuthServerMetadata): Promise<{ code: string }> {
-    const clientInfo = this.clientInformation()
-    if (!clientInfo) {
-      throw new Error("No client information available. Run login() or register a client first.")
-    }
+	async redirectToAuthorization(metadata: OAuthServerMetadata): Promise<{ code: string }> {
+		const clientInfo = this.clientInformation();
+		if (!clientInfo) {
+			throw new Error("No client information available. Run login() or register a client first.");
+		}
 
-    if (this.callbackPort === null) {
-      this.callbackPort = await findAvailablePort()
-    }
+		if (this.callbackPort === null) {
+			this.callbackPort = await findAvailablePort();
+		}
 
-    const result = await runAuthorizationCodeRedirect({
-      authorizationEndpoint: metadata.authorizationEndpoint,
-      callbackPort: this.callbackPort,
-      clientId: clientInfo.clientId,
-      redirectUri: this.redirectUrl(),
-      scopes: this.scopes,
-      resource: metadata.resource,
-    })
+		const result = await runAuthorizationCodeRedirect({
+			authorizationEndpoint: metadata.authorizationEndpoint,
+			callbackPort: this.callbackPort,
+			clientId: clientInfo.clientId,
+			redirectUri: this.redirectUrl(),
+			scopes: this.scopes,
+			resource: metadata.resource,
+		});
 
-    this.saveCodeVerifier(result.verifier)
-    return { code: result.code }
-  }
+		this.saveCodeVerifier(result.verifier);
+		return { code: result.code };
+	}
 
-  async login(): Promise<OAuthTokenData> {
-    const metadata = await discoverOAuthServerMetadata(this.serverUrl)
+	async login(): Promise<OAuthTokenData> {
+		const metadata = await discoverOAuthServerMetadata(this.serverUrl);
 
-    const clientRegistrationStorage: ClientRegistrationStorage = {
-      getClientRegistration: () => this.storedClientInfo,
-      setClientRegistration: (_serverIdentifier: string, credentials: ClientCredentials) => {
-        this.storedClientInfo = credentials
-      },
-    }
+		const clientRegistrationStorage: ClientRegistrationStorage = {
+			getClientRegistration: () => this.storedClientInfo,
+			setClientRegistration: (_serverIdentifier: string, credentials: ClientCredentials) => {
+				this.storedClientInfo = credentials;
+			},
+		};
 
-    const clientInfo = await getOrRegisterClient({
-      ...(metadata.registrationEndpoint ? { registrationEndpoint: metadata.registrationEndpoint } : {}),
-      serverIdentifier: this.serverUrl,
-      clientName: PLUGIN_NAME,
-      redirectUris: [this.redirectUrl()],
-      tokenEndpointAuthMethod: "none",
-      ...(this.configClientId ? { clientId: this.configClientId } : {}),
-      storage: clientRegistrationStorage,
-    })
+		const clientInfo = await getOrRegisterClient({
+			...(metadata.registrationEndpoint ? { registrationEndpoint: metadata.registrationEndpoint } : {}),
+			serverIdentifier: this.serverUrl,
+			clientName: PLUGIN_NAME,
+			redirectUris: [this.redirectUrl()],
+			tokenEndpointAuthMethod: "none",
+			...(this.configClientId ? { clientId: this.configClientId } : {}),
+			storage: clientRegistrationStorage,
+		});
 
-    if (!clientInfo) {
-      throw new Error("Failed to obtain client credentials. Provide a clientId or ensure the server supports DCR.")
-    }
+		if (!clientInfo) {
+			throw new Error("Failed to obtain client credentials. Provide a clientId or ensure the server supports DCR.");
+		}
 
-    this.storedClientInfo = clientInfo
+		this.storedClientInfo = clientInfo;
 
-    const { code } = await this.redirectToAuthorization(metadata)
-    const verifier = this.codeVerifier()
-    if (!verifier) {
-      throw new Error("Code verifier not found")
-    }
+		const { code } = await this.redirectToAuthorization(metadata);
+		const verifier = this.codeVerifier();
+		if (!verifier) {
+			throw new Error("Code verifier not found");
+		}
 
-    const tokenResponse = await fetch(metadata.tokenEndpoint, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: this.redirectUrl(),
-        client_id: clientInfo.clientId,
-        code_verifier: verifier,
-        ...(metadata.resource ? { resource: metadata.resource } : {}),
-      }).toString(),
-    })
+		const tokenResponse = await fetch(metadata.tokenEndpoint, {
+			method: "POST",
+			headers: { "content-type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({
+				grant_type: "authorization_code",
+				code,
+				redirect_uri: this.redirectUrl(),
+				client_id: clientInfo.clientId,
+				code_verifier: verifier,
+				...(metadata.resource ? { resource: metadata.resource } : {}),
+			}).toString(),
+		});
 
-    const tokenData = await parseTokenResponse(tokenResponse)
-    const oauthTokenData = buildOAuthTokenData(tokenData, clientInfo)
+		const tokenData = await parseTokenResponse(tokenResponse);
+		const oauthTokenData = buildOAuthTokenData(tokenData, clientInfo);
 
-    this.saveTokens(oauthTokenData)
-    return oauthTokenData
-  }
+		this.saveTokens(oauthTokenData);
+		return oauthTokenData;
+	}
 
-  async refresh(refreshToken: string): Promise<OAuthTokenData> {
-    const metadata = await discoverOAuthServerMetadata(this.serverUrl)
-    const clientInfo = this.clientInformation()
-    const clientId = clientInfo?.clientId ?? this.configClientId
-    if (!clientId) {
-      throw new Error("No client information available. Run login() or register a client first.")
-    }
+	async refresh(refreshToken: string): Promise<OAuthTokenData> {
+		const metadata = await discoverOAuthServerMetadata(this.serverUrl);
+		const clientInfo = this.clientInformation();
+		const clientId = clientInfo?.clientId ?? this.configClientId;
+		if (!clientId) {
+			throw new Error("No client information available. Run login() or register a client first.");
+		}
 
-    const tokenResponse = await fetch(metadata.tokenEndpoint, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-        client_id: clientId,
-        ...(clientInfo?.clientSecret ? { client_secret: clientInfo.clientSecret } : {}),
-        ...(metadata.resource ? { resource: metadata.resource } : {}),
-      }).toString(),
-    })
+		const tokenResponse = await fetch(metadata.tokenEndpoint, {
+			method: "POST",
+			headers: { "content-type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({
+				grant_type: "refresh_token",
+				refresh_token: refreshToken,
+				client_id: clientId,
+				...(clientInfo?.clientSecret ? { client_secret: clientInfo.clientSecret } : {}),
+				...(metadata.resource ? { resource: metadata.resource } : {}),
+			}).toString(),
+		});
 
-    const tokenData = await parseTokenResponse(tokenResponse)
-    const oauthTokenData = buildOAuthTokenData(tokenData, {
-      clientId,
-      ...(clientInfo?.clientSecret ? { clientSecret: clientInfo.clientSecret } : {}),
-    }, refreshToken)
+		const tokenData = await parseTokenResponse(tokenResponse);
+		const oauthTokenData = buildOAuthTokenData(
+			tokenData,
+			{
+				clientId,
+				...(clientInfo?.clientSecret ? { clientSecret: clientInfo.clientSecret } : {}),
+			},
+			refreshToken,
+		);
 
-    this.saveTokens(oauthTokenData)
-    return oauthTokenData
-  }
+		this.saveTokens(oauthTokenData);
+		return oauthTokenData;
+	}
 }
 
-export { generateCodeVerifier, generateCodeChallenge, buildAuthorizationUrl }
+export { buildAuthorizationUrl, generateCodeChallenge, generateCodeVerifier };

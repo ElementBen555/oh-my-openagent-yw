@@ -1,16 +1,16 @@
 export function escapeAppleScriptText(input: string): string {
-  return input.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+	return input.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 export function escapePowerShellSingleQuotedText(input: string): string {
-  return input.replace(/'/g, "''")
+	return input.replace(/'/g, "''");
 }
 
 export function buildWindowsToastScript(title: string, message: string): string {
-  const psTitle = escapePowerShellSingleQuotedText(title)
-  const psMessage = escapePowerShellSingleQuotedText(message)
+	const psTitle = escapePowerShellSingleQuotedText(title);
+	const psMessage = escapePowerShellSingleQuotedText(message);
 
-  return `
+	return `
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
 $Template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
 $RawXml = [xml] $Template.GetXml()
@@ -21,5 +21,7 @@ $SerializedXml.LoadXml($RawXml.OuterXml)
 $Toast = [Windows.UI.Notifications.ToastNotification]::new($SerializedXml)
 $Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('OpenCode')
 $Notifier.Show($Toast)
-`.trim().replace(/\n/g, "; ")
+`
+		.trim()
+		.replace(/\n/g, "; ");
 }

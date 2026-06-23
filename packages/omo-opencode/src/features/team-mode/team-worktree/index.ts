@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/team-core/team-worktree"
+export * from "@oh-my-opencode/team-core/team-worktree";

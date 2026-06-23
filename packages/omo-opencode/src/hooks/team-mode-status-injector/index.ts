@@ -1,1 +1,1 @@
-export { createTeamModeStatusInjector } from "./hook"
+export { createTeamModeStatusInjector } from "./hook";

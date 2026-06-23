@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/skills-loader-core/opencode-skill-loader/skill-definition-record"
+export * from "@oh-my-opencode/skills-loader-core/opencode-skill-loader/skill-definition-record";

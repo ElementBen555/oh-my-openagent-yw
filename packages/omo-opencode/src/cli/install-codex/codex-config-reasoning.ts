@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/codex-config-reasoning"
+export * from "@oh-my-opencode/omo-codex/install/codex-config-reasoning";

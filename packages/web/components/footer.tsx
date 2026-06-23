@@ -1,5 +1,5 @@
-import type { JSX } from "react"
 import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
 import { Link } from "@/i18n/routing"
 
 export async function Footer({ locale }: { readonly locale?: string } = {}): Promise<JSX.Element> {

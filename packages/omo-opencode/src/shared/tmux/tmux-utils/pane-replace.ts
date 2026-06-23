@@ -1,7 +1,7 @@
-import { replaceTmuxPane as replaceTmuxPaneCore } from "@oh-my-opencode/tmux-core"
-import type { ReplaceTmuxPaneDeps, TmuxConfig } from "@oh-my-opencode/tmux-core"
-import type { SpawnPaneResult } from "../types"
-import { withPaneReplaceDeps } from "./adapter-deps"
+import type { ReplaceTmuxPaneDeps, TmuxConfig } from "@oh-my-opencode/tmux-core";
+import { replaceTmuxPane as replaceTmuxPaneCore } from "@oh-my-opencode/tmux-core";
+import type { SpawnPaneResult } from "../types";
+import { withPaneReplaceDeps } from "./adapter-deps";
 
 export async function replaceTmuxPane(
 	paneId: string,
@@ -20,5 +20,5 @@ export async function replaceTmuxPane(
 		_serverUrl,
 		_directory,
 		withPaneReplaceDeps(depsInput),
-	)
+	);
 }

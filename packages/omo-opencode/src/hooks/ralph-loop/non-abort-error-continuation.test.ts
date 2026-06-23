@@ -1,37 +1,37 @@
 /// <reference types="bun-types" />
-import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { existsSync, mkdirSync, rmSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
-import { createRalphLoopHook } from "./index"
-import { clearState } from "./storage"
-import { DEFAULT_PROMPT_ASYNC_POST_DISPATCH_HOLD_MS } from "../shared/prompt-async-gate"
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { DEFAULT_PROMPT_ASYNC_POST_DISPATCH_HOLD_MS } from "../shared/prompt-async-gate";
+import { createRalphLoopHook } from "./index";
+import { clearState } from "./storage";
 
 describe("ralph-loop non-abort error continuation", () => {
-	const testDirectory = join(tmpdir(), `ralph-loop-non-abort-error-${Date.now()}`)
-	let promptCalls: Array<{ sessionID: string; text: string }>
-	let messagesCalls: Array<{ sessionID: string }>
-	let syncPromptCalls: number
+	const testDirectory = join(tmpdir(), `ralph-loop-non-abort-error-${Date.now()}`);
+	let promptCalls: Array<{ sessionID: string; text: string }>;
+	let messagesCalls: Array<{ sessionID: string }>;
+	let syncPromptCalls: number;
 
 	beforeEach(() => {
-		promptCalls = []
-		messagesCalls = []
-		syncPromptCalls = 0
-		mkdirSync(testDirectory, { recursive: true })
-		clearState(testDirectory)
-	})
+		promptCalls = [];
+		messagesCalls = [];
+		syncPromptCalls = 0;
+		mkdirSync(testDirectory, { recursive: true });
+		clearState(testDirectory);
+	});
 
 	afterEach(() => {
-		expect(syncPromptCalls).toBe(0)
-		clearState(testDirectory)
+		expect(syncPromptCalls).toBe(0);
+		clearState(testDirectory);
 		if (existsSync(testDirectory)) {
-			rmSync(testDirectory, { recursive: true, force: true })
+			rmSync(testDirectory, { recursive: true, force: true });
 		}
-	})
+	});
 
 	async function failSyncPrompt(): Promise<never> {
-		syncPromptCalls += 1
-		throw new Error("Ralph Loop runtime-error continuation must use promptAsync")
+		syncPromptCalls += 1;
+		throw new Error("Ralph Loop runtime-error continuation must use promptAsync");
 	}
 
 	test("continues immediately after non-abort session error", async () => {
@@ -45,18 +45,18 @@ describe("ralph-loop non-abort error continuation", () => {
 			client: {
 				session: {
 					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+						messagesCalls.push({ sessionID: options.path.id });
+						return { data: [] };
 					},
 					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
 					}) => {
 						promptCalls.push({
 							sessionID: options.path.id,
 							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+						});
+						return {};
 					},
 					prompt: failSyncPrompt,
 				},
@@ -64,12 +64,12 @@ describe("ralph-loop non-abort error continuation", () => {
 					showToast: async () => ({}),
 				},
 			},
-		} as never)
+		} as never);
 
 		hook.startLoop("session-123", "Keep working", {
 			messageCountAtStart: 0,
 			maxIterations: 5,
-		})
+		});
 
 		await hook.event({
 			event: {
@@ -79,15 +79,15 @@ describe("ralph-loop non-abort error continuation", () => {
 					error: { name: "CommandFailedError" },
 				},
 			},
-		})
+		});
 
 		// then - the loop should continue without waiting for a later idle event
-		expect(promptCalls).toHaveLength(1)
-		expect(promptCalls[0]?.sessionID).toBe("session-123")
-		expect(promptCalls[0]?.text).toContain("Keep working")
-		expect(messagesCalls.length).toBeGreaterThan(0)
-		expect(hook.getState()?.iteration).toBe(2)
-	})
+		expect(promptCalls).toHaveLength(1);
+		expect(promptCalls[0]?.sessionID).toBe("session-123");
+		expect(promptCalls[0]?.text).toContain("Keep working");
+		expect(messagesCalls.length).toBeGreaterThan(0);
+		expect(hook.getState()?.iteration).toBe(2);
+	});
 	test("continues ultrawork loop immediately after non-abort session error", async () => {
 		// given - an active ULW Loop receives a recoverable runtime error
 		const hook = createRalphLoopHook({
@@ -99,18 +99,18 @@ describe("ralph-loop non-abort error continuation", () => {
 			client: {
 				session: {
 					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+						messagesCalls.push({ sessionID: options.path.id });
+						return { data: [] };
 					},
 					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
 					}) => {
 						promptCalls.push({
 							sessionID: options.path.id,
 							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+						});
+						return {};
 					},
 					prompt: failSyncPrompt,
 				},
@@ -118,13 +118,13 @@ describe("ralph-loop non-abort error continuation", () => {
 					showToast: async () => ({}),
 				},
 			},
-		} as never)
+		} as never);
 
 		hook.startLoop("session-123", "Keep ultraworking", {
 			messageCountAtStart: 0,
 			maxIterations: 5,
 			ultrawork: true,
-		})
+		});
 
 		await hook.event({
 			event: {
@@ -134,21 +134,21 @@ describe("ralph-loop non-abort error continuation", () => {
 					error: { name: "RuntimeError" },
 				},
 			},
-		})
+		});
 
 		// then - the ULW continuation keeps the ultrawork directive
-		expect(promptCalls).toHaveLength(1)
-		expect(promptCalls[0]?.sessionID).toBe("session-123")
-		expect(promptCalls[0]?.text).toMatch(/^ultrawork /)
-		expect(promptCalls[0]?.text).toContain("Keep ultraworking")
-		expect(hook.getState()?.iteration).toBe(2)
-	})
+		expect(promptCalls).toHaveLength(1);
+		expect(promptCalls[0]?.sessionID).toBe("session-123");
+		expect(promptCalls[0]?.text).toMatch(/^ultrawork /);
+		expect(promptCalls[0]?.text).toContain("Keep ultraworking");
+		expect(hook.getState()?.iteration).toBe(2);
+	});
 
 	test("continues runtime retry after activity is followed by immediate real idle", async () => {
 		// given - an active loop retries a recoverable runtime error
-		const originalDateNow = Date.now
-		let currentNow = originalDateNow()
-		Date.now = () => currentNow
+		const originalDateNow = Date.now;
+		const currentNow = originalDateNow();
+		Date.now = () => currentNow;
 		const hook = createRalphLoopHook({
 			directory: testDirectory,
 			project: testDirectory,
@@ -158,18 +158,18 @@ describe("ralph-loop non-abort error continuation", () => {
 			client: {
 				session: {
 					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+						messagesCalls.push({ sessionID: options.path.id });
+						return { data: [] };
 					},
 					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
 					}) => {
 						promptCalls.push({
 							sessionID: options.path.id,
 							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+						});
+						return {};
 					},
 					prompt: failSyncPrompt,
 				},
@@ -177,13 +177,13 @@ describe("ralph-loop non-abort error continuation", () => {
 					showToast: async () => ({}),
 				},
 			},
-		} as never)
+		} as never);
 
 		try {
 			hook.startLoop("session-123", "Keep working", {
 				messageCountAtStart: 0,
 				maxIterations: 5,
-			})
+			});
 
 			await hook.event({
 				event: {
@@ -193,7 +193,7 @@ describe("ralph-loop non-abort error continuation", () => {
 						error: { name: "RuntimeError" },
 					},
 				},
-			})
+			});
 
 			// when - retried-run activity is followed by an immediate real idle
 			await hook.event({
@@ -207,24 +207,24 @@ describe("ralph-loop non-abort error continuation", () => {
 						delta: "working",
 					},
 				},
-			})
+			});
 			await hook.event({
 				event: { type: "session.idle", properties: { sessionID: "session-123" } },
-			})
+			});
 
 			// then - real activity clears stale-idle suppression and allows the next iteration
-			expect(promptCalls).toHaveLength(2)
-			expect(hook.getState()?.iteration).toBe(3)
+			expect(promptCalls).toHaveLength(2);
+			expect(hook.getState()?.iteration).toBe(3);
 		} finally {
-			Date.now = originalDateNow
+			Date.now = originalDateNow;
 		}
-	})
+	});
 
 	test("continues after retry run activity when no stale idle arrived", async () => {
 		// given - an active loop retries a recoverable runtime error
-		const originalDateNow = Date.now
-		let currentNow = originalDateNow()
-		Date.now = () => currentNow
+		const originalDateNow = Date.now;
+		let currentNow = originalDateNow();
+		Date.now = () => currentNow;
 		const hook = createRalphLoopHook({
 			directory: testDirectory,
 			project: testDirectory,
@@ -234,18 +234,18 @@ describe("ralph-loop non-abort error continuation", () => {
 			client: {
 				session: {
 					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+						messagesCalls.push({ sessionID: options.path.id });
+						return { data: [] };
 					},
 					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
 					}) => {
 						promptCalls.push({
 							sessionID: options.path.id,
 							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+						});
+						return {};
 					},
 					prompt: failSyncPrompt,
 				},
@@ -253,13 +253,13 @@ describe("ralph-loop non-abort error continuation", () => {
 					showToast: async () => ({}),
 				},
 			},
-		} as never)
+		} as never);
 
 		try {
 			hook.startLoop("session-123", "Keep working", {
 				messageCountAtStart: 0,
 				maxIterations: 5,
-			})
+			});
 
 			await hook.event({
 				event: {
@@ -269,7 +269,7 @@ describe("ralph-loop non-abort error continuation", () => {
 						error: { name: "RuntimeError" },
 					},
 				},
-			})
+			});
 
 			// when - retried-run activity is followed by an idle after the hold expires
 			await hook.event({
@@ -283,25 +283,25 @@ describe("ralph-loop non-abort error continuation", () => {
 						delta: "working",
 					},
 				},
-			})
-			currentNow += DEFAULT_PROMPT_ASYNC_POST_DISPATCH_HOLD_MS + 1
+			});
+			currentNow += DEFAULT_PROMPT_ASYNC_POST_DISPATCH_HOLD_MS + 1;
 			await hook.event({
 				event: { type: "session.idle", properties: { sessionID: "session-123" } },
-			})
+			});
 
 			// then - the later real idle is allowed to continue the loop
-			expect(promptCalls).toHaveLength(2)
-			expect(hook.getState()?.iteration).toBe(3)
+			expect(promptCalls).toHaveLength(2);
+			expect(hook.getState()?.iteration).toBe(3);
 		} finally {
-			Date.now = originalDateNow
+			Date.now = originalDateNow;
 		}
-	})
+	});
 
 	test("continues after retry run activity from legacy message.part.updated part session id", async () => {
 		// given - an active loop retries a recoverable runtime error
-		const originalDateNow = Date.now
-		let currentNow = originalDateNow()
-		Date.now = () => currentNow
+		const originalDateNow = Date.now;
+		let currentNow = originalDateNow();
+		Date.now = () => currentNow;
 		const hook = createRalphLoopHook({
 			directory: testDirectory,
 			project: testDirectory,
@@ -311,18 +311,18 @@ describe("ralph-loop non-abort error continuation", () => {
 			client: {
 				session: {
 					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+						messagesCalls.push({ sessionID: options.path.id });
+						return { data: [] };
 					},
 					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
 					}) => {
 						promptCalls.push({
 							sessionID: options.path.id,
 							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+						});
+						return {};
 					},
 					prompt: failSyncPrompt,
 				},
@@ -330,13 +330,13 @@ describe("ralph-loop non-abort error continuation", () => {
 					showToast: async () => ({}),
 				},
 			},
-		} as never)
+		} as never);
 
 		try {
 			hook.startLoop("session-123", "Keep working", {
 				messageCountAtStart: 0,
 				maxIterations: 5,
-			})
+			});
 
 			await hook.event({
 				event: {
@@ -346,7 +346,7 @@ describe("ralph-loop non-abort error continuation", () => {
 						error: { name: "RuntimeError" },
 					},
 				},
-			})
+			});
 
 			// when - legacy retried-run activity is followed by an idle after the hold expires
 			await hook.event({
@@ -362,62 +362,64 @@ describe("ralph-loop non-abort error continuation", () => {
 						},
 					},
 				},
-			})
-			currentNow += DEFAULT_PROMPT_ASYNC_POST_DISPATCH_HOLD_MS + 1
+			});
+			currentNow += DEFAULT_PROMPT_ASYNC_POST_DISPATCH_HOLD_MS + 1;
 			await hook.event({
 				event: { type: "session.idle", properties: { sessionID: "session-123" } },
-			})
+			});
 
 			// then - the later real idle is allowed to continue the loop
-			expect(promptCalls).toHaveLength(2)
-			expect(hook.getState()?.iteration).toBe(3)
+			expect(promptCalls).toHaveLength(2);
+			expect(hook.getState()?.iteration).toBe(3);
 		} finally {
-			Date.now = originalDateNow
+			Date.now = originalDateNow;
 		}
-	})
+	});
 
 	test("skips immediate runtime retry while background tasks are running", async () => {
 		// given - an active loop owns running background work
-		const hook = createRalphLoopHook({
-			directory: testDirectory,
-			project: testDirectory,
-			worktree: testDirectory,
-			serverUrl: "http://localhost:4096",
-			$: async () => ({}),
-			client: {
-				session: {
-					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+		const hook = createRalphLoopHook(
+			{
+				directory: testDirectory,
+				project: testDirectory,
+				worktree: testDirectory,
+				serverUrl: "http://localhost:4096",
+				$: async () => ({}),
+				client: {
+					session: {
+						messages: async (options: { path: { id: string } }) => {
+							messagesCalls.push({ sessionID: options.path.id });
+							return { data: [] };
+						},
+						promptAsync: async (options: {
+							path: { id: string };
+							body: { parts: Array<{ type: string; text: string }> };
+						}) => {
+							promptCalls.push({
+								sessionID: options.path.id,
+								text: options.body.parts[0]?.text ?? "",
+							});
+							return {};
+						},
+						prompt: failSyncPrompt,
 					},
-					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
-					}) => {
-						promptCalls.push({
-							sessionID: options.path.id,
-							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+					tui: {
+						showToast: async () => ({}),
 					},
-					prompt: failSyncPrompt,
 				},
-				tui: {
-					showToast: async () => ({}),
+			} as never,
+			{
+				backgroundManager: {
+					getTasksByParentSession: (sessionID: string) =>
+						sessionID === "session-123" ? [{ status: "running" }] : [],
 				},
 			},
-		} as never, {
-			backgroundManager: {
-				getTasksByParentSession: (sessionID: string) => sessionID === "session-123"
-					? [{ status: "running" }]
-					: [],
-			},
-		})
+		);
 
 		hook.startLoop("session-123", "Keep working", {
 			messageCountAtStart: 0,
 			maxIterations: 5,
-		})
+		});
 
 		// when - the same session reports a recoverable runtime error
 		await hook.event({
@@ -428,12 +430,12 @@ describe("ralph-loop non-abort error continuation", () => {
 					error: { name: "RuntimeError" },
 				},
 			},
-		})
+		});
 
 		// then - Ralph waits for background work instead of starting overlapping continuation
-		expect(promptCalls).toHaveLength(0)
-		expect(hook.getState()?.iteration).toBe(1)
-	})
+		expect(promptCalls).toHaveLength(0);
+		expect(hook.getState()?.iteration).toBe(1);
+	});
 
 	test("stops retrying runtime errors after max iterations", async () => {
 		// given - an active Ralph Loop has one retry remaining
@@ -446,18 +448,18 @@ describe("ralph-loop non-abort error continuation", () => {
 			client: {
 				session: {
 					messages: async (options: { path: { id: string } }) => {
-						messagesCalls.push({ sessionID: options.path.id })
-						return { data: [] }
+						messagesCalls.push({ sessionID: options.path.id });
+						return { data: [] };
 					},
 					promptAsync: async (options: {
-						path: { id: string }
-						body: { parts: Array<{ type: string; text: string }> }
+						path: { id: string };
+						body: { parts: Array<{ type: string; text: string }> };
 					}) => {
 						promptCalls.push({
 							sessionID: options.path.id,
 							text: options.body.parts[0]?.text ?? "",
-						})
-						return {}
+						});
+						return {};
 					},
 					prompt: failSyncPrompt,
 				},
@@ -465,12 +467,12 @@ describe("ralph-loop non-abort error continuation", () => {
 					showToast: async () => ({}),
 				},
 			},
-		} as never)
+		} as never);
 
 		hook.startLoop("session-123", "Keep working", {
 			messageCountAtStart: 0,
 			maxIterations: 2,
-		})
+		});
 
 		// when - the first runtime error consumes the final allowed attempt
 		await hook.event({
@@ -481,7 +483,7 @@ describe("ralph-loop non-abort error continuation", () => {
 					error: { name: "RuntimeError" },
 				},
 			},
-		})
+		});
 
 		// when - another runtime error arrives after the retry budget is exhausted
 		await hook.event({
@@ -492,10 +494,10 @@ describe("ralph-loop non-abort error continuation", () => {
 					error: { name: "RuntimeError" },
 				},
 			},
-		})
+		});
 
 		// then - the loop does not exceed the configured retry count
-		expect(promptCalls).toHaveLength(1)
-		expect(hook.getState()).toBeNull()
-	})
-})
+		expect(promptCalls).toHaveLength(1);
+		expect(hook.getState()).toBeNull();
+	});
+});

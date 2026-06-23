@@ -109,7 +109,7 @@ If any issues are found during critical review:
 - NEVER remove code that serves a functional purpose
 - ALWAYS verify changes compile/parse correctly
 - ALWAYS preserve test coverage
-- If uncertain about a change, err on the side of keeping the original code`
+- If uncertain about a change, err on the side of keeping the original code`;
 
 export const REMOVE_AI_SLOPS_TEAM_MODE_ADDENDUM = `
 ---
@@ -136,7 +136,7 @@ Team mode is enabled for this session. The rules below **override Phase 2-4** of
     {
       "kind": "category",
       "category": "quick",
-      "prompt": "You run $omo:remove-ai-slops on ONE file per task. Load $omo:remove-ai-slops via the skill tool. Read the task description for the file path. Apply the skill's detection criteria verbatim. After edits: run lsp_diagnostics on the file. Report via team_send_message(teamRunId=<id>, to=\"lead\", summary=<change count>, body=<full $omo:remove-ai-slops report>) + team_task_update(status=completed). On ambiguity: send team_send_message(teamRunId=<id>, to=\"lead\", summary=\"UNCLEAR\", body=<reason>) + team_task_update(status=pending). Never git add, never run tests, never touch other files."
+      "prompt": "You run $omo:remove-ai-slops on ONE file per task. Load $omo:remove-ai-slops via the skill tool. Read the task description for the file path. Apply the skill's detection criteria verbatim. After edits: run lsp_diagnostics on the file. Report via team_send_message(teamRunId=<id>, to="lead", summary=<change count>, body=<full $omo:remove-ai-slops report>) + team_task_update(status=completed). On ambiguity: send team_send_message(teamRunId=<id>, to="lead", summary="UNCLEAR", body=<reason>) + team_task_update(status=pending). Never git add, never run tests, never touch other files."
     },
     { "kind": "category", "category": "quick", "prompt": "Same contract as peer quick worker." },
     { "kind": "category", "category": "quick", "prompt": "Same contract as peer quick worker." },
@@ -211,4 +211,4 @@ The \`~/.omo/teams/slop-squad/config.json\` declaration file stays on disk; it i
 - Do not inline the full slop-criteria into every task description; rely on the Phase 2 broadcast.
 - Do not call \`team_create\` again mid-session. One team per resolution.
 - Do not put \`oracle\` / \`librarian\` into the team spec — they are team-ineligible; call them via \`task()\` outside the team when needed.
-`
+`;

@@ -1,10 +1,7 @@
-import {
-	getIsolatedSessionName,
-	spawnTmuxSession as spawnTmuxSessionCore,
-} from "@oh-my-opencode/tmux-core"
-import type { SpawnTmuxSessionDeps, TmuxConfig } from "@oh-my-opencode/tmux-core"
-import type { SpawnPaneResult } from "../types"
-import { withSessionSpawnDeps } from "./adapter-deps"
+import type { SpawnTmuxSessionDeps, TmuxConfig } from "@oh-my-opencode/tmux-core";
+import { getIsolatedSessionName, spawnTmuxSession as spawnTmuxSessionCore } from "@oh-my-opencode/tmux-core";
+import type { SpawnPaneResult } from "../types";
+import { withSessionSpawnDeps } from "./adapter-deps";
 
 export async function spawnTmuxSession(
 	sessionId: string,
@@ -25,7 +22,7 @@ export async function spawnTmuxSession(
 		sourcePaneId,
 		withSessionSpawnDeps(depsInput),
 		managerId,
-	)
+	);
 }
 
-export { getIsolatedSessionName }
+export { getIsolatedSessionName };

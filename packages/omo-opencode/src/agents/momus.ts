@@ -1,7 +1,7 @@
 import type { AgentConfig } from "@opencode-ai/sdk";
+import { createAgentToolRestrictions } from "../shared/permission-compat";
 import type { AgentMode, AgentPromptMetadata } from "./types";
 import { buildClaudeThinkingConfig, isGptModel } from "./types";
-import { createAgentToolRestrictions } from "../shared/permission-compat";
 
 const MODE: AgentMode = "subagent";
 
@@ -279,65 +279,59 @@ Response language: match the language of the plan content.
 export { MOMUS_DEFAULT_PROMPT as MOMUS_SYSTEM_PROMPT };
 
 export function createMomusAgent(model: string): AgentConfig {
-  const restrictions = createAgentToolRestrictions([
-    "write",
-    "edit",
-    "apply_patch",
-  ]);
+	const restrictions = createAgentToolRestrictions(["write", "edit", "apply_patch"]);
 
-  const base = {
-    description:
-      "Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Momus - OhMyOpenCode)",
-    mode: MODE,
-    model,
-    temperature: 0.1,
-    ...restrictions,
-    prompt: MOMUS_DEFAULT_PROMPT,
-  } as AgentConfig;
+	const base = {
+		description:
+			"Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Momus - OhMyOpenCode)",
+		mode: MODE,
+		model,
+		temperature: 0.1,
+		...restrictions,
+		prompt: MOMUS_DEFAULT_PROMPT,
+	} as AgentConfig;
 
-  if (isGptModel(model)) {
-    return {
-      ...base,
-      prompt: MOMUS_GPT_PROMPT,
-      reasoningEffort: "medium",
-      textVerbosity: "high",
-    } as AgentConfig;
-  }
+	if (isGptModel(model)) {
+		return {
+			...base,
+			prompt: MOMUS_GPT_PROMPT,
+			reasoningEffort: "medium",
+			textVerbosity: "high",
+		} as AgentConfig;
+	}
 
-  return {
-    ...base,
-    ...buildClaudeThinkingConfig(model),
-  } as AgentConfig;
+	return {
+		...base,
+		...buildClaudeThinkingConfig(model),
+	} as AgentConfig;
 }
 createMomusAgent.mode = MODE;
 
 export const momusPromptMetadata: AgentPromptMetadata = {
-  category: "advisor",
-  cost: "EXPENSIVE",
-  promptAlias: "Momus",
-  triggers: [
-    {
-      domain: "Plan review",
-      trigger:
-        "Evaluate work plans for clarity, verifiability, and completeness",
-    },
-    {
-      domain: "Quality assurance",
-      trigger:
-        "Catch gaps, ambiguities, and missing context before implementation",
-    },
-  ],
-  useWhen: [
-    "After Prometheus creates a work plan",
-    "Before executing a complex todo list",
-    "To validate plan quality before delegating to executors",
-    "When plan needs rigorous review for ADHD-driven omissions",
-  ],
-  avoidWhen: [
-    "Simple, single-task requests",
-    "When user explicitly wants to skip review",
-    "For trivial plans that don't need formal review",
-  ],
-  keyTrigger:
-    "Work plan saved to `.omo/plans/*.md` → invoke Momus with the file path as the sole prompt (e.g. `prompt=\".omo/plans/my-plan.md\"`). Do NOT invoke Momus for inline plans or todo lists.",
+	category: "advisor",
+	cost: "EXPENSIVE",
+	promptAlias: "Momus",
+	triggers: [
+		{
+			domain: "Plan review",
+			trigger: "Evaluate work plans for clarity, verifiability, and completeness",
+		},
+		{
+			domain: "Quality assurance",
+			trigger: "Catch gaps, ambiguities, and missing context before implementation",
+		},
+	],
+	useWhen: [
+		"After Prometheus creates a work plan",
+		"Before executing a complex todo list",
+		"To validate plan quality before delegating to executors",
+		"When plan needs rigorous review for ADHD-driven omissions",
+	],
+	avoidWhen: [
+		"Simple, single-task requests",
+		"When user explicitly wants to skip review",
+		"For trivial plans that don't need formal review",
+	],
+	keyTrigger:
+		'Work plan saved to `.omo/plans/*.md` → invoke Momus with the file path as the sole prompt (e.g. `prompt=".omo/plans/my-plan.md"`). Do NOT invoke Momus for inline plans or todo lists.',
 };

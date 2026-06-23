@@ -1,6 +1,6 @@
-import type { JSX } from "react"
-import { getTranslations } from "next-intl/server"
 import { ArrowRight } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import type { JSX } from "react"
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
 

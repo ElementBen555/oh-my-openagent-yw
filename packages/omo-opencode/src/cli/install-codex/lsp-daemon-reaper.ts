@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/omo-codex/install/lsp-daemon-reaper"
+export * from "@oh-my-opencode/omo-codex/install/lsp-daemon-reaper";

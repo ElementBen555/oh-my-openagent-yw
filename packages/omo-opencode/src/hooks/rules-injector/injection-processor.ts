@@ -9,17 +9,12 @@ import type {
 	ToolExecuteOutput,
 	TranscriptHydrationHook,
 } from "./injection-types";
-import {
-	createContentHash,
-	isDuplicateByContentHash,
-	isDuplicateByRealPath,
-	shouldApplyRule,
-} from "./matcher";
 import { createMatchDecisionCache } from "./match-decision-cache";
+import { createContentHash, isDuplicateByContentHash, isDuplicateByRealPath, shouldApplyRule } from "./matcher";
 import { createParsedRuleReader } from "./parsed-rule-cache";
 import { resolveFilePath } from "./path-resolution";
-import { getRuleMatchReason } from "./rule-match-reason";
 import type { FindRuleFilesOptions } from "./rule-file-finder";
+import { getRuleMatchReason } from "./rule-match-reason";
 import type { RuleScanCache } from "./rule-scan-cache";
 import { saveInjectedRules } from "./storage";
 
@@ -43,14 +38,8 @@ export type CreateRuleInjectionProcessorDeps = RuleInjectionProcessorDeps & {
 	transcriptHydration?: TranscriptHydrationHook;
 };
 
-export function createRuleInjectionProcessor(
-	deps: CreateRuleInjectionProcessorDeps,
-): {
-	processFilePathForInjection: (
-		filePath: string,
-		sessionID: string,
-		output: ToolExecuteOutput,
-	) => Promise<void>;
+export function createRuleInjectionProcessor(deps: CreateRuleInjectionProcessorDeps): {
+	processFilePathForInjection: (filePath: string, sessionID: string, output: ToolExecuteOutput) => Promise<void>;
 } {
 	const {
 		workspaceDirectory,
@@ -62,8 +51,7 @@ export function createRuleInjectionProcessor(
 		shouldApplyRule: shouldApplyRuleImpl = shouldApplyRule,
 		isDuplicateByRealPath: isDuplicateByRealPathImpl = isDuplicateByRealPath,
 		createContentHash: createContentHashImpl = createContentHash,
-		isDuplicateByContentHash:
-			isDuplicateByContentHashImpl = isDuplicateByContentHash,
+		isDuplicateByContentHash: isDuplicateByContentHashImpl = isDuplicateByContentHash,
 		saveInjectedRules: saveInjectedRulesImpl = saveInjectedRules,
 		transcriptHydration,
 	} = deps;
@@ -93,29 +81,17 @@ export function createRuleInjectionProcessor(
 		const transcriptRelativePaths = transcriptHydration
 			? await transcriptHydration.hydrateSession(sessionID)
 			: EMPTY_TRANSCRIPT_SET;
-		const normalizedTranscriptRelativePaths = new Set(
-			[...transcriptRelativePaths].map(normalizeRuleRelativePath),
-		);
+		const normalizedTranscriptRelativePaths = new Set([...transcriptRelativePaths].map(normalizeRuleRelativePath));
 
-		const ruleFileCandidates = findRuleFiles(
-			projectRoot,
-			home,
-			resolved,
-			finderOptions,
-			ruleScanCache,
-		);
+		const ruleFileCandidates = findRuleFiles(projectRoot, home, resolved, finderOptions, ruleScanCache);
 		const toInject: RuleToInject[] = [];
 		let dirty = false;
 
 		for (const candidate of ruleFileCandidates) {
-			if (isDuplicateByRealPathImpl(candidate.realPath, cache.realPaths))
-				continue;
+			if (isDuplicateByRealPathImpl(candidate.realPath, cache.realPaths)) continue;
 
 			try {
-				const { metadata, body, statFingerprint } = getParsedRule(
-					candidate.path,
-					candidate.realPath,
-				);
+				const { metadata, body, statFingerprint } = getParsedRule(candidate.path, candidate.realPath);
 				const matchReason = getRuleMatchReason({
 					matchDecisionCache,
 					isSingleFile: candidate.isSingleFile,
@@ -129,8 +105,7 @@ export function createRuleInjectionProcessor(
 				if (matchReason === null) continue;
 
 				const contentHash = createContentHashImpl(body);
-				if (isDuplicateByContentHashImpl(contentHash, cache.contentHashes))
-					continue;
+				if (isDuplicateByContentHashImpl(contentHash, cache.contentHashes)) continue;
 
 				const relativePath = normalizeRuleRelativePath(candidate.relativePath);
 
@@ -155,7 +130,6 @@ export function createRuleInjectionProcessor(
 				if (!(error instanceof Error)) {
 					throw error;
 				}
-				continue;
 			}
 		}
 

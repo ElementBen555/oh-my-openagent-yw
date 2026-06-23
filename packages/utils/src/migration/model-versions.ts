@@ -15,53 +15,53 @@
  * (#3777, #4527).
  */
 export const MODEL_VERSION_MAP: Record<string, string> = {
-  "anthropic/claude-opus-4-4": "anthropic/claude-opus-4-7",
-}
+	"anthropic/claude-opus-4-4": "anthropic/claude-opus-4-7",
+};
 
 const CURRENT_USER_SELECTABLE_MODELS = new Set([
-  "anthropic/claude-opus-4-5",
-  "anthropic/claude-opus-4-6",
-  "anthropic/claude-sonnet-4-5",
-])
+	"anthropic/claude-opus-4-5",
+	"anthropic/claude-opus-4-6",
+	"anthropic/claude-sonnet-4-5",
+]);
 
 function migrationKey(oldModel: string, newModel: string): string {
-  return `model-version:${oldModel}->${newModel}`
+	return `model-version:${oldModel}->${newModel}`;
 }
 
 export function migrateModelVersions(
-  configs: Record<string, unknown>,
-  appliedMigrations?: Set<string>
+	configs: Record<string, unknown>,
+	appliedMigrations?: Set<string>,
 ): { migrated: Record<string, unknown>; changed: boolean; newMigrations: string[] } {
-  const migrated: Record<string, unknown> = {}
-  let changed = false
-  const newMigrations: string[] = []
+	const migrated: Record<string, unknown> = {};
+	let changed = false;
+	const newMigrations: string[] = [];
 
-  for (const [key, value] of Object.entries(configs)) {
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      const config = value as Record<string, unknown>
-      if (
-        typeof config.model === "string" &&
-        !CURRENT_USER_SELECTABLE_MODELS.has(config.model) &&
-        MODEL_VERSION_MAP[config.model]
-      ) {
-        const oldModel = config.model
-        const newModel = MODEL_VERSION_MAP[oldModel]
-        const mKey = migrationKey(oldModel, newModel)
+	for (const [key, value] of Object.entries(configs)) {
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			const config = value as Record<string, unknown>;
+			if (
+				typeof config.model === "string" &&
+				!CURRENT_USER_SELECTABLE_MODELS.has(config.model) &&
+				MODEL_VERSION_MAP[config.model]
+			) {
+				const oldModel = config.model;
+				const newModel = MODEL_VERSION_MAP[oldModel];
+				const mKey = migrationKey(oldModel, newModel);
 
-        // Skip if this migration was already applied (user may have reverted)
-        if (appliedMigrations?.has(mKey)) {
-          migrated[key] = value
-          continue
-        }
+				// Skip if this migration was already applied (user may have reverted)
+				if (appliedMigrations?.has(mKey)) {
+					migrated[key] = value;
+					continue;
+				}
 
-        migrated[key] = { ...config, model: newModel }
-        changed = true
-        newMigrations.push(mKey)
-        continue
-      }
-    }
-    migrated[key] = value
-  }
+				migrated[key] = { ...config, model: newModel };
+				changed = true;
+				newMigrations.push(mKey);
+				continue;
+			}
+		}
+		migrated[key] = value;
+	}
 
-  return { migrated, changed, newMigrations }
+	return { migrated, changed, newMigrations };
 }

@@ -1,1 +1,1 @@
-export * from "../../shared/session-idle-settle"
+export * from "../../shared/session-idle-settle";

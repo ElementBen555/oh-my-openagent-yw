@@ -1,1 +1,1 @@
-export { extractSemverFromOutput } from "@oh-my-opencode/utils"
+export { extractSemverFromOutput } from "@oh-my-opencode/utils";

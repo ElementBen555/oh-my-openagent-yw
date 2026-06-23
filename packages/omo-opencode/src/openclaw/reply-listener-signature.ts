@@ -1,1 +1,1 @@
-export * from "@oh-my-opencode/openclaw-core/reply-listener-signature"
+export * from "@oh-my-opencode/openclaw-core/reply-listener-signature";

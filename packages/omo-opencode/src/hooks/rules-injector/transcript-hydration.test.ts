@@ -5,9 +5,7 @@ function makeClient(
 	messages: (sessionID: string) => Promise<{ data: unknown }>,
 ): Parameters<typeof createTranscriptHydrationStore>[0]["client"] {
 	const session = {
-		messages: mock(async (args: { path: { id: string } }) =>
-			messages(args.path.id),
-		),
+		messages: mock(async (args: { path: { id: string } }) => messages(args.path.id)),
 	};
 	return { session };
 }
@@ -25,9 +23,7 @@ describe("createTranscriptHydrationStore", () => {
 					parts: [
 						{
 							type: "tool",
-							output:
-								ruleMarker("AGENTS.md") +
-								ruleMarker(".omo/rules/typescript.md"),
+							output: ruleMarker("AGENTS.md") + ruleMarker(".omo/rules/typescript.md"),
 						},
 					],
 				},
@@ -41,10 +37,7 @@ describe("createTranscriptHydrationStore", () => {
 		const relativePaths = await store.hydrateSession("session-1");
 
 		// then
-		expect([...relativePaths].sort()).toEqual([
-			".omo/rules/typescript.md",
-			"AGENTS.md",
-		]);
+		expect([...relativePaths].sort()).toEqual([".omo/rules/typescript.md", "AGENTS.md"]);
 	});
 
 	it("#given empty transcript #when hydrateSession runs #then returns empty set", async () => {
@@ -67,9 +60,7 @@ describe("createTranscriptHydrationStore", () => {
 			client: makeClient(async () => {
 				callCount += 1;
 				return {
-					data: [
-						{ parts: [{ type: "tool", output: ruleMarker("AGENTS.md") }] },
-					],
+					data: [{ parts: [{ type: "tool", output: ruleMarker("AGENTS.md") }] }],
 				};
 			}),
 		});
@@ -153,9 +144,7 @@ describe("createTranscriptHydrationStore", () => {
 			client: makeClient(async () => {
 				callCount += 1;
 				return {
-					data: [
-						{ parts: [{ type: "tool", output: ruleMarker("AGENTS.md") }] },
-					],
+					data: [{ parts: [{ type: "tool", output: ruleMarker("AGENTS.md") }] }],
 				};
 			}),
 		});

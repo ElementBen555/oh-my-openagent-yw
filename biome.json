@@ -1,0 +1,78 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"style": {
+				"noDefaultExport": "error",
+				"noEnum": "error",
+				"noNonNullAssertion": "error",
+				"useImportType": "error",
+				"useConst": "error",
+				"useNodejsImportProtocol": "off"
+			},
+			"complexity": {
+				"useLiteralKeys": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noTsIgnore": "error",
+				"noControlCharactersInRegex": "off",
+				"noEmptyInterface": "off"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"indentWidth": 3,
+		"lineWidth": 120
+	},
+	"files": {
+		"includes": [
+			"packages/omo-opencode/src/**/*.ts",
+			"packages/omo-codex/src/**/*.ts",
+			"packages/utils/src/**/*.ts",
+			"packages/model-core/src/**/*.ts",
+			"packages/prompts-core/src/**/*.ts",
+			"packages/rules-engine/src/**/*.ts",
+			"packages/agents-md-core/src/**/*.ts",
+			"packages/comment-checker-core/src/**/*.ts",
+			"packages/hashline-core/src/**/*.ts",
+			"packages/boulder-state/src/**/*.ts",
+			"packages/telemetry-core/src/**/*.ts",
+			"packages/lsp-core/src/**/*.ts",
+			"packages/mcp-stdio-core/src/**/*.ts",
+			"packages/tmux-core/src/**/*.ts",
+			"packages/claude-code-compat-core/src/**/*.ts",
+			"packages/skills-loader-core/src/**/*.ts",
+			"packages/mcp-client-core/src/**/*.ts",
+			"packages/openclaw-core/src/**/*.ts",
+			"packages/team-core/src/**/*.ts",
+			"packages/delegate-core/src/**/*.ts",
+			"packages/shared-skills/scripts/**/*.mjs",
+			"script/**/*.ts",
+			"!**/node_modules/**/*",
+			"!**/dist/**/*",
+			"!packages/shared-skills/upstreams/**/*",
+			"!packages/lsp-tools-mcp/**/*",
+			"!packages/lsp-daemon/**/*",
+			"!packages/omo-codex/plugin/**/*",
+			"!packages/web/**/*"
+		]
+	},
+	"overrides": [
+		{
+			"includes": ["packages/omo-opencode/src/**/*.test.ts", "packages/omo-codex/src/**/*.test.ts", "**/*.test.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noDefaultExport": "off"
+					}
+				}
+			}
+		}
+	]
+}

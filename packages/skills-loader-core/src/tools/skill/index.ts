@@ -1,2 +1,2 @@
-export * from "./scope-priority"
-export * from "./skill-matcher"
+export * from "./scope-priority";
+export * from "./skill-matcher";

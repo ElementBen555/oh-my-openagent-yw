@@ -1,1 +1,1 @@
-export const file14 = 14
+export const file14 = 14;

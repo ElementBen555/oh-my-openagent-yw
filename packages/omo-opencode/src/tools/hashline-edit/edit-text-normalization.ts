@@ -1,9 +1,9 @@
 export {
-  stripLinePrefixes,
-  toNewLines,
-  restoreLeadingIndent,
-  stripInsertAnchorEcho,
-  stripInsertBeforeEcho,
-  stripInsertBoundaryEcho,
-  stripRangeBoundaryEcho,
-} from "@oh-my-opencode/hashline-core"
+	restoreLeadingIndent,
+	stripInsertAnchorEcho,
+	stripInsertBeforeEcho,
+	stripInsertBoundaryEcho,
+	stripLinePrefixes,
+	stripRangeBoundaryEcho,
+	toNewLines,
+} from "@oh-my-opencode/hashline-core";

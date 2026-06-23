@@ -1,4 +1,11 @@
-export { createSessionState, clearSession, isDynamicInjected, isStaticInjected, markDynamicInjected, markStaticInjected } from "./cache.js";
+export {
+	clearSession,
+	createSessionState,
+	isDynamicInjected,
+	isStaticInjected,
+	markDynamicInjected,
+	markStaticInjected,
+} from "./cache.js";
 export {
 	BUNDLED_RULE_SUBDIR,
 	DEFAULT_DYNAMIC_MAX_RESULT_CHARS,
@@ -21,11 +28,17 @@ export {
 	USER_HOME_RULE_SUBDIRS,
 	USER_HOME_SINGLE_FILES,
 } from "./constants.js";
+export { createEngine, defaultConfig } from "./engine.js";
 export { loadDynamicCandidates } from "./engine-dynamic-loader.js";
 export { loadCandidate, staticMatchReason } from "./engine-loader.js";
 export { isRootSingleFile, pathBasesForTarget, toPosixPath } from "./engine-paths.js";
 export { loadStaticCandidates } from "./engine-static-loader.js";
-export { createEngine, defaultConfig } from "./engine.js";
+export type {
+	CandidateProjectMembership,
+	DynamicMatchCache,
+	Engine,
+	EngineDeps,
+} from "./engine-types.js";
 export {
 	createRuleDiscoveryCache,
 	findPluginBundledCandidates,
@@ -41,12 +54,6 @@ export { findProjectRoot } from "./project-root.js";
 export { scanRuleFiles } from "./scanner.js";
 export { DEFAULT_AUTO_DISABLED_SOURCES, disabledSourcesFromConfig } from "./sources.js";
 export { isNeverTruncatedRule, truncateBudget, truncateRule } from "./truncator.js";
-export type {
-	DynamicMatchCache,
-	Engine,
-	EngineDeps,
-	CandidateProjectMembership,
-} from "./engine-types.js";
 export type {
 	LoadedRule,
 	MatchReason,
